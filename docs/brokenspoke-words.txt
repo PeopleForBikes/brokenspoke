@@ -1,0 +1,11 @@
+BROKENSPOKE
+brokenspoke
+Ggloo
+kubectl
+Kubernetes
+Minikube
+minikube
+mkdir
+pgcli
+psql
+SVGgloo

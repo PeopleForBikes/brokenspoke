@@ -1,0 +1,18 @@
+serverDefinitions:
+  enabled: false
+  servers:
+    firstServer:
+      Name: 'PGAdmin'
+      Group: 'Servers'
+      Port: 5432
+      Username: 'postgres'
+      Host: 'postgresql.default.svc.cluster.local'
+      SSLMode: 'prefer'
+      MaintenanceDB: 'postgres'
+
+env:
+  email: admin@pgadmin.com
+  password: admin
+
+ingress:
+  enabled: true

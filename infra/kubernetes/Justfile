@@ -1,0 +1,30 @@
+# Setup the developer environment (default).
+setup: minikube postgresql natsio
+
+# Setup the minikube cluster.
+minikube:
+  ./00-setup.sh
+
+# Deploy and configure nats.io.
+natsio:
+  cd nats.io && ./natsio.sh
+
+# Nats.io port-forwarding
+natsio-forward:
+  kubectl port-forward --namespace default svc/nats 4222:4222
+
+# Deploy and configure PGAdmin.
+pgadmin:
+  cd pgadmin && ./pgadmin.sh
+
+# Deploy and configure PostgreSQL
+postgresql:
+  cd postgresql && ./postgresql.sh
+
+# PostgreSQL port-forwarding
+postgresql-forward:
+  kubectl port-forward --namespace default svc/postgresql 5432:5432
+
+# Destroy the developer environment.
+teardown:
+  minikube delete

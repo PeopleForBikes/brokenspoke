@@ -1,0 +1,5 @@
+# primary:
+#   service:
+#     type: NodePort
+networkPolicy:
+  enabled: true
