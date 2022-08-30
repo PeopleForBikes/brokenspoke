@@ -10,8 +10,8 @@ repo_license = "Under MIT License"
 repo_url = "https://github.com/PeopleForBikes/brokenspoke"
 
 [[extra.list]]
-title = "Brokenspoke Core"
-content = "A Rust library with Python exports which contains the core logic for all the Broken Spoke projects."
+title = "BNA Core"
+content = "A Rust library with Python exports which contains the core logic for all the BNA projects."
 
 [[extra.list]]
 title = "SVGgloo"

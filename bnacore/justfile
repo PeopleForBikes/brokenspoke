@@ -1,0 +1,20 @@
+venv := ".env"
+bin := venv + "/bin"
+maturin := bin + "/maturin"
+
+# Setup Maturin.
+setup:
+  test -d env || python3 -m venv {{ venv }}
+  source {{ bin }}/activate && pip install -U pip && pip install maturin
+
+# Installs the crate as module in the current virtualenv.
+develop:
+  source {{ bin }}/activate && maturin develop
+
+# Build the crate into python pyckages.
+build:
+  source {{ bin }}/activate && maturin build
+
+# Build distributable for all major Python versions.
+dist:
+	docker run --rm -v $(shell pwd):/io konstin2/maturin build --release --strip
