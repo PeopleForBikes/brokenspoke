@@ -362,12 +362,11 @@ impl ShortScoreCard {
     where
         P: AsRef<Path>,
     {
-        let mut wtr = csv::Writer::from_path(path)?;
+        let mut w = csv::Writer::from_path(path)?;
         for entry in entries {
-            wtr.serialize(entry)?;
+            w.serialize(entry)?;
         }
-        wtr.flush()?;
-        Ok(())
+        Ok(w.flush()?)
     }
 }
 

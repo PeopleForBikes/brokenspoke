@@ -1,6 +1,6 @@
-# pfbcore
+# bnacore
 
-Contains the common pieces between the different PFB projects
+Contains the common pieces between the different BNA projects.
 
 ## Python bindings
 
