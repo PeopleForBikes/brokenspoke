@@ -1,4 +1,5 @@
 .DS_Store
 /target
-output/
 examples/brochure/brochure.csv
+output/
+pipelines/brochures/output

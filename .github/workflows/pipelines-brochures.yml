@@ -1,0 +1,72 @@
+name: pipelines/brochures
+
+defaults:
+  run:
+    working-directory: pipelines/brochures
+
+on:
+  pull_request:
+    paths:
+      - "pipelines/brochures/**"
+    types:
+      - opened
+      - synchronize
+      - reopened
+  push:
+    paths:
+      - "pipelines/brochures/**"
+    branches:
+      - main
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - run: rustup component add clippy rustfmt
+      - uses: Swatinem/rust-cache@v1
+      - uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --manifest-path pipelines/brochures/Cargo.toml --check
+      - uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: --manifest-path pipelines/brochures/Cargo.toml -- -D warnings
+      - uses: actions-rs/cargo@v1
+        with:
+          command: check
+          args: --manifest-path pipelines/brochures/Cargo.toml
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - uses: Swatinem/rust-cache@v1
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --manifest-path pipelines/brochures/Cargo.toml
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: Swatinem/rust-cache@v1
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --manifest-path pipelines/brochures/Cargo.toml
