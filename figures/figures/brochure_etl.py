@@ -1,9 +1,21 @@
 from diagrams import Diagram
+from diagrams.aws.compute import (
+    ECR,
+    Fargate,
+    Lambda,
+)
 from diagrams.aws.storage import S3
-from diagrams.aws.compute import Lambda, Fargate, ECR
 
 with Diagram("Brochure ETL", show=False, direction="LR"):
-    images = ECR("ECR")
-    svggloo = Fargate("SVGgloo")
-    S3("City Ratings Store") >> Lambda("Rating to Shortcode") >> svggloo >> S3("Brochure Store")
-    images >> svggloo
+    # images = ECR("ECR")
+    svggloo = Lambda("SVGgloo")
+    pdf_exporter = Fargate("PDF Exporter")
+    (
+        S3("City Ratings Store")
+        >> Lambda("Rating to Shortcode")
+        >> svggloo
+        >> pdf_exporter
+        >> Lambda("Add pages")
+        >> S3("Brochure Store")
+    )
+    # images >> pdf_exporter

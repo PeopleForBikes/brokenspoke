@@ -1,5 +1,4 @@
 **/*.rs.bk
-*.csv
 *.egg
 *.egg-info/
 *.ipynb
@@ -29,6 +28,7 @@
 /target/
 Cargo.lock
 __pycache__/
+bnacore/examples/output
 build/
 cache/
 coverage.xml

@@ -10,7 +10,7 @@ use color_eyre::{eyre::Report, Result};
 use std::fs;
 
 // The paths must be relative to the Cargo.toml file.
-const CITY_RATINGS_CSV: &'static str = "../../assets/city_ratings/city_ratings_2021_v15.csv";
+const CITY_RATINGS_CSV: &'static str = "../assets/city_ratings/city_ratings_2021_v15.csv";
 const OUTPUT_DIR: &'static str = "examples/output";
 const SHORTCODES_CSV: &'static str = "examples/output/shortcodes.csv";
 
