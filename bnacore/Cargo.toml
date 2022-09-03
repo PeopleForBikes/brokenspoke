@@ -15,7 +15,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 csv = "1.1"
-pyo3 = { version = "0.16.5" }
+pyo3 = { version = "0.17.1" }
 serde = { version = "1.0", features = ["derive"] }
 thiserror = "1.0"
 url = "2.0"
