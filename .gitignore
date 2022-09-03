@@ -50,6 +50,7 @@ pip-log.txt
 profile.svg
 results/*
 sdist/
+svggloo/target/
 target/
 var/
 venv/
