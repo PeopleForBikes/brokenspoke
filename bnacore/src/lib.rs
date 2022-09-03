@@ -48,7 +48,7 @@ impl std::convert::From<Error> for PyErr {
 }
 
 /// Describe all the available city datasets.
-#[derive(Debug, PartialEq, PartialOrd, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Clone, Copy)]
 pub enum Dataset {
     NeighborhoodWays,
     NeighborhoodOverallScores,
