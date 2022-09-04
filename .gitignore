@@ -47,6 +47,7 @@ nosetests.xml
 parts/
 pip-delete-this-directory.txt
 pip-log.txt
+pipelines/brochures/output/
 profile.svg
 results/*
 sdist/
