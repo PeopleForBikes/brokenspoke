@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link rel="preload" as="font" href="https://brokenspoke.peopleforbikes.github.io/fonts/vendor/jost/jost-v4-latin-regular.woff2" type="font/woff2" crossorigin>
+  <link rel="preload" as="font" href="https://brokenspoke.peopleforbikes.github.io/fonts/vendor/jost/jost-v4-latin-700.woff2"  type="font/woff2" crossorigin>
+
+
+<link rel="stylesheet" href="https://brokenspoke.peopleforbikes.github.io/main.css">
+
+
+
+  
+  
+    
+  
+
+  
+  
+    
+    
+  
+  
+  
+    
+  
+  
+  
+  
+    
+  
+  
+  
+
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+
+
+	
+
+
+	
+
+<title>Developer Setup | Broken Spoke</title>
+<meta name="description" content="All you want to know about the Broken Spoke projects">
+<link rel="canonical" href="https://brokenspoke.peopleforbikes.github.io/docs/overview/developer-setup/">
+
+
+
+
+
+
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "BreadcrumbList",
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+          {
+            "@type": "ListItem",
+            "position":  1 ,
+            "name": "Home",
+            "item": "https://brokenspoke.peopleforbikes.github.io/"
+          },
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  2 ,
+            "name": "Docs",
+            "item": "https://brokenspoke.peopleforbikes.github.io/docs/"
+          },
+        
+      
+        
+        
+        
+        
+        
+        
+        
+        
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  3 ,
+            "name": "Overview",
+            "item": "https://brokenspoke.peopleforbikes.github.io/docs/overview/"
+          },
+        
+      
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  4 ,
+            "name": "Developer Setup",
+            "item": "https://brokenspoke.peopleforbikes.github.io/docs/overview/developer-setup/"
+          },
+        
+      
+    
+  }
+</script>
+
+
+
+
+
+
+  <meta name="theme-color" content="#fff">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://brokenspoke.peopleforbikes.github.io/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://brokenspoke.peopleforbikes.github.io/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://brokenspoke.peopleforbikes.github.io/favicon-16x16.png">
+  
+    <link rel="manifest" href="https://brokenspoke.peopleforbikes.github.io/site.webmanifest" crossorigin>
+  
+
+
+  
+
+</head>
+
+  
+
+<body class="docs single">
+  
+  
+  
+  
+<div class="header-bar fixed-top"></div>
+<header class="navbar fixed-top navbar-expand-md navbar-light">
+	<div class="container">
+		<input class="menu-btn order-0" type="checkbox" id="menu-btn">
+		<label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+		<a class="navbar-brand order-1 order-md-0 me-auto" href="https://brokenspoke.peopleforbikes.github.io">Broken Spoke</a>
+		<button id="mode" class="btn btn-link order-2 order-md-4" type="button" aria-label="Toggle mode">
+			<span class="toggle-dark"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-moon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></span>
+			<span class="toggle-light"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-sun"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></span>
+		</button>
+		<ul class="navbar-nav fork-me order-3 order-md-5">
+			
+				
+					<li class="nav-item">
+						<a class="nav-link" href="https://github.com/PeopleForBikes/brokenspoke"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ms-2 visually-hidden">GitHub</span></a>
+					</li>
+				
+			
+		</ul>
+		<div class="collapse navbar-collapse order-4 order-md-1">
+			<ul class="navbar-nav main-nav me-auto order-5 order-md-2">
+				
+					
+				
+				
+				
+					
+						<li class="nav-item docs active">
+							<a class="nav-link" href="https://brokenspoke.peopleforbikes.github.io/docs/overview/overview/">Docs</a>
+						</li>
+					
+				
+			</ul>
+			<div class="break order-6 d-md-none"></div>
+			
+				<form class="navbar-form flex-grow-1 order-7 order-md-3">
+					<input id="userinput" class="form-control is-search" type="search" placeholder="Search docs..."
+						aria-label="Search docs..." autocomplete="off">
+					<div id="suggestions" class="shadow bg-white rounded"></div>
+				</form>
+			
+		</div>
+	</div>
+</header>
+
+
+
+  
+<div class="wrap container" role="document">
+  <div class="content">
+    <div class="row flex-xl-nowrap">
+	  
+<div class="col-lg-5 col-xl-4 docs-sidebar">
+	<nav class="docs-links" aria-label="Main navigation">
+			
+			
+			
+					<h3>Docs</h3>
+					<ul class="list-unstyled">
+					                           
+							<li><a class="docs-link" href="https://brokenspoke.peopleforbikes.github.io/docs/code-of-conduct/"></a></li>
+					
+					</ul>
+			
+			
+					
+					
+					
+							<h3>General</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://brokenspoke.peopleforbikes.github.io/docs/overview/overview/">Overview</a></li>
+							                           
+									<li><a class="docs-link active" href="https://brokenspoke.peopleforbikes.github.io/docs/overview/developer-setup/">Developer Setup</a></li>
+							
+					</ul>
+					
+					
+					
+					
+							<h3>Pipelines</h3>
+							<ul class="list-unstyled">
+							                           
+									<li><a class="docs-link" href="https://brokenspoke.peopleforbikes.github.io/docs/pipelines/brochures/">Brochures</a></li>
+							
+					</ul>
+					
+					
+			
+	</nav>
+</div>
+
+	  
+  
+  <nav class="docs-toc d-none d-xl-block col-xl-3" aria-label="Secondary navigation">
+  	<div class="page-links">
+  			<h3>On this page</h3>
+  			<nav id="TableOfContents">
+  					<ul>
+  							
+  							<li><a href="https://brokenspoke.peopleforbikes.github.io/docs/overview/developer-setup/#requirements">Requirements</a></li>
+  							
+  									<ul>
+  											
+  											<li><a href="https://brokenspoke.peopleforbikes.github.io/docs/overview/developer-setup/#platforms">Platforms</a></li>
+  											
+  									</ul>
+  							
+  							
+  							<li><a href="https://brokenspoke.peopleforbikes.github.io/docs/overview/developer-setup/#setup-the-local-dev-environment">Setup the local dev environment</a></li>
+  							
+  									<ul>
+  											
+  											<li><a href="https://brokenspoke.peopleforbikes.github.io/docs/overview/developer-setup/#connecting-to-the-database">Connecting to the database</a></li>
+  											
+  									</ul>
+  							
+  							
+  					</ul>
+  			</nav>
+  	</div>
+  </nav>
+  
+
+      <main class="docs-content col-lg-11 col-xl-9">
+        <h1>Developer Setup</h1>
+        
+        <p>The infrastructure relies heavily on <a href="https://www.docker.com/">Docker</a> containers and <a href="https://kubernetes.io/">Kubernetes</a>.</p>
+<h2 id="requirements">Requirements</h2>
+<p>Before starting, it is assumed that the following tools are installed and
+configured on the developer machine. If that is not the case, please refer to
+the official installation instructions to prepare your environment.</p>
+<ul>
+<li><a href="https://git-scm.com/downloads">git</a></li>
+<li><a href="https://www.docker.com/get-started/">docker</a></li>
+<li><a href="https://kubernetes.io/docs/tasks/tools/">kubectl</a></li>
+<li><a href="https://minikube.sigs.k8s.io/docs/start/">minikube</a></li>
+<li><a href="https://helm.sh/docs/intro/install/">helm</a></li>
+<li><a href="https://github.com/casey/just#packages=">just</a></li>
+</ul>
+<p>It is also expected for all the Broken Spoke Projects to be located in the same
+folder. If that is not the case, the commands described in this documentation
+will have to be adjusted accordingly.</p>
+<p>Configuring helper variables may help:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#b48ead;">export </span><span style="color:#bf616a;">PFB_HOME</span><span>=&quot;</span><span style="color:#a3be8c;">{</span><span>$</span><span style="color:#bf616a;">HOME</span><span style="color:#a3be8c;">}/projects/PeopleForBikes</span><span>&quot;
+</span><span style="color:#b48ead;">export </span><span style="color:#bf616a;">BROKENSPOKE_INFRA</span><span>=&quot;</span><span style="color:#a3be8c;">{</span><span>$</span><span style="color:#bf616a;">PFB_HOME</span><span style="color:#a3be8c;">}/brokenspoke/infra</span><span>&quot;
+</span></code></pre>
+<p>Then make sure the directories exist and go to the right one:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">mkdir -p </span><span>${</span><span style="color:#bf616a;">PFB_HOME</span><span>}
+</span><span style="color:#96b5b4;">cd </span><span>${</span><span style="color:#bf616a;">PFB_HOME</span><span>}
+</span></code></pre>
+<h3 id="platforms">Platforms</h3>
+<p>Last but not least, while we try to be platform agnostic and provide as much
+abstraction as possible, the main developers work on OSX and Linux, therefore
+Windows users may have to adapt these instructions. As always, pull-requests to
+help us improve the multi-platform support and automation are welcome.</p>
+<h2 id="setup-the-local-dev-environment">Setup the local dev environment</h2>
+<blockquote>
+<p><strong>REMARK: make sure to run the commands in the correct folder.</strong></p>
+</blockquote>
+<p>Start by cloning the [Broken Spoke] repository:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">git</span><span> clone git@github.com:PeopleForBikes/brokenspoke.git
+</span><span style="color:#96b5b4;">cd </span><span>${</span><span style="color:#bf616a;">BROKENSPOKE_INFRA</span><span>}
+</span></code></pre>
+<p>Provision and configure a local Kubernetes cluster:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">just
+</span></code></pre>
+<p>This will spin up <a href="https://minikube.sigs.k8s.io/docs/">Minikube</a> and configure a <a href="https://www.postgresql.org/">postgresql</a> instance.</p>
+<p>The process will take a few minutes. Follow the it on the screen as it will
+display some useful pieces of information.</p>
+<h3 id="connecting-to-the-database">Connecting to the database</h3>
+<p>Export the connection string as follow:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#b48ead;">export </span><span style="color:#bf616a;">DATABASE_URL</span><span>=</span><span style="color:#a3be8c;">postgresql://minikube:minikube@127.0.0.1:5432/bna
+</span></code></pre>
+<p>In another terminal, start the kubectl process:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">kubectl</span><span> port-forward</span><span style="color:#bf616a;"> --namespace</span><span> default svc/postgresql 5432:5432
+</span></code></pre>
+<blockquote>
+<p><strong>REMARK: this terminal will have to stay open as long as you plan to interact
+with the database.</strong></p>
+</blockquote>
+<p>The database is now accessible using your favorite client, for instance <a href="https://www.pgcli.com/">pgcli</a>:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">pgcli </span><span>$</span><span style="color:#bf616a;">DATABASE_URL
+</span></code></pre>
+<p>or <a href="https://www.postgresql.org/docs/current/app-psql.html">psql</a>:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> psql $</span><span style="color:#bf616a;">DATABASE_URL -c </span><span>&#39;</span><span style="color:#a3be8c;">SELECT COUNT(id) from city;</span><span>&#39;
+</span><span> </span><span style="color:#bf616a;">count
+</span><span style="color:#bf616a;">-------
+</span><span>   </span><span style="color:#bf616a;">767
+</span><span>(</span><span style="color:#bf616a;">1</span><span> row)
+</span></code></pre>
+
+        
+        
+<div class="docs-navigation d-flex justify-content-between">
+  
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        <a href="https:&#x2F;&#x2F;brokenspoke.peopleforbikes.github.io&#x2F;docs&#x2F;code-of-conduct&#x2F;">
+          <div class="card my-1">
+            <div class="card-body py-2">
+              &larr; 
+            </div>
+          </div>
+        </a>
+      
+    
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+      
+      
+        
+          
+          
+          <a class="ms-auto" href="https:&#x2F;&#x2F;brokenspoke.peopleforbikes.github.io&#x2F;docs&#x2F;pipelines&#x2F;brochures&#x2F;">
+            <div class="card my-1">
+              <div class="card-body py-2">
+                Brochures &rarr;
+              </div>
+            </div>
+          </a>
+          
+          
+          
+        
+      
+    
+  
+</div>
+
+      </main>
+    </div>
+  </div>
+</div>
+
+
+  
+    
+<footer class="footer text-muted">
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 order-last order-lg-first">
+				<ul class="list-inline">
+					
+						<li class="list-inline-item">Powered by <a href="https://www.getzola.org/">Zola</a>, and <a href="https://github.com/aaranxu/adidoks">AdiDoks</a></li>
+					
+				</ul>
+			</div>
+			<div class="col-lg-8 order-first order-lg-last text-lg-end">
+				<ul class="list-inline">
+					
+						
+							<li class="list-inline-item"><a href="https://brokenspoke.peopleforbikes.github.io/docs/code-of-conduct/">Code of Conduct</a></li>
+						
+					
+				</ul>
+			</div>
+		</div>
+	</div>
+</footer>
+
+  
+
+  
+<script type="text/javascript" src="https://brokenspoke.peopleforbikes.github.io/js/main.js" defer></script>
+
+  <script type="text/javascript" src="https://brokenspoke.peopleforbikes.github.io/plugins/elasticlunr.min.js" defer></script>
+  <script type="text/javascript" src="https://brokenspoke.peopleforbikes.github.io/search_index.en.js" defer></script>
+  <script type="text/javascript" src="https://brokenspoke.peopleforbikes.github.io/js/search.js" defer></script>
+
+  
+</body>
+</html>
