@@ -1,12 +1,16 @@
 # Meta task running ALL the CI tasks at onces.
-ci: lint docs
+ci: lint
 
 # Meta task running all the linters at once.
 lint: lint-md
 
 # Lint markown files.
 lint-md:
-    npx --yes markdownlint-cli2 "**/*.md" "#.venv"
+    npx --yes markdownlint-cli2 "**/*.md" "#.venv" "#docs/themes"
+
+# Check spelling.
+lint-spellcheck:
+	npx --yes cspell --no-progress --show-suggestions --show-context "docs/content/**/*.md"
 
 # Meta tasks running all formatters at once.
 fmt: fmt-md fmt-just
@@ -21,6 +25,6 @@ fmt-md:
 
 # Build the documentation
 docs:
-    echo "TBD"
+    cd docs && zola build
 
 

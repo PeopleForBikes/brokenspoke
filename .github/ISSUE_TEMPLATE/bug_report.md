@@ -3,7 +3,7 @@ name: Bug report
 about: Create a report to help us improve
 labels: "kind/bug"
 ---
-
+# Bug Report
 <!-- Provide a general summary of the issue in the title above. -->
 
 ## Current Behavior
@@ -70,7 +70,7 @@ echo "$OUTPUT" | tee >(pbcopy)
 
 -->
 
-```
+```bash
 (replace the example bellow with the script output)
 Last commit:
   583bc87 Fix configuration issue

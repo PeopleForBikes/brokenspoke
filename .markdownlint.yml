@@ -5,3 +5,4 @@ line-length:
   tables: false
   code_blocks: false
 single-h1: false
+no-inline-html: false

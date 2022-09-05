@@ -4,6 +4,8 @@ about: Suggest an idea for this project
 labels: "kind/feature"
 ---
 
+# Feature Request
+
 <!-- Provide a general summary of the issue in the title above. -->
 
 ## Current Behavior
