@@ -40,6 +40,16 @@ jobs:
         env:
           BUILD_DIR: docs
           BUILD_ONLY: true
+      - uses: actions/upload-artifact@v3
+        with:
+          name: docs
+          path: docs/public
+
+  # Noop job to statisfy the branch protection.
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
 
   deploy:
     runs-on: ubuntu-latest
@@ -48,16 +58,12 @@ jobs:
       - build
     if: github.ref == 'refs/heads/main'
     steps:
-      - name: Checkout main
-        uses: actions/checkout@v3.0.0
-      - name: Build and deploy
-        uses: shalzz/zola-deploy-action@v0.16.1
-        env:
-          BUILD_DIR: docs
-          PAGES_BRANCH: gh-pages
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # - name: Deploy
-      #   uses: peaceiris/actions-gh-pages@v3
-      #   with:
-      #     github_token: ${{ secrets.GITHUB_TOKEN }}
-      #     publish_dir: ./docs/public
+      - uses: actions/download-artifact@v3
+        with:
+          name: docs
+          path: docs/public
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/public
