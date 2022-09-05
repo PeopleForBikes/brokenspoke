@@ -32,7 +32,7 @@ Configuring helper variables may help:
 
 ```bash
 export PFB_HOME="{$HOME}/projects/PeopleForBikes"
-export BROKENSPOKE_INFRA="{$PFB_HOME}/brokenspoke-infra"
+export BROKENSPOKE_INFRA="{$PFB_HOME}/brokenspoke/infra"
 ```
 
 Then make sure the directories exist and go to the right one:
@@ -53,10 +53,10 @@ help us improve the multi-platform support and automation are welcome.
 
 > **REMARK: make sure to run the commands in the correct folder.**
 
-Start by cloning the [Broken Spoke Infrastructure] repository:
+Start by cloning the [Broken Spoke] repository:
 
 ```bash
-git clone git@github.com:PeopleForBikes/brokenspoke-infra.git ${BROKENSPOKE_INFRA}
+git clone git@github.com:PeopleForBikes/brokenspoke.git
 cd ${BROKENSPOKE_INFRA}
 ```
 
@@ -68,7 +68,7 @@ just
 
 This will spin up [Minikube] and configure a [postgresql] instance.
 
-The process will take a few minutes. Follow the process on the screen as it will
+The process will take a few minutes. Follow the it on the screen as it will
 display some useful pieces of information.
 
 ### Connecting to the database
@@ -104,16 +104,10 @@ $ psql $DATABASE_URL -c 'SELECT COUNT(id) from city;'
 (1 row)
 ```
 
-[broken spoke infrastructure]: github.com:PeopleForBikes/brokenspoke-infra
 [docker]: https://www.docker.com/
 [git]: https://git-scm.com/downloads
-[javascript]: https://developer.mozilla.org/en-US/docs/Web/JavaScript
 [kubernetes]: https://kubernetes.io/
 [minikube]: https://minikube.sigs.k8s.io/docs/
-[next.js]: https://nextjs.org/
 [pgcli]: https://www.pgcli.com/
 [postgresql]: https://www.postgresql.org/
 [psql]: https://www.postgresql.org/docs/current/app-psql.html
-[python]: https://www.python.org/
-[react]: https://reactjs.org/
-[rust]: https://www.rust-lang.org/

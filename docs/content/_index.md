@@ -15,7 +15,7 @@ content = "A Rust library with Python exports which contains the core logic for 
 
 [[extra.list]]
 title = "SVGgloo"
-content = "A tool to handle data-merge operations between and SVG template and a CSV file."
+content = "A tool to handle data-merge operations between an SVG template and a CSV file."
 
 [[extra.list]]
 title = "Infrastructure"
@@ -24,4 +24,8 @@ content = "Automation to provision local/cloud environments for the Broken Spoke
 [[extra.list]]
 title = "Analyzer"
 content = "Run an analysis locally."
+
+[[extra.list]]
+title = "Pipelines"
+content = "Dedicated Automated Pipelines."
 +++

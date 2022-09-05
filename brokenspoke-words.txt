@@ -1,6 +1,7 @@
 BROKENSPOKE
 brokenspoke
 Ggloo
+Inkscape
 kubectl
 Kubernetes
 Minikube
@@ -9,3 +10,4 @@ mkdir
 pgcli
 psql
 SVGgloo
+shortcode
