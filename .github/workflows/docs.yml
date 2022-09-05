@@ -7,7 +7,7 @@ defaults:
 on:
   pull_request:
     paths:
-      - ".github/**"
+      - ".github/workflows/docs.yml"
       - "docs/**"
     types:
       - opened
@@ -15,7 +15,7 @@ on:
       - reopened
   push:
     paths:
-      - ".github/**"
+      - ".github/workflows/docs.yml"
       - "docs/**"
     branches:
       - main
@@ -48,8 +48,16 @@ jobs:
       - build
     if: github.ref == 'refs/heads/main'
     steps:
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/public
+      - name: Checkout main
+        uses: actions/checkout@v3.0.0
+      - name: Build and deploy
+        uses: shalzz/zola-deploy-action@v0.16.1
+        env:
+          BUILD_DIR: docs
+          PAGES_BRANCH: gh-pages
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Deploy
+      #   uses: peaceiris/actions-gh-pages@v3
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     publish_dir: ./docs/public
