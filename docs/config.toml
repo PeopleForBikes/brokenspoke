@@ -1,5 +1,5 @@
 # The URL the site will be built for
-base_url = "https://peopleforbikes.github.io/brokenspoke/"
+base_url = "https://peopleforbikes.github.io/brokenspoke"
 
 # The site title and description; used in feeds by default.
 title = "Broken Spoke"
