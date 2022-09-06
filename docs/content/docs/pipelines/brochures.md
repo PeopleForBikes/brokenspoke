@@ -29,7 +29,7 @@ Finally we add extra pages to the brochure. Typically the extra pages contain
 instructions to help cities to implement better policies and safer street
 designs.
 
-<img src="/images/pipelines/brochures/brochure_etl.png"
+<img src="../../../images/pipelines/brochure_etl.png"
 alt="Brochure Pipeline" width="100%">
 
 ## Rendering
@@ -37,7 +37,7 @@ alt="Brochure Pipeline" width="100%">
 Here is an example of the SVG file being generated at the beginning of the
 process.
 
-<img src="/images/pipelines/brochures/united_states-tx-austin.svg"
+<img src="../../../images/pipelines/brochures/united_states-tx-austin.svg"
 alt="Brochure Rendering For Austin, TX" width="60%"
 style="display: block;margin: 0 auto;">
 
