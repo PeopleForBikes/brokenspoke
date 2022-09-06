@@ -29,7 +29,7 @@ Finally we add extra pages to the brochure. Typically the extra pages contain
 instructions to help cities to implement better policies and safer street
 designs.
 
-<img src="../../../images/pipelines/brochure_etl.png"
+<img src="../../../images/pipelines/brochures/brochure_etl.png"
 alt="Brochure Pipeline" width="100%">
 
 ## Rendering
