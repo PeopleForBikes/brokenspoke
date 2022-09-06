@@ -2,17 +2,17 @@
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
 	<title>Broken Spoke</title>
 	<subtitle>All you want to know about the Broken Spoke projects</subtitle>
-	<link href="https://brokenspoke.peopleforbikes.github.io/atom.xml" rel="self" type="application/atom+xml"/>
-  <link href="https://brokenspoke.peopleforbikes.github.io"/>
+	<link href="https://peopleforbikes.github.io/brokenspoke/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://peopleforbikes.github.io/brokenspoke/"/>
 	<generator uri="https://www.getzola.org/">Zola</generator>
 	<updated>2022-08-28T22:07:37+00:00</updated>
-	<id>https://brokenspoke.peopleforbikes.github.io/atom.xml</id>
+	<id>https://peopleforbikes.github.io/brokenspoke/atom.xml</id>
 	<entry xml:lang="en">
 		<title></title>
 		<published>2022-08-28T22:07:37+00:00</published>
 		<updated>2022-08-28T22:07:37+00:00</updated>
-		<link rel="alternate" href="https://brokenspoke.peopleforbikes.github.io/docs/code-of-conduct/" type="text/html"/>
-		<id>https://brokenspoke.peopleforbikes.github.io/docs/code-of-conduct/</id>
+		<link rel="alternate" href="https://peopleforbikes.github.io/brokenspoke/docs/code-of-conduct/" type="text/html"/>
+		<id>https://peopleforbikes.github.io/brokenspoke/docs/code-of-conduct/</id>
 		<content type="html">&lt;h1 id=&quot;community-code-of-conduct&quot;&gt;Community Code of Conduct&lt;&#x2F;h1&gt;
 &lt;p&gt;The Brokenspoke-analyzer project follows the
 &lt;a href=&quot;https:&#x2F;&#x2F;peopleforbikes.github.io&#x2F;code-of-conduct&#x2F;&quot;&gt;BNA Mechanics Code of Conduct&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
@@ -22,8 +22,8 @@
 		<title>Developer Setup</title>
 		<published>2021-11-26T08:20:00+00:00</published>
 		<updated>2021-11-26T08:20:00+00:00</updated>
-		<link rel="alternate" href="https://brokenspoke.peopleforbikes.github.io/docs/overview/developer-setup/" type="text/html"/>
-		<id>https://brokenspoke.peopleforbikes.github.io/docs/overview/developer-setup/</id>
+		<link rel="alternate" href="https://peopleforbikes.github.io/brokenspoke/docs/overview/developer-setup/" type="text/html"/>
+		<id>https://peopleforbikes.github.io/brokenspoke/docs/overview/developer-setup/</id>
 		<content type="html">&lt;p&gt;The infrastructure relies heavily on &lt;a href=&quot;https:&#x2F;&#x2F;www.docker.com&#x2F;&quot;&gt;Docker&lt;&#x2F;a&gt; containers and &lt;a href=&quot;https:&#x2F;&#x2F;kubernetes.io&#x2F;&quot;&gt;Kubernetes&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;requirements&quot;&gt;Requirements&lt;&#x2F;h2&gt;
 &lt;p&gt;Before starting, it is assumed that the following tools are installed and

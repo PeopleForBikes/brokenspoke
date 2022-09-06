@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-        <loc>https://brokenspoke.peopleforbikes.github.io/</loc>
+        <loc>https://peopleforbikes.github.io/brokenspoke/</loc>
     </url>
     <url>
-        <loc>https://brokenspoke.peopleforbikes.github.io/docs/</loc>
+        <loc>https://peopleforbikes.github.io/brokenspoke/docs/</loc>
     </url>
     <url>
-        <loc>https://brokenspoke.peopleforbikes.github.io/docs/code-of-conduct/</loc>
+        <loc>https://peopleforbikes.github.io/brokenspoke/docs/code-of-conduct/</loc>
         <lastmod>2022-08-28T22:07:37+00:00</lastmod>
     </url>
     <url>
-        <loc>https://brokenspoke.peopleforbikes.github.io/docs/overview/</loc>
+        <loc>https://peopleforbikes.github.io/brokenspoke/docs/overview/</loc>
     </url>
     <url>
-        <loc>https://brokenspoke.peopleforbikes.github.io/docs/overview/developer-setup/</loc>
+        <loc>https://peopleforbikes.github.io/brokenspoke/docs/overview/developer-setup/</loc>
         <lastmod>2021-11-26T08:20:00+00:00</lastmod>
     </url>
     <url>
-        <loc>https://brokenspoke.peopleforbikes.github.io/docs/overview/overview/</loc>
+        <loc>https://peopleforbikes.github.io/brokenspoke/docs/overview/overview/</loc>
     </url>
     <url>
-        <loc>https://brokenspoke.peopleforbikes.github.io/docs/pipelines/</loc>
+        <loc>https://peopleforbikes.github.io/brokenspoke/docs/pipelines/</loc>
     </url>
     <url>
-        <loc>https://brokenspoke.peopleforbikes.github.io/docs/pipelines/brochures/</loc>
+        <loc>https://peopleforbikes.github.io/brokenspoke/docs/pipelines/brochures/</loc>
     </url>
 </urlset>
