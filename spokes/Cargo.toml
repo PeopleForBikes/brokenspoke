@@ -4,6 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [[bin]]
+name = "bundler"
+path = "src/bundler.rs"
+
+[[bin]]
 name = "shortcodes"
 path = "src/shortcodes.rs"
 

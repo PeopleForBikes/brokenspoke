@@ -1,5 +1,6 @@
 //! This crate defines the structures and functions which are shared between
 //! the PFB projects.
+pub mod bundle;
 pub mod scorecard;
 pub mod template;
 
@@ -45,6 +46,12 @@ pub enum Error {
     MiniJinja {
         #[from]
         source: minijinja::Error,
+    },
+    /// Zip Error.
+    #[error("Zip error")]
+    ZipError {
+        #[from]
+        source: zip::result::ZipError,
     },
 }
 

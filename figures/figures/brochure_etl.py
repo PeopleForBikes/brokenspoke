@@ -16,6 +16,7 @@ with Diagram("Brochure ETL", show=False, direction="LR"):
         >> svggloo
         >> pdf_exporter
         >> Lambda("Add pages")
+        >> Lambda("Bundle")
         >> S3("Brochure Store")
     )
     # images >> pdf_exporter

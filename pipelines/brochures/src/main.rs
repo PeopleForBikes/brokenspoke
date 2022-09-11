@@ -1,8 +1,5 @@
 use color_eyre::{eyre::Report, Result};
-use std::ffi::OsStr;
-use std::fs;
-use std::path::PathBuf;
-use std::process::Command;
+use std::{ffi::OsStr, fs, path::PathBuf, process::Command};
 use walkdir::WalkDir;
 
 fn main() -> Result<(), Report> {
@@ -35,11 +32,14 @@ fn main() -> Result<(), Report> {
         .arg(&city_ratings_15)
         .arg(&output_dir.join("brochure.csv"))
         .output()?;
+    dbg!(&_output);
 
     //  Generate SVG files.
     let _output = Command::new("cargo")
         .arg("run")
         .arg("-p")
+        .arg("spokes")
+        .arg("--bin")
         .arg("svggloo")
         .arg("--")
         .arg("--field")
@@ -51,6 +51,7 @@ fn main() -> Result<(), Report> {
         .arg(&brochure_template_copy.canonicalize()?)
         .arg(&output_dir.canonicalize()?)
         .output()?;
+    dbg!(&_output);
 
     // Collect all the SVGs.
     let mut svg_files = Vec::new();
@@ -73,6 +74,21 @@ fn main() -> Result<(), Report> {
     cmd.args(svg_files);
     cmd.current_dir(fs::canonicalize(&output_dir)?);
     let _output = cmd.output()?;
+    dbg!(&_output);
+
+    // Bundle the brochures.
+    let _output = Command::new("cargo")
+        .arg("run")
+        .arg("-p")
+        .arg("spokes")
+        .arg("--bin")
+        .arg("bundler")
+        .arg("--")
+        .arg("--ignore")
+        .arg("country")
+        .arg(&output_dir.canonicalize()?)
+        .output()?;
+    dbg!(&_output);
 
     Ok(())
 }
