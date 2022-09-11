@@ -46,9 +46,9 @@
 
 	
 
-<title>Developer Setup | Broken Spoke</title>
+<title>Svggloo | Broken Spoke</title>
 <meta name="description" content="All you want to know about the Broken Spoke projects">
-<link rel="canonical" href="https://peopleforbikes.github.io/brokenspoke/docs/overview/developer-setup/">
+<link rel="canonical" href="https://peopleforbikes.github.io/brokenspoke/docs/spokes/svggloo/">
 
 
 
@@ -103,14 +103,11 @@
           {
             "@type": "ListItem",
             "position":  3 ,
-            "name": "Overview",
-            "item": "https://peopleforbikes.github.io/brokenspoke/docs/overview/"
+            "name": "Spokes",
+            "item": "https://peopleforbikes.github.io/brokenspoke/docs/spokes/"
           },
         
       
-        
-        
-        
         
         
         
@@ -124,8 +121,8 @@
           {
             "@type": "ListItem",
             "position":  4 ,
-            "name": "Developer Setup",
-            "item": "https://peopleforbikes.github.io/brokenspoke/docs/overview/developer-setup/"
+            "name": "Svggloo",
+            "item": "https://peopleforbikes.github.io/brokenspoke/docs/spokes/svggloo/"
           },
         
       
@@ -231,7 +228,7 @@
 							                           
 									<li><a class="docs-link" href="https://peopleforbikes.github.io/brokenspoke/docs/overview/overview/">Overview</a></li>
 							                           
-									<li><a class="docs-link active" href="https://peopleforbikes.github.io/brokenspoke/docs/overview/developer-setup/">Developer Setup</a></li>
+									<li><a class="docs-link" href="https://peopleforbikes.github.io/brokenspoke/docs/overview/developer-setup/">Developer Setup</a></li>
 							
 					</ul>
 					
@@ -253,7 +250,7 @@
 							                           
 									<li><a class="docs-link" href="https://peopleforbikes.github.io/brokenspoke/docs/spokes/shortcodes/">Shortcodes</a></li>
 							                           
-									<li><a class="docs-link" href="https://peopleforbikes.github.io/brokenspoke/docs/spokes/svggloo/">Svggloo</a></li>
+									<li><a class="docs-link active" href="https://peopleforbikes.github.io/brokenspoke/docs/spokes/svggloo/">Svggloo</a></li>
 							
 					</ul>
 					
@@ -270,20 +267,18 @@
   			<nav id="TableOfContents">
   					<ul>
   							
-  							<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/overview/developer-setup/#requirements">Requirements</a></li>
+  							<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/spokes/svggloo/#quickstart">Quickstart</a></li>
+  							
+  							
+  							<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/spokes/svggloo/#specifics">Specifics</a></li>
   							
   									<ul>
   											
-  											<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/overview/developer-setup/#platforms">Platforms</a></li>
+  											<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/spokes/svggloo/#template">Template</a></li>
   											
-  									</ul>
-  							
-  							
-  							<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/overview/developer-setup/#setup-the-local-dev-environment">Setup the local dev environment</a></li>
-  							
-  									<ul>
+  											<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/spokes/svggloo/#data-file">Data file</a></li>
   											
-  											<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/overview/developer-setup/#connecting-to-the-database">Connecting to the database</a></li>
+  											<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/spokes/svggloo/#svg-export">SVG Export</a></li>
   											
   									</ul>
   							
@@ -295,72 +290,30 @@
   
 
       <main class="docs-content col-lg-11 col-xl-9">
-        <h1>Developer Setup</h1>
+        <h1>Svggloo</h1>
         
-        <p>The infrastructure relies heavily on <a href="https://www.docker.com/">Docker</a> containers and <a href="https://kubernetes.io/">Kubernetes</a>.</p>
-<h2 id="requirements">Requirements</h2>
-<p>Before starting, it is assumed that the following tools are installed and
-configured on the developer machine. If that is not the case, please refer to
-the official installation instructions to prepare your environment.</p>
+        <p>Svggloo is a tool to perform a data-merge operation in an SVG file.</p>
+<h2 id="quickstart">Quickstart</h2>
+<p>The tool expects the following inputs:</p>
 <ul>
-<li><a href="https://git-scm.com/downloads">git</a></li>
-<li><a href="https://www.docker.com/get-started/">docker</a></li>
-<li><a href="https://kubernetes.io/docs/tasks/tools/">kubectl</a></li>
-<li><a href="https://minikube.sigs.k8s.io/docs/start/">minikube</a></li>
-<li><a href="https://helm.sh/docs/intro/install/">helm</a></li>
-<li><a href="https://github.com/casey/just#packages=">just</a></li>
+<li>an SVG file to use as a template (see template details in the dedicated
+section below)</li>
+<li>a data file with the same name as the template, but with a <code>.csv</code> extension.
+Each record in the data file will produce a new output.</li>
 </ul>
-<p>It is also expected for all the Broken Spoke Projects to be located in the same
-folder. If that is not the case, the commands described in this documentation
-will have to be adjusted accordingly.</p>
-<p>Configuring helper variables may help:</p>
-<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#b48ead;">export </span><span style="color:#bf616a;">PFB_HOME</span><span>=&quot;</span><span style="color:#a3be8c;">{</span><span>$</span><span style="color:#bf616a;">HOME</span><span style="color:#a3be8c;">}/projects/PeopleForBikes</span><span>&quot;
-</span><span style="color:#b48ead;">export </span><span style="color:#bf616a;">BROKENSPOKE_INFRA</span><span>=&quot;</span><span style="color:#a3be8c;">{</span><span>$</span><span style="color:#bf616a;">PFB_HOME</span><span style="color:#a3be8c;">}/brokenspoke/infra</span><span>&quot;
+<p>Usage:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">svggloo --field</span><span> country</span><span style="color:#bf616a;"> --field</span><span> state</span><span style="color:#bf616a;"> --field</span><span> city</span><span style="color:#bf616a;"> --export</span><span> Inkscape \
+</span><span>  examples/brochures/brochure.svg
 </span></code></pre>
-<p>Then make sure the directories exist and go to the right one:</p>
-<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">mkdir -p </span><span>${</span><span style="color:#bf616a;">PFB_HOME</span><span>}
-</span><span style="color:#96b5b4;">cd </span><span>${</span><span style="color:#bf616a;">PFB_HOME</span><span>}
-</span></code></pre>
-<h3 id="platforms">Platforms</h3>
-<p>Last but not least, while we try to be platform agnostic and provide as much
-abstraction as possible, the main developers work on OSX and Linux, therefore
-Windows users may have to adapt these instructions. As always, pull-requests to
-help us improve the multi-platform support and automation are welcome.</p>
-<h2 id="setup-the-local-dev-environment">Setup the local dev environment</h2>
-<blockquote>
-<p><strong>REMARK: make sure to run the commands in the correct folder.</strong></p>
-</blockquote>
-<p>Start by cloning the [Broken Spoke] repository:</p>
-<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">git</span><span> clone git@github.com:PeopleForBikes/brokenspoke.git
-</span><span style="color:#96b5b4;">cd </span><span>${</span><span style="color:#bf616a;">BROKENSPOKE_INFRA</span><span>}
-</span></code></pre>
-<p>Provision and configure a local Kubernetes cluster:</p>
-<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">just
-</span></code></pre>
-<p>This will spin up <a href="https://minikube.sigs.k8s.io/docs/">Minikube</a> and configure a <a href="https://www.postgresql.org/">postgresql</a> instance.</p>
-<p>The process will take a few minutes. Follow the it on the screen as it will
-display some useful pieces of information.</p>
-<h3 id="connecting-to-the-database">Connecting to the database</h3>
-<p>Export the connection string as follow:</p>
-<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#b48ead;">export </span><span style="color:#bf616a;">DATABASE_URL</span><span>=</span><span style="color:#a3be8c;">postgresql://minikube:minikube@127.0.0.1:5432/bna
-</span></code></pre>
-<p>In another terminal, start the kubectl process:</p>
-<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">kubectl</span><span> port-forward</span><span style="color:#bf616a;"> --namespace</span><span> default svc/postgresql 5432:5432
-</span></code></pre>
-<blockquote>
-<p><strong>REMARK: this terminal will have to stay open as long as you plan to interact
-with the database.</strong></p>
-</blockquote>
-<p>The database is now accessible using your favorite client, for instance <a href="https://www.pgcli.com/">pgcli</a>:</p>
-<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">pgcli </span><span>$</span><span style="color:#bf616a;">DATABASE_URL
-</span></code></pre>
-<p>or <a href="https://www.postgresql.org/docs/current/app-psql.html">psql</a>:</p>
-<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> psql $</span><span style="color:#bf616a;">DATABASE_URL -c </span><span>&#39;</span><span style="color:#a3be8c;">SELECT COUNT(id) from city;</span><span>&#39;
-</span><span> </span><span style="color:#bf616a;">count
-</span><span style="color:#bf616a;">-------
-</span><span>   </span><span style="color:#bf616a;">767
-</span><span>(</span><span style="color:#bf616a;">1</span><span> row)
-</span></code></pre>
+<h2 id="specifics">Specifics</h2>
+<h3 id="template">Template</h3>
+<p>The template use the jinja2 syntax to perform replacements, therefore all
+variables in the template must be surrounded by <code>{{}}</code>, for instance <code>{{name}}</code>.</p>
+<h3 id="data-file">Data file</h3>
+<p>The data file must be a CSV file.</p>
+<h3 id="svg-export">SVG Export</h3>
+<p>The SVG export is done using <a href="https://inkscape.org/">inkscape</a>, <a href="https://cairosvg.org/">cairosvg</a>, or <a href="https://docs.rs/svg2pdf/latest/svg2pdf/">svg2pdf</a>. If the
+exporter program is not found svggloo will abort the operation.</p>
 
         
         
@@ -376,13 +329,32 @@ with the database.</strong></p>
     
       
         
-        <a href="https:&#x2F;&#x2F;peopleforbikes.github.io&#x2F;brokenspoke&#x2F;docs&#x2F;code-of-conduct&#x2F;">
-          <div class="card my-1">
-            <div class="card-body py-2">
-              &larr; 
-            </div>
-          </div>
-        </a>
+        
+          
+        
+      
+        
+        
+          
+            
+              
+              <a href="https:&#x2F;&#x2F;peopleforbikes.github.io&#x2F;brokenspoke&#x2F;docs&#x2F;pipelines&#x2F;brochures&#x2F;">
+                <div class="card my-1">
+                  <div class="card-body py-2">
+                    &larr; Brochures
+                  </div>
+                </div>
+              </a>
+            
+            
+            
+          
+        
+      
+        
+        
+          
+        
       
     
   
@@ -402,19 +374,6 @@ with the database.</strong></p>
     
       
       
-        
-          
-          
-          <a class="ms-auto" href="https:&#x2F;&#x2F;peopleforbikes.github.io&#x2F;brokenspoke&#x2F;docs&#x2F;pipelines&#x2F;brochures&#x2F;">
-            <div class="card my-1">
-              <div class="card-body py-2">
-                Brochures &rarr;
-              </div>
-            </div>
-          </a>
-          
-          
-          
         
       
     
