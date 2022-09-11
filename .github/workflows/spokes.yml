@@ -1,22 +1,22 @@
-name: svggloo
+name: spokes
 
 defaults:
   run:
-    working-directory: svggloo
+    working-directory: spokes
 
 on:
   pull_request:
     paths:
-      - ".github/workflows/svggloo.yml"
-      - "svggloo/**"
+      - ".github/workflows/spokes.yml"
+      - "spokes/**"
     types:
       - opened
       - synchronize
       - reopened
   push:
     paths:
-      - ".github/workflows/svggloo.yml"
-      - "svggloo/**"
+      - ".github/workflows/spokes.yml"
+      - "spokes/**"
     branches:
       - main
     tags:
@@ -37,15 +37,15 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: fmt
-          args: --manifest-path svggloo/Cargo.toml --check
+          args: --manifest-path spokes/Cargo.toml --check
       - uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --manifest-path svggloo/Cargo.toml -- -D warnings
+          args: --manifest-path spokes/Cargo.toml -- -D warnings
       - uses: actions-rs/cargo@v1
         with:
           command: check
-          args: --manifest-path svggloo/Cargo.toml
+          args: --manifest-path spokes/Cargo.toml
 
   test:
     runs-on: ubuntu-latest
@@ -60,7 +60,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --manifest-path svggloo/Cargo.toml
+          args: --manifest-path spokes/Cargo.toml
 
   build:
     name: build
@@ -71,4 +71,4 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --manifest-path svggloo/Cargo.toml
+          args: --manifest-path spokes/Cargo.toml

@@ -2,7 +2,7 @@
 ci: lint
 
 # Meta task running all the linters at once.
-lint: lint-md
+lint: lint-md lint-spellcheck
 
 # Lint markown files.
 lint-md:
@@ -10,7 +10,7 @@ lint-md:
 
 # Check spelling.
 lint-spellcheck:
-	npx --yes cspell --no-progress --show-suggestions --show-context "docs/content/**/*.md"
+	npx --yes cspell --no-progress --show-suggestions --show-context "**/*.md"
 
 # Meta tasks running all formatters at once.
 fmt: fmt-md fmt-just

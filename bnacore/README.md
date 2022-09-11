@@ -17,7 +17,7 @@ import bnacore
 from pathlib import Path
 
 csv_file = Path("../retrieve/examples/city_ratings_2021_v15.csv")
-recs = pfbcore.ScoreCard.load_csv(str(csv_file))
+recs = bnacore.ScoreCard.load_csv(str(csv_file))
 rec = recs[0]
 rec.city.name
 ```

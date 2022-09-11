@@ -7,6 +7,10 @@ edition = "2021"
 name = "shortcodes"
 path = "src/shortcodes.rs"
 
+[[bin]]
+name = "svggloo"
+path = "src/svggloo.rs"
+
 [dependencies]
 bnacore = { path = "../bnacore" }
 clap = { version = "3.2.17", features = ["cargo", "derive"] }

@@ -1,6 +1,7 @@
 //! This crate defines the structures and functions which are shared between
 //! the PFB projects.
 pub mod scorecard;
+pub mod template;
 
 use crate::scorecard::{City, CommunitySurvey, ScoreCard, BNA};
 use pyo3::{exceptions::PyOSError, prelude::*};
@@ -38,6 +39,12 @@ pub enum Error {
     IOError {
         #[from]
         source: io::Error,
+    },
+    /// MiniJinja Error.
+    #[error("MiniJinja error")]
+    MiniJinja {
+        #[from]
+        source: minijinja::Error,
     },
 }
 

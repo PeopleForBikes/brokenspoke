@@ -1,5 +1,4 @@
-use clap::ValueEnum;
-use color_eyre::{eyre::Report, Result};
+use crate::Error;
 use csv::Reader;
 use minijinja::Environment;
 use serde::Serialize;
@@ -12,7 +11,7 @@ use std::{
 
 type Record = HashMap<String, String>;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Exporter {
     Inkscape,
     CairoSVG,
@@ -38,7 +37,7 @@ pub enum Exporter {
 /// ```no_run
 /// # use color_eyre::{eyre::Report, Result};
 /// use std::path::Path;
-/// use svggloo::template::{render, Exporter};
+/// use bnacore::template::{render, Exporter};
 ///
 /// # fn main() -> Result<(), Report> {
 /// let svg_template = Path::new("SVG_TEMPLATE_FILENAME");
@@ -64,7 +63,7 @@ pub fn render(
     exporter: Option<Exporter>,
     field_based_name: Option<Vec<String>>,
     separator: Option<&str>,
-) -> Result<(), Report> {
+) -> Result<(), Error> {
     // Locate the template file data and the prepare the output directory.
     let template_data = svg_template.with_extension("csv");
     fs::create_dir_all(output_dir)?;
@@ -127,7 +126,7 @@ pub fn render(
 ///
 /// ```no_run
 /// # use color_eyre::{eyre::Report, Result};
-/// use svggloo::template::render_record;
+/// use bnacore::template::render_record;
 /// use std::collections::HashMap;
 ///
 /// # fn main() -> Result<(), Report> {
@@ -138,7 +137,7 @@ pub fn render(
 /// # Ok(())
 /// # }
 /// ```
-pub fn render_record<S: Serialize>(template: &str, record: S) -> Result<String, Report> {
+pub fn render_record<S: Serialize>(template: &str, record: S) -> Result<String, Error> {
     let name = "template";
     let mut env = Environment::new();
     env.add_template(name, template)?;
@@ -152,7 +151,7 @@ pub fn render_record<S: Serialize>(template: &str, record: S) -> Result<String, 
 pub fn render_record_from_file<S: Serialize>(
     svg_template: &Path,
     record: S,
-) -> Result<String, Report> {
+) -> Result<String, Error> {
     // Load the template.
     let template = fs::read_to_string(svg_template)?;
 
