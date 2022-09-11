@@ -1,10 +1,11 @@
 $schema: https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json
-version: '0.2'
+version: "0.2"
 dictionaryDefinitions:
   - name: brokenspoke-words
-    path: './brokenspoke-words.txt'
+    path: "./brokenspoke-words.txt"
     addWords: true
 dictionaries:
   - brokenspoke-words
 ignorePaths:
-  - '/brokenspoke-words.txt'
+  - "/brokenspoke-words.txt"
+  - "/docs/themes/**"

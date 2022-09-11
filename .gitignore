@@ -51,6 +51,9 @@ pipelines/brochures/output/
 profile.svg
 results/*
 sdist/
+spokes/examples/brochures/brochure.csv
+spokes/examples/brochures/output/
+spokes/examples/brochures/shortcodes-2021-v15.csv
 svggloo/target/
 target/
 var/

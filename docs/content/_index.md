@@ -14,6 +14,10 @@ title = "BNA Core"
 content = "A Rust library with Python exports which contains the core logic for all the BNA projects."
 
 [[extra.list]]
+title = "Spokes"
+content = "An assortment of CLI tools leveraging BNA Core."
+
+[[extra.list]]
 title = "SVGgloo"
 content = "A tool to handle data-merge operations between an SVG template and a CSV file."
 
