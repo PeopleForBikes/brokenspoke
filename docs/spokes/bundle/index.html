@@ -46,9 +46,9 @@
 
 	
 
-<title>Brochures | Broken Spoke</title>
+<title>Bundle | Broken Spoke</title>
 <meta name="description" content="All you want to know about the Broken Spoke projects">
-<link rel="canonical" href="https://peopleforbikes.github.io/brokenspoke/docs/pipelines/brochures/">
+<link rel="canonical" href="https://peopleforbikes.github.io/brokenspoke/docs/spokes/bundle/">
 
 
 
@@ -103,8 +103,8 @@
           {
             "@type": "ListItem",
             "position":  3 ,
-            "name": "Pipelines",
-            "item": "https://peopleforbikes.github.io/brokenspoke/docs/pipelines/"
+            "name": "Spokes",
+            "item": "https://peopleforbikes.github.io/brokenspoke/docs/spokes/"
           },
         
       
@@ -121,8 +121,8 @@
           {
             "@type": "ListItem",
             "position":  4 ,
-            "name": "Brochures",
-            "item": "https://peopleforbikes.github.io/brokenspoke/docs/pipelines/brochures/"
+            "name": "Bundle",
+            "item": "https://peopleforbikes.github.io/brokenspoke/docs/spokes/bundle/"
           },
         
       
@@ -238,7 +238,7 @@
 							<h3>Pipelines</h3>
 							<ul class="list-unstyled">
 							                           
-									<li><a class="docs-link active" href="https://peopleforbikes.github.io/brokenspoke/docs/pipelines/brochures/">Brochures</a></li>
+									<li><a class="docs-link" href="https://peopleforbikes.github.io/brokenspoke/docs/pipelines/brochures/">Brochures</a></li>
 							
 					</ul>
 					
@@ -248,7 +248,7 @@
 							<h3>Spokes</h3>
 							<ul class="list-unstyled">
 							                           
-									<li><a class="docs-link" href="https://peopleforbikes.github.io/brokenspoke/docs/spokes/bundle/">Bundle</a></li>
+									<li><a class="docs-link active" href="https://peopleforbikes.github.io/brokenspoke/docs/spokes/bundle/">Bundle</a></li>
 							                           
 									<li><a class="docs-link" href="https://peopleforbikes.github.io/brokenspoke/docs/spokes/shortcodes/">Shortcodes</a></li>
 							                           
@@ -269,21 +269,10 @@
   			<nav id="TableOfContents">
   					<ul>
   							
-  							<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/pipelines/brochures/#how-it-works">How it works</a></li>
+  							<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/spokes/bundle/#goal">Goal</a></li>
   							
   							
-  							<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/pipelines/brochures/#rendering">Rendering</a></li>
-  							
-  							
-  							<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/pipelines/brochures/#run-it-locally">Run it locally</a></li>
-  							
-  									<ul>
-  											
-  											<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/pipelines/brochures/#requirements">Requirements</a></li>
-  											
-  											<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/pipelines/brochures/#run-it">Run it</a></li>
-  											
-  									</ul>
+  							<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/spokes/bundle/#example">Example</a></li>
   							
   							
   					</ul>
@@ -293,44 +282,38 @@
   
 
       <main class="docs-content col-lg-11 col-xl-9">
-        <h1>Brochures</h1>
+        <h1>Bundle</h1>
         
-        <p>The brochure pipelines generates City Ratings brochures based off the City
-Ratings Results.</p>
-<h2 id="how-it-works">How it works</h2>
-<p>The pipeline starts by converting the original city ratings file, to the
-shortcode version. Basically, that just means converting the headers to a 2-5
-letter code. For instance &quot;opportunity&quot; becomes &quot;op&quot;.</p>
-<p>The next step is to perform a data-merge operation between the shortcode file
-which was just created and the brochure template. This step will generate one
-SVG file per city. At this point the SVG itself is completely distributable if
-only an image is needed.</p>
-<p>To make it more portable, the following step will convert all the SVG files into
-PDF.</p>
-<p>Finally we add extra pages to the brochure. Typically the extra pages contain
-instructions to help cities to implement better policies and safer street
-designs.</p>
-<p><img src="../../../images/pipelines/brochures/brochure_etl.png"
-alt="Brochure Pipeline" width="100%"></p>
-<h2 id="rendering">Rendering</h2>
-<p>Here is an example of the SVG file being generated at the beginning of the
-process.</p>
-<p><img src="../../../images/pipelines/brochures/united_states-tx-austin.svg"
-alt="Brochure Rendering For Austin, TX" width="60%"
-style="display: block;margin: 0 auto;"></p>
-<h2 id="run-it-locally">Run it locally</h2>
-<h3 id="requirements">Requirements</h3>
-<ul>
-<li><a href="https://www.rust-lang.org/tools/install">Rust</a></li>
-<li><a href="https://inkscape.org/release/">Inkscape</a></li>
-<li><a href="https://fonts.google.com/specimen/Montserrat">Montserrat Font</a></li>
-<li>Dharma Gothic Extended Font</li>
-</ul>
-<h3 id="run-it">Run it</h3>
-<p>This pipeline was written in Rust and can be run locally with the following
-commands:</p>
-<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#96b5b4;">cd</span><span> pipelines/brochures
-</span><span style="color:#bf616a;">cargo</span><span> run
+        <p>A tool to bundle brochures together in order to simplify their distribution.</p>
+<h2 id="goal">Goal</h2>
+<p>The goal is to bundle brochures of the same state or country into in single zip
+file to simplify distributing them.</p>
+<p>The process also generates a special file named <code>all.zip</code> which contains all the
+generated brochures in one zip file.</p>
+<p>In order to work, the tool expects the brochure names to respect the BNA
+convention: <code>&lt;country&gt;-&lt;state&gt;-&lt;city&gt;.pdf</code>.</p>
+<h2 id="example">Example</h2>
+<p>If the following brochures were generated and put in the same folder:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#96b5b4;">.
+</span><span style="color:#bf616a;">├──</span><span> australia-nt-alice_springs.pdf
+</span><span style="color:#bf616a;">├──</span><span> england-eng-london.pdf
+</span><span style="color:#bf616a;">├──</span><span> france-idf-paris.pdf
+</span><span style="color:#bf616a;">├──</span><span> united_states-ca-arcata.pdf
+</span><span style="color:#bf616a;">├──</span><span> united_states-fl-altamonte_springs.pdf
+</span><span style="color:#bf616a;">├──</span><span> united_states-id-meridian.pdf
+</span><span style="color:#bf616a;">├──</span><span> united_states-ks-topeka.pdf
+</span><span style="color:#bf616a;">├──</span><span> united_states-nc-durham.pdf
+</span><span style="color:#bf616a;">├──</span><span> united_states-pa-pittsburgh.pdf
+</span><span style="color:#bf616a;">└──</span><span> united_states-ut-park_city.pdf
+</span></code></pre>
+<p>Running the bundler on this folder would produce the following bundles:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#96b5b4;">.
+</span><span style="color:#bf616a;">├──</span><span> all.zip
+</span><span style="color:#bf616a;">├──</span><span> australia.zip
+</span><span style="color:#bf616a;">├──</span><span> england.zip
+</span><span style="color:#bf616a;">├──</span><span> france.zip
+</span><span style="color:#bf616a;">└──</span><span> united_states.zip
+</span><span>
 </span></code></pre>
 
         
@@ -354,23 +337,23 @@ commands:</p>
         
         
           
-        
-      
-        
-        
-          
             
               
-              <a href="https:&#x2F;&#x2F;peopleforbikes.github.io&#x2F;brokenspoke&#x2F;docs&#x2F;overview&#x2F;developer-setup&#x2F;">
+              <a href="https:&#x2F;&#x2F;peopleforbikes.github.io&#x2F;brokenspoke&#x2F;docs&#x2F;pipelines&#x2F;brochures&#x2F;">
                 <div class="card my-1">
                   <div class="card-body py-2">
-                    &larr; Developer Setup
+                    &larr; Brochures
                   </div>
                 </div>
               </a>
             
             
             
+          
+        
+      
+        
+        
           
         
       
@@ -397,19 +380,6 @@ commands:</p>
     
       
       
-        
-          
-          
-          <a class="ms-auto" href="https:&#x2F;&#x2F;peopleforbikes.github.io&#x2F;brokenspoke&#x2F;docs&#x2F;spokes&#x2F;bundle&#x2F;">
-            <div class="card my-1">
-              <div class="card-body py-2">
-                Bundle &rarr;
-              </div>
-            </div>
-          </a>
-          
-          
-          
         
       
     
