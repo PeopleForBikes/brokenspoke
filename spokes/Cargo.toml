@@ -4,6 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [[bin]]
+name = "appender"
+path = "src/appender.rs"
+
+[[bin]]
 name = "bundler"
 path = "src/bundler.rs"
 
