@@ -36,6 +36,7 @@ data/
 develop-eggs/
 dist/
 docs/_build/
+docs/public/
 downloads/
 eggs/
 env/

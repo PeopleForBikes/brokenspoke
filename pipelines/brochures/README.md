@@ -1,4 +1,4 @@
-# Brochure Pipelines
+# Brochure Pipeline
 
 From this directory, run:
 

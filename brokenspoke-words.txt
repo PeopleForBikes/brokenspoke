@@ -6,6 +6,8 @@ Minikube
 Quickstart
 SVGgloo
 Shortcodes
+altamonte
+arcata
 bnacore
 bnasc
 brokenspoke
