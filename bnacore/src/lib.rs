@@ -1,6 +1,7 @@
 //! This crate defines the structures and functions which are shared between
 //! the PFB projects.
 pub mod bundle;
+pub mod combine;
 pub mod scorecard;
 pub mod template;
 

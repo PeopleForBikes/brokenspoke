@@ -1,5 +1,5 @@
 +++
-title = "Bundle"
+title = "Bundler"
 sort_by = "weight"
 weight = 1
 template = "docs/page.html"
@@ -22,6 +22,10 @@ In order to work, the tool expects the brochure names to respect the BNA
 convention: `<country>-<state>-<city>.pdf`.
 
 ## Example
+
+```bash
+bundler --ignore country spokes/examples/brochures/output
+```
 
 If the following brochures were generated and put in the same folder:
 
