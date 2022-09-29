@@ -30,7 +30,10 @@
         <loc>https://peopleforbikes.github.io/brokenspoke/docs/spokes/</loc>
     </url>
     <url>
-        <loc>https://peopleforbikes.github.io/brokenspoke/docs/spokes/bundle/</loc>
+        <loc>https://peopleforbikes.github.io/brokenspoke/docs/spokes/appender/</loc>
+    </url>
+    <url>
+        <loc>https://peopleforbikes.github.io/brokenspoke/docs/spokes/bundler/</loc>
     </url>
     <url>
         <loc>https://peopleforbikes.github.io/brokenspoke/docs/spokes/shortcodes/</loc>
