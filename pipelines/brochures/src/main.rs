@@ -1,13 +1,19 @@
 use color_eyre::{eyre::Report, Result};
 use std::{ffi::OsStr, fs, path::PathBuf, process::Command};
+use tracing::{debug, info};
 use walkdir::WalkDir;
 
 fn main() -> Result<(), Report> {
     // Setup the application.
     color_eyre::install()?;
 
+    // Setup logging.
+    tracing_subscriber::fmt::fmt()
+        .with_max_level(tracing::Level::DEBUG)
+        .init();
+
     // Get the paths.
-    let top_dir = PathBuf::from("../../");
+    let top_dir = PathBuf::from("../../").canonicalize()?;
     let asset_dir = top_dir.join("assets");
     let output_dir = top_dir.join("pipelines/brochures/output");
     let brochure_template = asset_dir.join("brochures/brochure.svg").canonicalize()?;
@@ -17,12 +23,16 @@ fn main() -> Result<(), Report> {
     let brochure_template_copy = output_dir.join("brochure.svg");
 
     // Create the output directory.
+    info!("📁 Creating the output directory...");
     fs::create_dir_all(&output_dir)?;
+    // dbg!(&output_dir);
 
-    // Copy the brochure template frmo the asset directory.
+    // Copy the brochure template from the asset directory.
+    info!("⚙️  Copying the brochure template...");
     fs::copy(&brochure_template, &brochure_template_copy)?;
 
     // Convert the City Ratings file to a Shortcode file.
+    info!("🔄 Converting the City Ratings file to a Shortcode file...");
     let _output = Command::new("cargo")
         .arg("run")
         .arg("-p")
@@ -32,9 +42,10 @@ fn main() -> Result<(), Report> {
         .arg(&city_ratings_15)
         .arg(&output_dir.join("brochure.csv"))
         .output()?;
-    dbg!(&_output);
+    // dbg!(&_output);
 
     //  Generate SVG files.
+    info!("📄 Generating SVG files...");
     let _output = Command::new("cargo")
         .arg("run")
         .arg("-p")
@@ -49,11 +60,12 @@ fn main() -> Result<(), Report> {
         .arg("--field")
         .arg("ci")
         .arg(&brochure_template_copy.canonicalize()?)
-        .arg(&output_dir.canonicalize()?)
+        .arg(&output_dir)
         .output()?;
-    dbg!(&_output);
+    // dbg!(&_output);
 
     // Collect all the SVGs.
+    debug!("🗄️  Collecting the generated SVG files...");
     let mut svg_files = Vec::new();
     for entry in WalkDir::new(&output_dir).into_iter().filter_map(|e| e.ok()) {
         let path = entry.into_path();
@@ -65,18 +77,22 @@ fn main() -> Result<(), Report> {
             }
         }
     }
+    // dbg!(&svg_files);
 
     // Generate the PDF files.
+    info!("📃 Generating PDF files...");
     let mut cmd = Command::new("inkscape");
     cmd.arg("--export-area-drawing")
         .arg("--batch-process")
         .arg("--export-type=pdf");
     cmd.args(svg_files);
-    cmd.current_dir(fs::canonicalize(&output_dir)?);
+    cmd.current_dir(&output_dir);
+    // dbg!(&cmd);
     let _output = cmd.output()?;
-    dbg!(&_output);
+    // dbg!(&_output);
 
     // Bundle the brochures.
+    info!("📦 Bundling the brochures...");
     let _output = Command::new("cargo")
         .arg("run")
         .arg("-p")
@@ -88,7 +104,8 @@ fn main() -> Result<(), Report> {
         .arg("country")
         .arg(&output_dir.canonicalize()?)
         .output()?;
-    dbg!(&_output);
+    // dbg!(&_output);
 
+    info!("✅ Done");
     Ok(())
 }
