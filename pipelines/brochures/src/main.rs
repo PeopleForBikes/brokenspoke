@@ -1,5 +1,13 @@
-use color_eyre::{eyre::Report, Result};
-use std::{ffi::OsStr, fs, path::PathBuf, process::Command};
+use color_eyre::{
+    eyre::{eyre, Report},
+    Result,
+};
+use std::{
+    ffi::OsStr,
+    fs,
+    path::PathBuf,
+    process::{Command, Output},
+};
 use tracing::{debug, info};
 use walkdir::WalkDir;
 
@@ -33,7 +41,7 @@ fn main() -> Result<(), Report> {
 
     // Convert the City Ratings file to a Shortcode file.
     info!("🔄 Converting the City Ratings file to a Shortcode file...");
-    let _output = Command::new("cargo")
+    let output = Command::new("cargo")
         .arg("run")
         .arg("-p")
         .arg("spokes")
@@ -42,11 +50,12 @@ fn main() -> Result<(), Report> {
         .arg(&city_ratings_15)
         .arg(&output_dir.join("brochure.csv"))
         .output()?;
+    process_output(&output)?;
     // dbg!(&_output);
 
     //  Generate SVG files.
     info!("📄 Generating SVG files...");
-    let _output = Command::new("cargo")
+    let output = Command::new("cargo")
         .arg("run")
         .arg("-p")
         .arg("spokes")
@@ -59,10 +68,11 @@ fn main() -> Result<(), Report> {
         .arg("st")
         .arg("--field")
         .arg("ci")
-        .arg(&brochure_template_copy.canonicalize()?)
+        .arg(&brochure_template_copy)
         .arg(&output_dir)
         .output()?;
-    // dbg!(&_output);
+    process_output(&output)?;
+    // dbg!(&output);
 
     // Collect all the SVGs.
     debug!("🗄️  Collecting the generated SVG files...");
@@ -87,13 +97,13 @@ fn main() -> Result<(), Report> {
         .arg("--export-type=pdf");
     cmd.args(svg_files);
     cmd.current_dir(&output_dir);
-    // dbg!(&cmd);
-    let _output = cmd.output()?;
-    // dbg!(&_output);
+    let output = cmd.output()?;
+    process_output_with_command(&output, &cmd)?;
+    // dbg!(&output);
 
     // Bundle the brochures.
     info!("📦 Bundling the brochures...");
-    let _output = Command::new("cargo")
+    let output = Command::new("cargo")
         .arg("run")
         .arg("-p")
         .arg("spokes")
@@ -104,8 +114,35 @@ fn main() -> Result<(), Report> {
         .arg("country")
         .arg(&output_dir.canonicalize()?)
         .output()?;
-    // dbg!(&_output);
+    process_output_with_command(&output, &cmd)?;
+    // dbg!(&output);
 
     info!("✅ Done");
     Ok(())
+}
+
+fn process_output_with_command(output: &Output, cmd: &Command) -> Result<(), Report> {
+    if output.status.success() {
+        return Ok(());
+    }
+
+    Err(eyre!(
+        "The command {:?} failed with status code {:?} and the following error: {:?}.\n The following arguments were passed to the command:\n {:?}",
+        cmd.get_program(),
+        output.status.code(),
+        String::from_utf8_lossy(&output.stderr),
+        cmd.get_args().collect::<Vec<&OsStr>>()
+    ))
+}
+
+fn process_output(output: &Output) -> Result<(), Report> {
+    if output.status.success() {
+        return Ok(());
+    }
+
+    Err(eyre!(
+        "The command  failed with status code {:?} and the following error: {:?}.",
+        output.status.code(),
+        String::from_utf8_lossy(&output.stderr),
+    ))
 }
