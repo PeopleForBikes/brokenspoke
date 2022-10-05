@@ -24,14 +24,23 @@ infrastructure piece.
 
 ### Broken Spoke Infrastructure
 
-### Broken Spoke Tools
+The infrastructure leverages Kubernetes and Docker to run the services.
 
-Several tools using the BNA data:
+Tools and services can also be run locally, either directly from their
+subdirectory, either using the minikube setup we provide (see the
+[Developer Setup](./developer-setup.md) page for more details).
 
-- Brochure generator
-- City importer
-- City Ratings generator
-- SVGgloo
+### BNA Core
+
+BNA Core is the heart of the Broken spoke, but also extends to other BNA
+projects. This library is written in [Rust], but also provides [Python]
+bindings.
+
+### The Spokes
+
+The "spokes" are a set of command line utilities based off the "bnacore"
+library. Each tool performs a single action. The goal is to combine them to
+build pipelines that can either run locally or in the cloud.
 
 [docker]: https://www.docker.com/
 [javascript]: https://developer.mozilla.org/en-US/docs/Web/JavaScript
