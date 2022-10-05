@@ -11,15 +11,11 @@ repo_url = "https://github.com/PeopleForBikes/brokenspoke"
 
 [[extra.list]]
 title = "BNA Core"
-content = "A Rust library with Python exports which contains the core logic for all the BNA projects."
+content = "A Rust library, with Python bindings, which contains the core logic for all the BNA projects."
 
 [[extra.list]]
 title = "Spokes"
 content = "An assortment of CLI tools leveraging BNA Core."
-
-[[extra.list]]
-title = "SVGgloo"
-content = "A tool to handle data-merge operations between an SVG template and a CSV file."
 
 [[extra.list]]
 title = "Infrastructure"
@@ -27,9 +23,13 @@ content = "Automation to provision local/cloud environments for the Broken Spoke
 
 [[extra.list]]
 title = "Analyzer"
-content = "Run an analysis locally."
+content = "Run a bicycle network analysis locally."
 
 [[extra.list]]
 title = "Pipelines"
-content = "Dedicated Automated Pipelines."
+content = "A set of dedicated automated pipelines build off the spokes."
+
+[[extra.list]]
+title = "Incubator"
+content = "A playground full of BNA projects that may one day become official."
 +++
