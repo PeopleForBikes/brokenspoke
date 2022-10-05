@@ -277,7 +277,9 @@
   											
   											<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/overview/overview/#broken-spoke-infrastructure">Broken Spoke Infrastructure</a></li>
   											
-  											<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/overview/overview/#broken-spoke-tools">Broken Spoke Tools</a></li>
+  											<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/overview/overview/#bna-core">BNA Core</a></li>
+  											
+  											<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/overview/overview/#the-spokes">The Spokes</a></li>
   											
   									</ul>
   							
@@ -300,14 +302,18 @@ process around the BNA.</p>
 interests you. However it is most likely that you will want to start with the
 infrastructure piece.</p>
 <h3 id="broken-spoke-infrastructure">Broken Spoke Infrastructure</h3>
-<h3 id="broken-spoke-tools">Broken Spoke Tools</h3>
-<p>Several tools using the BNA data:</p>
-<ul>
-<li>Brochure generator</li>
-<li>City importer</li>
-<li>City Ratings generator</li>
-<li>SVGgloo</li>
-</ul>
+<p>The infrastructure leverages Kubernetes and Docker to run the services.</p>
+<p>Tools and services can also be run locally, either directly from their
+subdirectory, either using the minikube setup we provide (see the
+<a href="./developer-setup.md">Developer Setup</a> page for more details).</p>
+<h3 id="bna-core">BNA Core</h3>
+<p>BNA Core is the heart of the Broken spoke, but also extends to other BNA
+projects. This library is written in <a href="https://www.rust-lang.org/">Rust</a>, but also provides <a href="https://www.python.org/">Python</a>
+bindings.</p>
+<h3 id="the-spokes">The Spokes</h3>
+<p>The &quot;spokes&quot; are a set of command line utilities based off the &quot;bnacore&quot;
+library. Each tool performs a single action. The goal is to combine them to
+build pipelines that can either run locally or in the cloud.</p>
 
         
         

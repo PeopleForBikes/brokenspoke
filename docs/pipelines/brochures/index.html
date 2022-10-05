@@ -308,10 +308,12 @@ which was just created and the brochure template. This step will generate one
 SVG file per city. At this point the SVG itself is completely distributable if
 only an image is needed.</p>
 <p>To make it more portable, the following step will convert all the SVG files into
-PDF.</p>
-<p>Finally we add extra pages to the brochure. Typically the extra pages contain
+PDF files.</p>
+<p>Then we add extra pages to the brochure. Typically the extra pages contain
 instructions to help cities to implement better policies and safer street
 designs.</p>
+<p>Finally we bundle the brochures by country or state to simplify their
+distribution.</p>
 <p><img src="../../../images/pipelines/brochures/brochure_etl.png"
 alt="Brochure Pipeline" width="100%"></p>
 <h2 id="rendering">Rendering</h2>
@@ -333,6 +335,16 @@ style="display: block;margin: 0 auto;"></p>
 commands:</p>
 <pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#96b5b4;">cd</span><span> pipelines/brochures
 </span><span style="color:#bf616a;">cargo</span><span> run
+</span></code></pre>
+<p>This will produce the following output:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">2022-10-05T01:53:20.508083Z</span><span>  INFO brochures: 📁 Creating the output directory...
+</span><span style="color:#bf616a;">2022-10-05T01:53:20.508248Z</span><span>  INFO brochures: ⚙️  Copying the brochure template...
+</span><span style="color:#bf616a;">2022-10-05T01:53:20.509215Z</span><span>  INFO brochures: 🔄 Converting the City Ratings file to a Shortcode file...
+</span><span style="color:#bf616a;">2022-10-05T01:53:20.925506Z</span><span>  INFO brochures: 📄 Generating SVG files...
+</span><span style="color:#bf616a;">2022-10-05T01:53:21.346107Z</span><span> DEBUG brochures: 🗄️  Collecting the generated SVG files...
+</span><span style="color:#bf616a;">2022-10-05T01:53:21.348323Z</span><span>  INFO brochures: 📃 Generating PDF files...
+</span><span style="color:#bf616a;">2022-10-05T01:54:14.165587Z</span><span>  INFO brochures: 📦 Bundling the brochures...
+</span><span style="color:#bf616a;">2022-10-05T01:54:26.702501Z</span><span>  INFO brochures: ✅ Done
 </span></code></pre>
 
         
