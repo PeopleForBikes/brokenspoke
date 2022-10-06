@@ -1,9 +1,9 @@
 use bnacore::bundle::{Bundle, GroupBy};
-use clap::{crate_name, ArgEnum, Parser, ValueHint};
+use clap::{crate_name, ArgAction, Parser, ValueEnum, ValueHint};
 use color_eyre::{eyre::Report, Result};
 use std::path::PathBuf;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ArgEnum)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
 pub enum GroupByArg {
     Country,
     State,
@@ -32,16 +32,16 @@ impl From<GroupByArg> for GroupBy {
 #[clap(name = crate_name!(), author, about, version)]
 pub struct Opts {
     /// Sets the verbosity level
-    #[clap(short, long, parse(from_occurrences))]
+    #[clap(short, long, action = ArgAction::Count)]
     pub verbose: u8,
     /// Silently ignore the files not matching the exact name format
     #[clap(short, long)]
     pub ignore: bool,
     /// Specify how to group the files,
-    #[clap(arg_enum)]
+    #[clap(value_enum)]
     pub group_by: GroupByArg,
     /// Specify the directory containing the files to bundle.
-    #[clap(parse(from_os_str), value_hint = ValueHint::DirPath)]
+    #[clap(value_parser, value_hint = ValueHint::DirPath)]
     pub input_dir: PathBuf,
 }
 

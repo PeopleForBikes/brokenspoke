@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 #[clap(name = crate_name!(), author, about, version)]
 pub struct Opts {
     /// Sets the verbosity level
-    #[clap(short, long, parse(from_occurrences))]
+    #[clap(short, long, value_parser)]
     pub verbose: u8,
     /// Specify the document to append to the other ones
     #[clap()]
