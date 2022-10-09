@@ -3,37 +3,45 @@ use regex::Regex;
 use std::{
     collections::HashMap,
     ffi::OsStr,
+    fs,
     fs::File,
     io::{Read, Write},
     path::PathBuf,
 };
 use walkdir::{DirEntry, WalkDir};
-use zip::write::FileOptions;
+use zip::{write::FileOptions, ZipWriter};
 
 /// Define a structure to handle brochure bundles.
 pub struct Bundle {
     pub input_dir: PathBuf,
     pub group_by: GroupBy,
-    pub ignore: bool,
+    pub strict: bool,
+    pub filetype: FileType,
 }
 
 /// Define the different ways to groups city rating brochures.
 pub enum GroupBy {
+    City,
     Country,
     State,
+}
+
+pub enum FileType {
+    All,
+    Pdf,
 }
 
 impl Bundle {
     /// Group file names by [`GroupBy`], usually country or state.
     ///
     /// The file names are expected to be in the following format:
-    /// `<country>-<state>-<city>.pdf`.
+    /// `<country>-<state>-<city>[-<filename>].<extension>`.
     /// The function will panic if a file does not match this format.
     ///
     /// ```rust
     /// use std::collections::HashMap;
     /// use std::path::PathBuf;
-    /// use bnacore::bundle::{Bundle, GroupBy};
+    /// use bnacore::bundle::{Bundle, FileType, GroupBy};
     ///
     /// let files = vec![
     ///     String::from("australia-nt-alice_springs.pdf"),
@@ -47,7 +55,7 @@ impl Bundle {
     /// country_groups.insert(String::from("england"), vec![PathBuf::from("england-eng-london.pdf")]);
     /// country_groups.insert(String::from("france"), vec![PathBuf::from("france-idf-paris.pdf")]);
     /// country_groups.insert(String::from("united_states"), vec![PathBuf::from("united_states-ca-arcata.pdf"), PathBuf::from("united_states-fl-altamonte_springs.pdf")]);
-    /// let bundle = Bundle {input_dir: PathBuf::from("."), group_by: GroupBy::Country, ignore: false};
+    /// let bundle = Bundle {input_dir: PathBuf::from("."), group_by: GroupBy::Country, strict: true, filetype: FileType::Pdf};
     /// let groups = bundle.group(&files);
     /// assert_eq!(country_groups, groups);
     /// ````
@@ -62,13 +70,13 @@ impl Bundle {
     /// Group file names by [`GroupBy`], usually country or state.
     ///
     /// The file names are expected to be in the following format:
-    /// `<country>-<state>-<city>.pdf`.
+    /// `<country>-<state>-<city>[-<filename>].<extension>`.
     /// The function will panic if a file does not match this format.
     ///
     /// ```rust
     /// use std::collections::HashMap;
     /// use std::path::PathBuf;
-    /// use bnacore::bundle::{Bundle, GroupBy};
+    /// use bnacore::bundle::{Bundle, FileType, GroupBy};
     ///
     /// let files = vec![
     ///     PathBuf::from("australia-nt-alice_springs.pdf"),
@@ -82,7 +90,7 @@ impl Bundle {
     /// country_groups.insert(String::from("england"), vec![PathBuf::from("england-eng-london.pdf")]);
     /// country_groups.insert(String::from("france"), vec![PathBuf::from("france-idf-paris.pdf")]);
     /// country_groups.insert(String::from("united_states"), vec![PathBuf::from("united_states-ca-arcata.pdf"), PathBuf::from("united_states-fl-altamonte_springs.pdf")]);
-    /// let bundle = Bundle {input_dir: PathBuf::from("."), group_by: GroupBy::Country, ignore: false};
+    /// let bundle = Bundle {input_dir: PathBuf::from("."), group_by: GroupBy::Country, strict: true, filetype: FileType::Pdf};
     /// let groups = bundle.group_files(&files);
     /// assert_eq!(country_groups, groups);
     /// ````
@@ -90,12 +98,15 @@ impl Bundle {
         let mut groups: HashMap<String, Vec<PathBuf>> = HashMap::new();
         let re = Regex::new(
             r"(?x)
-        (?P<country>(.*)) # country
+        (?P<country>([^-]*))# country
         -
-        (?P<state>(.*))   # state (or country)
+        (?P<state>([^-]*))  # state (or country)
         -
-        (?P<city>(.*))   # city
-        .pdf              # file extension
+        (?P<city>([^-]*))   # city
+        -?                  # optional separator
+        (.*)?               # optional file name
+        \.
+        (.*)                # file extension
         $
       ",
         )
@@ -105,16 +116,21 @@ impl Bundle {
             let filename = path.file_name().map(|f| f.to_str()).unwrap().unwrap();
             let caps = match re.captures(filename) {
                 None => {
-                    if self.ignore {
-                        continue;
+                    if self.strict {
+                        panic!("The file `{filename}` does not have the right format. `<country>-<state>-<city>[-<filename>].<extension>` was expected.")
                     } else {
-                        panic!("The file `{filename}` does not have the right format. `<country>-<state>-<city>.pdf` was expected.")
+                        continue;
                     }
                 }
                 Some(c) => c,
             };
 
             let key = match self.group_by {
+                GroupBy::City => format!(
+                    "{}-{}",
+                    caps.name("city").unwrap().as_str(),
+                    caps.name("state").unwrap().as_str()
+                ),
                 GroupBy::Country => caps.name("country").unwrap().as_str().to_string(),
                 GroupBy::State => caps.name("state").unwrap().as_str().to_string(),
             };
@@ -128,23 +144,31 @@ impl Bundle {
     }
 
     /// Creates a zip file for each group, as well as a zip file for all the files.
-    pub fn zip(&self) -> Result<(), Error> {
-        // Collect the PDF files.
-        let pdf_files = self.gather_pdf_files();
+    pub fn zip(&self, bundle_all: bool) -> Result<(), Error> {
+        // Collect the files.
+        let collected_files = match self.filetype {
+            FileType::All => self.gather_all_files(),
+            FileType::Pdf => self.gather_pdf_files(),
+        };
 
         // Group the files.
-        let groups = self.group_files(&pdf_files);
+        let groups = self.group_files(&collected_files);
+
+        // Create a "bundles" directory to store the bundles.
+        let bundle_dir = self.input_dir.join("bundles");
+        fs::create_dir_all(&bundle_dir)?;
 
         // Zip them all.
-        let all_path = self.input_dir.join("all.zip");
-        let all_file = std::fs::File::create(&all_path).unwrap();
-        let mut all_zip = zip::ZipWriter::new(all_file);
-
+        let all_zip_path = bundle_dir.join("all.zip");
+        if bundle_all {
+            let all_zip_file = File::create(&all_zip_path).unwrap();
+            ZipWriter::new(all_zip_file);
+        }
         // Zip each group.
         for (group_name, files) in groups.iter() {
             // Zip the group.
             let group_name = format!("{group_name}.zip");
-            let group_path = self.input_dir.join(&group_name);
+            let group_path = bundle_dir.join(&group_name);
             let group_file = std::fs::File::create(&group_path).unwrap();
             let mut group_zip = zip::ZipWriter::new(group_file);
 
@@ -155,14 +179,17 @@ impl Bundle {
                 let mut buffer = Vec::new();
                 f.read_to_end(&mut buffer)?;
 
-                // Add a file object to the archive.
+                // Add the file object to the archive.
                 let file_name = file.file_name().map(|f| f.to_str()).unwrap().unwrap();
                 group_zip.start_file(file_name, FileOptions::default())?;
-                all_zip.start_file(file_name, FileOptions::default())?;
-
-                // Write the content of the file into each zip files.
                 group_zip.write_all(&buffer)?;
-                all_zip.write_all(&buffer)?;
+
+                // Add the file to the "all" archive.
+                if bundle_all {
+                    let mut all_zip = ZipWriter::new(File::open(&all_zip_path)?);
+                    all_zip.start_file(file_name, FileOptions::default())?;
+                    all_zip.write_all(&buffer)?;
+                }
             }
         }
 
@@ -192,6 +219,16 @@ impl Bundle {
     pub fn gather_pdf_files(&self) -> Vec<PathBuf> {
         self.gather_files(filter_pdf_files)
     }
+
+    /// Gather any file.
+    pub fn gather_all_files(&self) -> Vec<PathBuf> {
+        self.gather_files(filter_files)
+    }
+}
+
+/// Define the conditions to select files.
+pub fn filter_files(entry: &DirEntry) -> bool {
+    entry.metadata().unwrap().is_file()
 }
 
 /// Define the conditions to select a PDF file.

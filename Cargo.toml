@@ -1,2 +1,2 @@
 [workspace]
-members = ["bnacore", "pipelines/brochures", "spokes"]
+members = ["bnacore", "pipelines/brochures", "pipelines/retrieve", "spokes"]

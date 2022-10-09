@@ -1,5 +1,5 @@
-figures/.venv
-bnacore/target
-svggloo/target
-target
-docs/themes
+figures/.venv/
+bnacore/target/
+svggloo/target/
+target/
+docs/themes/

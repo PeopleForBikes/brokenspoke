@@ -49,12 +49,14 @@ parts/
 pip-delete-this-directory.txt
 pip-log.txt
 pipelines/brochures/output/
+pipelines/retrieve/output/
 profile.svg
 results/*
 sdist/
 spokes/examples/brochures/brochure.csv
 spokes/examples/brochures/output/
 spokes/examples/brochures/shortcodes-2021-v15.csv
+spokes/output/
 svggloo/target/
 target/
 var/
