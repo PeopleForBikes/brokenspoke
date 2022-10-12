@@ -46,9 +46,9 @@
 
 	
 
-<title>Svggloo | Broken Spoke</title>
+<title>Retrieve | Broken Spoke</title>
 <meta name="description" content="All you want to know about the Broken Spoke projects">
-<link rel="canonical" href="https://peopleforbikes.github.io/brokenspoke/docs/spokes/svggloo/">
+<link rel="canonical" href="https://peopleforbikes.github.io/brokenspoke/docs/pipelines/retrieve/">
 
 
 
@@ -103,8 +103,8 @@
           {
             "@type": "ListItem",
             "position":  3 ,
-            "name": "Spokes",
-            "item": "https://peopleforbikes.github.io/brokenspoke/docs/spokes/"
+            "name": "Pipelines",
+            "item": "https://peopleforbikes.github.io/brokenspoke/docs/pipelines/"
           },
         
       
@@ -121,8 +121,8 @@
           {
             "@type": "ListItem",
             "position":  4 ,
-            "name": "Svggloo",
-            "item": "https://peopleforbikes.github.io/brokenspoke/docs/spokes/svggloo/"
+            "name": "Retrieve",
+            "item": "https://peopleforbikes.github.io/brokenspoke/docs/pipelines/retrieve/"
           },
         
       
@@ -240,7 +240,7 @@
 							                           
 									<li><a class="docs-link" href="https://peopleforbikes.github.io/brokenspoke/docs/pipelines/brochures/">Brochures</a></li>
 							                           
-									<li><a class="docs-link" href="https://peopleforbikes.github.io/brokenspoke/docs/pipelines/retrieve/">Retrieve</a></li>
+									<li><a class="docs-link active" href="https://peopleforbikes.github.io/brokenspoke/docs/pipelines/retrieve/">Retrieve</a></li>
 							
 					</ul>
 					
@@ -258,7 +258,7 @@
 							                           
 									<li><a class="docs-link" href="https://peopleforbikes.github.io/brokenspoke/docs/spokes/shortcodes/">Shortcodes</a></li>
 							                           
-									<li><a class="docs-link active" href="https://peopleforbikes.github.io/brokenspoke/docs/spokes/svggloo/">Svggloo</a></li>
+									<li><a class="docs-link" href="https://peopleforbikes.github.io/brokenspoke/docs/spokes/svggloo/">Svggloo</a></li>
 							
 					</ul>
 					
@@ -275,16 +275,18 @@
   			<nav id="TableOfContents">
   					<ul>
   							
-  							<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/spokes/svggloo/#goal">Goal</a></li>
+  							<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/pipelines/retrieve/#how-it-works">How it works</a></li>
+  							
+  							
+  							<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/pipelines/retrieve/#run-it-locally">Run it locally</a></li>
   							
   									<ul>
   											
-  											<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/spokes/svggloo/#specifics">Specifics</a></li>
+  											<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/pipelines/retrieve/#requirements">Requirements</a></li>
+  											
+  											<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/pipelines/retrieve/#run-it">Run it</a></li>
   											
   									</ul>
-  							
-  							
-  							<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/spokes/svggloo/#example">Example</a></li>
   							
   							
   					</ul>
@@ -294,34 +296,30 @@
   
 
       <main class="docs-content col-lg-11 col-xl-9">
-        <h1>Svggloo</h1>
+        <h1>Retrieve</h1>
         
-        <p>Svggloo is a tool to perform a data-merge operation between an SVG file and a
-CSV file.</p>
-<h2 id="goal">Goal</h2>
-<p>The goal is to replace some specific placeholders in the template with specific
-values coming from the city rating file.</p>
-<h3 id="specifics">Specifics</h3>
-<h4 id="template">Template</h4>
-<p>The template use the jinja2 syntax to perform replacements, therefore all
-variables in the template must be surrounded by <code>{{}}</code>, for instance <code>{{name}}</code>.</p>
-<h4 id="data-file">Data file</h4>
-<p>The data file must be a CSV file.</p>
-<h4 id="svg-export">SVG Export</h4>
-<p>The SVG export is done using <a href="https://inkscape.org/">inkscape</a>, <a href="https://cairosvg.org/">cairosvg</a>, or <a href="https://docs.rs/svg2pdf/latest/svg2pdf/">svg2pdf</a>. If the
-exporter program is not found svggloo will abort the operation.</p>
-<h2 id="example">Example</h2>
-<p>Usage:</p>
-<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">svggloo --field</span><span> country</span><span style="color:#bf616a;"> --field</span><span> state</span><span style="color:#bf616a;"> --field</span><span> city</span><span style="color:#bf616a;"> --export</span><span> Inkscape \
-</span><span>  examples/brochures/brochure.svg
-</span></code></pre>
-<p>The tool expects the following inputs:</p>
+        <p>The retrieve pipeline downloads all the datasets for a list of given cities and
+bundle them all in a zip file.</p>
+<h2 id="how-it-works">How it works</h2>
+<p>The pipeline reads the city details from a City Rating CSV file and uses this
+information to automatically find the matching datasets to download.</p>
+<p>The pipeline will attempt to download all the available datasets for each city.
+As a result, the amount of data to retrieve then bundle can be quite large.</p>
+<p>As of 2021, there is about 11GB of datasets available and the pipeline take
+about 2h30 to complete.</p>
+<p><img src="../../../images/pipelines/retrieve/retrieve_etl.png"
+alt="Retrieve Pipeline" width="100%"></p>
+<h2 id="run-it-locally">Run it locally</h2>
+<h3 id="requirements">Requirements</h3>
 <ul>
-<li>an SVG file to use as a template (see template details in the dedicated
-section below)</li>
-<li>a data file with the same name as the template, but with a <code>.csv</code> extension.
-Each record in the data file will produce a new output.</li>
+<li><a href="https://www.rust-lang.org/tools/install">Rust</a></li>
 </ul>
+<h3 id="run-it">Run it</h3>
+<p>This pipeline was written in Rust and can be run locally with the following
+commands:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#96b5b4;">cd</span><span> pipelines/retrieve
+</span><span style="color:#bf616a;">cargo</span><span> run
+</span></code></pre>
 
         
         
@@ -344,23 +342,23 @@ Each record in the data file will produce a new output.</li>
         
         
           
+        
+      
+        
+        
+          
             
               
-              <a href="https:&#x2F;&#x2F;peopleforbikes.github.io&#x2F;brokenspoke&#x2F;docs&#x2F;pipelines&#x2F;retrieve&#x2F;">
+              <a href="https:&#x2F;&#x2F;peopleforbikes.github.io&#x2F;brokenspoke&#x2F;docs&#x2F;overview&#x2F;developer-setup&#x2F;">
                 <div class="card my-1">
                   <div class="card-body py-2">
-                    &larr; Retrieve
+                    &larr; Developer Setup
                   </div>
                 </div>
               </a>
             
             
             
-          
-        
-      
-        
-        
           
         
       
@@ -387,6 +385,19 @@ Each record in the data file will produce a new output.</li>
     
       
       
+        
+          
+          
+          <a class="ms-auto" href="https:&#x2F;&#x2F;peopleforbikes.github.io&#x2F;brokenspoke&#x2F;docs&#x2F;spokes&#x2F;appender&#x2F;">
+            <div class="card my-1">
+              <div class="card-body py-2">
+                Appender &rarr;
+              </div>
+            </div>
+          </a>
+          
+          
+          
         
       
     

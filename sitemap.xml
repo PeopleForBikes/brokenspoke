@@ -27,6 +27,9 @@
         <loc>https://peopleforbikes.github.io/brokenspoke/docs/pipelines/brochures/</loc>
     </url>
     <url>
+        <loc>https://peopleforbikes.github.io/brokenspoke/docs/pipelines/retrieve/</loc>
+    </url>
+    <url>
         <loc>https://peopleforbikes.github.io/brokenspoke/docs/spokes/</loc>
     </url>
     <url>
@@ -34,6 +37,9 @@
     </url>
     <url>
         <loc>https://peopleforbikes.github.io/brokenspoke/docs/spokes/bundler/</loc>
+    </url>
+    <url>
+        <loc>https://peopleforbikes.github.io/brokenspoke/docs/spokes/retriever/</loc>
     </url>
     <url>
         <loc>https://peopleforbikes.github.io/brokenspoke/docs/spokes/shortcodes/</loc>
