@@ -33,7 +33,6 @@ fn main() -> Result<(), Report> {
     // Create the output directory.
     info!("📁 Creating the output directory...");
     fs::create_dir_all(&output_dir)?;
-    // dbg!(&output_dir);
 
     // Copy the brochure template from the asset directory.
     info!("⚙️  Copying the brochure template...");
@@ -51,7 +50,6 @@ fn main() -> Result<(), Report> {
         .arg(&output_dir.join("brochure.csv"))
         .output()?;
     process_output(&output)?;
-    // dbg!(&_output);
 
     //  Generate SVG files.
     info!("📄 Generating SVG files...");
@@ -72,7 +70,6 @@ fn main() -> Result<(), Report> {
         .arg(&output_dir)
         .output()?;
     process_output(&output)?;
-    // dbg!(&output);
 
     // Collect all the SVGs.
     debug!("🗄️  Collecting the generated SVG files...");
@@ -87,19 +84,17 @@ fn main() -> Result<(), Report> {
             }
         }
     }
-    // dbg!(&svg_files);
 
     // Generate the PDF files.
     info!("📃 Generating PDF files...");
     let mut cmd = Command::new("inkscape");
     cmd.arg("--export-area-drawing")
         .arg("--batch-process")
-        .arg("--export-type=pdf");
-    cmd.args(svg_files);
-    cmd.current_dir(&output_dir);
+        .arg("--export-type=pdf")
+        .args(svg_files)
+        .current_dir(&output_dir);
     let output = cmd.output()?;
     process_output_with_command(&output, &cmd)?;
-    // dbg!(&output);
 
     // Bundle the brochures.
     info!("📦 Bundling the brochures...");
@@ -110,12 +105,11 @@ fn main() -> Result<(), Report> {
         .arg("--bin")
         .arg("bundler")
         .arg("--")
-        .arg("--ignore")
+        .arg("pdf")
         .arg("country")
         .arg(&output_dir.canonicalize()?)
         .output()?;
-    process_output_with_command(&output, &cmd)?;
-    // dbg!(&output);
+    process_output(&output)?;
 
     info!("✅ Done");
     Ok(())

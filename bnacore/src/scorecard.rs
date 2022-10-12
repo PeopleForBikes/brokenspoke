@@ -10,8 +10,7 @@
 //! slices `&[T]`. Refer to the
 //! [Mapping of Rust types to Python types](https://pyo3.rs/v0.16.3/conversions/tables.html)
 //! chapter of the Py03 book for more details.
-use crate::PFB_S3_STORAGE_BASE_URL;
-use crate::{Dataset, Error};
+use crate::{Dataset, Error, PFB_S3_PUBLIC_DOCUMENTS, PFB_S3_STORAGE_BASE_URL};
 use csv::Reader;
 use pyo3::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -96,14 +95,19 @@ impl City {
     }
 
     /// Return the URL of the specified dataset.
-    pub fn url(&self, dataset: Dataset) -> Result<Url, Error> {
-        let dataset_url = format!(
-            "{}/{}/{}.{}",
-            PFB_S3_STORAGE_BASE_URL,
-            self.uuid,
-            dataset,
-            dataset.extension()
-        );
+    pub fn url(&self, dataset: &Dataset) -> Result<Url, Error> {
+        let mut dataset_url: String = String::new();
+        if *dataset == Dataset::DataDictionary {
+            dataset_url.push_str(PFB_S3_PUBLIC_DOCUMENTS);
+        } else {
+            dataset_url.push_str(PFB_S3_STORAGE_BASE_URL);
+            dataset_url.push('/');
+            dataset_url.push_str(&self.uuid);
+        }
+        dataset_url.push('/');
+        dataset_url.push_str(&dataset.to_string());
+        dataset_url.push('.');
+        dataset_url.push_str(&dataset.extension());
         Ok(Url::parse(&dataset_url)?)
     }
 

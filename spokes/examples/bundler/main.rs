@@ -3,7 +3,7 @@
 //! ```
 //! cargo run --example bundler
 //! ```
-use bnacore::bundle::{Bundle, GroupBy};
+use bnacore::bundle::{Bundle, FileType, GroupBy};
 use color_eyre::{eyre::Report, Result};
 use std::path::PathBuf;
 
@@ -12,9 +12,10 @@ fn main() -> Result<(), Report> {
     let bundle = Bundle {
         input_dir: PathBuf::from("examples/brochures/output"),
         group_by: GroupBy::Country,
-        ignore: false,
+        strict: false,
+        filetype: FileType::Pdf,
     };
 
     // Zip'em.
-    Ok(bundle.zip()?)
+    Ok(bundle.zip(true)?)
 }

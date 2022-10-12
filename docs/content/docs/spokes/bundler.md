@@ -24,7 +24,7 @@ convention: `<country>-<state>-<city>.pdf`.
 ## Example
 
 ```bash
-bundler --ignore country spokes/examples/brochures/output
+bundler pdf country spokes/examples/brochures/output
 ```
 
 If the following brochures were generated and put in the same folder:

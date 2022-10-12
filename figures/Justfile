@@ -11,3 +11,4 @@ lint-python:
 # Build all figures
 build:
     poetry run python figures/brochure_etl.py
+    poetry run python figures/retrieve_etl.py
