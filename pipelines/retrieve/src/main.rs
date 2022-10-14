@@ -7,7 +7,7 @@ use std::{
     path::PathBuf,
     process::{Command, Output},
 };
-use tracing::{debug, info};
+use tracing::info;
 
 fn main() -> Result<(), Report> {
     // Setup the application.
