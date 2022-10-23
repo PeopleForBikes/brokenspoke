@@ -16,6 +16,8 @@ They are written in [Rust], [Python], and [Javascript] with [React]/[Next.js].
 
 The infrastructure relies heavily on [Docker] containers and [Kubernetes].
 
+This _line is just a test and will be removed_
+
 ## Getting started
 
 Depending on your interesting, you may jump directly to the sub-project that
