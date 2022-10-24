@@ -1,0 +1,40 @@
+name: incubator
+
+defaults:
+  run:
+    working-directory: incubator
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/incubator.yml"
+      - "incubator/**"
+    types:
+      - opened
+      - synchronize
+      - reopened
+  push:
+    paths:
+      - ".github/workflows/incubator.yml"
+      - "incubator/**"
+    branches:
+      - main
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
