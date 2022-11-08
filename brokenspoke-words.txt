@@ -1,4 +1,5 @@
 Appender
+BNAPI
 BROKENSPOKE
 Ggloo
 Inkscape
@@ -18,10 +19,12 @@ cssc
 fips
 justfile
 kubectl
+Mbps
 minikube
 mkdir
 pathlib
 pgcli
 psql
 rasc
+Seaorm
 shortcode

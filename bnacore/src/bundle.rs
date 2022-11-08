@@ -1,5 +1,7 @@
 use crate::Error;
+use libflate::gzip::{EncodeOptions, Encoder};
 use regex::Regex;
+
 use std::{
     collections::HashMap,
     ffi::OsStr,
@@ -191,6 +193,46 @@ impl Bundle {
                     all_zip.write_all(&buffer)?;
                 }
             }
+        }
+
+        Ok(())
+    }
+
+    /// Creates a gzip file for each group.
+    pub fn gzip(&self) -> Result<(), Error> {
+        // Collect the files.
+        let collected_files = match self.filetype {
+            FileType::All => self.gather_all_files(),
+            FileType::Pdf => self.gather_pdf_files(),
+        };
+
+        // Group the files.
+        let groups = self.group_files(&collected_files);
+
+        // Create a "bundles" directory to store the bundles.
+        let bundle_dir = self.input_dir.join("bundles");
+        fs::create_dir_all(&bundle_dir)?;
+
+        // Zip each group.
+        for (group_name, files) in groups.iter() {
+            // Zip the group.
+            let group_name = format!("{group_name}.gz");
+            let group_path = bundle_dir.join(&group_name);
+            let group_file = std::fs::File::create(&group_path).unwrap();
+            let options = EncodeOptions::new().no_compression();
+            let mut archive = Encoder::with_options(group_file, options).unwrap();
+
+            // Add each file from the group.
+            for file in files {
+                // Read the input file.
+                let mut f = File::open(file)?;
+                let mut buffer = Vec::new();
+                f.read_to_end(&mut buffer)?;
+
+                // Add the file object to the archive.
+                archive.write_all(&buffer)?;
+            }
+            archive.finish().into_result()?;
         }
 
         Ok(())
