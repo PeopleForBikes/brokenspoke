@@ -10,7 +10,7 @@ lint-md:
 
 # Check spelling.
 lint-spellcheck:
-	npx --yes cspell --no-progress --show-suggestions --show-context "**/*.md"
+    npx --yes cspell --no-progress --show-suggestions --show-context "**/*.md"
 
 # Meta tasks running all formatters at once.
 fmt: fmt-md fmt-just
@@ -26,5 +26,3 @@ fmt-md:
 # Build the documentation
 docs:
     cd docs && zola build
-
-

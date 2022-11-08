@@ -5,6 +5,8 @@ reasonably small, ideally < 100 lines.
 
 Available Spokes:
 
+- Appender
 - Bundler
+- Retriever
 - Shortcodes
 - SVGgloo
