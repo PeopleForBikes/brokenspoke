@@ -305,8 +305,9 @@ bundle them all in a zip file.</p>
 information to automatically find the matching datasets to download.</p>
 <p>The pipeline will attempt to download all the available datasets for each city.
 As a result, the amount of data to retrieve then bundle can be quite large.</p>
-<p>As of 2021, there is about 11GB of datasets available and the pipeline take
-about 2h30 to complete.</p>
+<p>As of 2021, there is about 11GB of datasets available, so depending on you
+internet connection it may take a while. For reference, with a 200Mbps
+connection, it took 11 min to complete.</p>
 <p><img src="../../../images/pipelines/retrieve/retrieve_etl.png"
 alt="Retrieve Pipeline" width="100%"></p>
 <h2 id="run-it-locally">Run it locally</h2>
@@ -319,6 +320,12 @@ alt="Retrieve Pipeline" width="100%"></p>
 commands:</p>
 <pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#96b5b4;">cd</span><span> pipelines/retrieve
 </span><span style="color:#bf616a;">cargo</span><span> run
+</span></code></pre>
+<p>Output:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">2022-11-08T02:55:01.944039Z</span><span>  INFO retrieve: 📁 Creating the output directory...
+</span><span style="color:#bf616a;">2022-11-08T02:55:01.944299Z</span><span>  INFO retrieve: 📡 Downloading datasets...
+</span><span style="color:#bf616a;">2022-11-08T03:02:17.860077Z</span><span>  INFO retrieve: 📦 Bundling datasets...
+</span><span style="color:#bf616a;">2022-11-08T03:06:09.756437Z</span><span>  INFO retrieve: ✅ Done
 </span></code></pre>
 
         
