@@ -24,7 +24,10 @@ fn main() -> Result<(), Report> {
     let top_dir = PathBuf::from("../../").canonicalize()?;
     let asset_dir = top_dir.join("assets");
     let output_dir = top_dir.join("pipelines/brochures/output");
-    let brochure_template = asset_dir.join("brochures/brochure.svg").canonicalize()?;
+    let brochure_template = asset_dir
+        .join("brochures/brochure-v3-p1.svg")
+        .canonicalize()?;
+    let brochure_information_page = asset_dir.join("brochures/brochure-v3-p2.pdf");
     let city_ratings_15 = asset_dir
         .join("city_ratings/city_ratings_2021_v15.csv")
         .canonicalize()?;
@@ -36,7 +39,7 @@ fn main() -> Result<(), Report> {
 
     // Copy the brochure template from the asset directory.
     info!("⚙️  Copying the brochure template...");
-    fs::copy(&brochure_template, &brochure_template_copy)?;
+    fs::copy(brochure_template, &brochure_template_copy)?;
 
     // Convert the City Ratings file to a Shortcode file.
     info!("🔄 Converting the City Ratings file to a Shortcode file...");
@@ -91,10 +94,29 @@ fn main() -> Result<(), Report> {
     cmd.arg("--export-area-drawing")
         .arg("--batch-process")
         .arg("--export-type=pdf")
-        .args(svg_files)
+        .args(&svg_files)
         .current_dir(&output_dir);
     let output = cmd.output()?;
     process_output_with_command(&output, &cmd)?;
+
+    // Append information page.
+    info!("📎 Append information page");
+    let pdf_files = svg_files
+        .iter()
+        .map(|f| output_dir.join(f))
+        .map(|f| f.with_extension("pdf"))
+        .map(|f| f.to_str().unwrap().to_string())
+        .collect::<Vec<String>>();
+    let output = Command::new("cargo")
+        .arg("run")
+        .arg("-p")
+        .arg("spokes")
+        .arg("--bin")
+        .arg("appender")
+        .arg(brochure_information_page)
+        .args(pdf_files)
+        .output()?;
+    process_output(&output)?;
 
     // Bundle the brochures.
     info!("📦 Bundling the brochures...");
