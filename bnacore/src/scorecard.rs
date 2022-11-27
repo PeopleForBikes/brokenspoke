@@ -64,11 +64,11 @@ impl City {
     pub fn new(
         name: &str,
         country: &str,
-        state: Option<&str>,
         uuid: &str,
         population: u32,
         ratings: f64,
         ratings_rounded: u8,
+        state: Option<&str>,
     ) -> Self {
         City {
             name: name.into(),
