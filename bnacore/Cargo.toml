@@ -17,7 +17,7 @@ crate-type = ["cdylib", "rlib"]
 csv = "1.1"
 libflate = "1.2.0"
 lopdf = "0.29.0"
-minijinja = "0.26.0"
+minijinja = "0.27.0"
 pyo3 = { version = "0.17.1" }
 regex = "1.6.0"
 serde = { version = "1.0", features = ["derive"] }
