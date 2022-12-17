@@ -32,8 +32,8 @@ where
 
         documents_pages.extend(
             doc.get_pages()
-                .into_iter()
-                .map(|(_, object_id)| {
+                .into_values()
+                .map(|object_id| {
                     if !first {
                         let bookmark = Bookmark::new(
                             format!("Page_{}", pagenum),
@@ -143,8 +143,8 @@ where
         dictionary.set(
             "Kids",
             documents_pages
-                .into_iter()
-                .map(|(object_id, _)| Object::Reference(object_id))
+                .into_keys()
+                .map(|(object_id, other)| Object::Reference((object_id, other)))
                 .collect::<Vec<_>>(),
         );
         document
