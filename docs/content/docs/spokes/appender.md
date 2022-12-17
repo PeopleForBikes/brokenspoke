@@ -22,13 +22,6 @@ Our main use case is to add general guidelines to all the city rating brochures.
 appender guidelines.pdf brochure-austin-tx.pdf brochure-boulder-co.pdf
 ```
 
-Would create the following files:
-
-```bash
-.
-├── brochure-austin-tx.merged.pdf
-├── brochure-austin-tx.pdf
-├── brochure-boulder-co.merged.pdf
-├── brochure-boulder-co.pdf
-└── guidelines.pdf
-```
+This command would append to content of `guidelines.pdf` to
+`brochure-austin-tx.pdf` and `brochure-boulder-co.pdf`, i.e. modifying the files
+in place.

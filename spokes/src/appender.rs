@@ -1,5 +1,5 @@
 use bnacore::combine::batch_append;
-use clap::{crate_name, Parser, ValueHint};
+use clap::{crate_name, ArgAction, Parser, ValueHint};
 use color_eyre::{eyre::Report, Result};
 use std::path::{Path, PathBuf};
 
@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 #[clap(name = crate_name!(), author, about, version)]
 pub struct Opts {
     /// Sets the verbosity level
-    #[clap(short, long, value_parser)]
+    #[clap(short, long, action = ArgAction::Count)]
     pub verbose: u8,
     /// Specify the document to append to the other ones
     #[clap()]
