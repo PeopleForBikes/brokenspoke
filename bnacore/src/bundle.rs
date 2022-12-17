@@ -170,8 +170,8 @@ impl Bundle {
         for (group_name, files) in groups.iter() {
             // Zip the group.
             let group_name = format!("{group_name}.zip");
-            let group_path = bundle_dir.join(&group_name);
-            let group_file = std::fs::File::create(&group_path).unwrap();
+            let group_path = bundle_dir.join(group_name);
+            let group_file = std::fs::File::create(group_path).unwrap();
             let mut group_zip = zip::ZipWriter::new(group_file);
 
             // Add each file from the group.
@@ -217,8 +217,8 @@ impl Bundle {
         for (group_name, files) in groups.iter() {
             // Zip the group.
             let group_name = format!("{group_name}.gz");
-            let group_path = bundle_dir.join(&group_name);
-            let group_file = std::fs::File::create(&group_path).unwrap();
+            let group_path = bundle_dir.join(group_name);
+            let group_file = std::fs::File::create(group_path).unwrap();
             let options = EncodeOptions::new().no_compression();
             let mut archive = Encoder::with_options(group_file, options).unwrap();
 

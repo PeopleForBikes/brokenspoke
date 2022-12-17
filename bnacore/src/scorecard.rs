@@ -317,9 +317,9 @@ pub struct ShortScoreCard {
 
     // Infrastructure
     #[pyo3(get, set)]
-    pub lsm: u8,
+    pub lsm: u32,
     #[pyo3(get, set)]
-    pub hsm: u8,
+    pub hsm: u32,
 }
 
 impl From<&ScoreCard> for ShortScoreCard {
@@ -350,12 +350,12 @@ impl From<&ScoreCard> for ShortScoreCard {
                 .infrastructure
                 .low_stress_miles
                 .unwrap_or_default()
-                .round() as u8,
+                .round() as u32,
             hsm: sc
                 .infrastructure
                 .high_stress_miles
                 .unwrap_or_default()
-                .round() as u8,
+                .round() as u32,
         }
     }
 }
