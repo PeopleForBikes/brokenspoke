@@ -9,6 +9,7 @@ use std::{
     process::{Command, Output},
 };
 use tracing::{debug, info};
+// use tracing_subscriber::fmt::writer::BoxMakeWriter;
 use walkdir::WalkDir;
 
 fn main() -> Result<(), Report> {
@@ -36,7 +37,7 @@ fn main() -> Result<(), Report> {
 
     // Copy the brochure template from the asset directory.
     info!("⚙️  Copying the brochure template...");
-    fs::copy(&brochure_template, &brochure_template_copy)?;
+    fs::copy(brochure_template, &brochure_template_copy)?;
 
     // Convert the City Ratings file to a Shortcode file.
     info!("🔄 Converting the City Ratings file to a Shortcode file...");
@@ -87,29 +88,7 @@ fn main() -> Result<(), Report> {
 
     // Generate the PDF files.
     info!("📃 Generating PDF files...");
-    let mut cmd = Command::new("inkscape");
-    cmd.arg("--export-area-drawing")
-        .arg("--batch-process")
-        .arg("--export-type=pdf")
-        .args(svg_files)
-        .current_dir(&output_dir);
-    let output = cmd.output()?;
-    process_output_with_command(&output, &cmd)?;
-
-    // Bundle the brochures.
-    info!("📦 Bundling the brochures...");
-    let output = Command::new("cargo")
-        .arg("run")
-        .arg("-p")
-        .arg("spokes")
-        .arg("--bin")
-        .arg("bundler")
-        .arg("--")
-        .arg("pdf")
-        .arg("country")
-        .arg(&output_dir.canonicalize()?)
-        .output()?;
-    process_output(&output)?;
+    generate_pdf(&svg_files, output_dir)?;
 
     info!("✅ Done");
     Ok(())
@@ -139,4 +118,50 @@ fn process_output(output: &Output) -> Result<(), Report> {
         output.status.code(),
         String::from_utf8_lossy(&output.stderr),
     ))
+}
+
+#[cfg(windows)]
+fn generate_pdf(batch: &[String], output_dir: PathBuf) -> Result<(), Report> {
+    // Generate batches of files to circumvent the Windows limitations.
+    // See PeopleForBikes/brokenspoke#34 for reference.
+    const CLI_MAX_LENGTH: usize = 8000;
+    let mut current_cli_length: usize = 0;
+    let mut file_batches: Vec<Vec<String>> = Vec::new();
+    let mut batched_files: Vec<String> = Vec::new();
+
+    for file in &batch {
+        if current_cli_length + file.len() < CLI_MAX_LENGTH {
+            current_cli_length += file.len();
+            batched_files.push(file.clone());
+        } else {
+            file_batches.push(batched_files);
+            batched_files = Vec::new();
+        }
+    }
+
+    // Generate the PDF files.
+    for (i, batch) in file_batches.iter().enumerate() {
+        info!("📃 Processing batch {}/{}...", i, batched_files.len());
+        let mut cmd = Command::new("inkscape");
+        cmd.arg("--export-area-drawing")
+            .arg("--batch-process")
+            .arg("--export-type=pdf")
+            .args(batch)
+            .current_dir(&output_dir);
+        let output = cmd.output().map_err(Report::new)?;
+        process_output_with_command(&output, &cmd)?;
+    }
+    ()
+}
+
+#[cfg(unix)]
+fn generate_pdf(batch: &[String], output_dir: PathBuf) -> Result<(), Report> {
+    let mut cmd = Command::new("inkscape");
+    cmd.arg("--export-area-drawing")
+        .arg("--batch-process")
+        .arg("--export-type=pdf")
+        .args(batch)
+        .current_dir(&output_dir);
+    let output = cmd.output().map_err(Report::new)?;
+    process_output_with_command(&output, &cmd)
 }
