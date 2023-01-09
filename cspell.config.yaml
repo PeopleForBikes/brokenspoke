@@ -9,3 +9,4 @@ dictionaries:
 ignorePaths:
   - "/brokenspoke-words.txt"
   - "/docs/themes/**"
+  - "target/**"
