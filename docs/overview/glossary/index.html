@@ -46,9 +46,9 @@
 
 	
 
-<title>Overview | Broken Spoke</title>
+<title>Glossary | Broken Spoke</title>
 <meta name="description" content="All you want to know about the Broken Spoke projects">
-<link rel="canonical" href="https://peopleforbikes.github.io/brokenspoke/docs/overview/overview/">
+<link rel="canonical" href="https://peopleforbikes.github.io/brokenspoke/docs/overview/glossary/">
 
 
 
@@ -121,8 +121,8 @@
           {
             "@type": "ListItem",
             "position":  4 ,
-            "name": "Overview",
-            "item": "https://peopleforbikes.github.io/brokenspoke/docs/overview/overview/"
+            "name": "Glossary",
+            "item": "https://peopleforbikes.github.io/brokenspoke/docs/overview/glossary/"
           },
         
       
@@ -226,11 +226,11 @@
 							<h3>General</h3>
 							<ul class="list-unstyled">
 							                           
-									<li><a class="docs-link active" href="https://peopleforbikes.github.io/brokenspoke/docs/overview/overview/">Overview</a></li>
+									<li><a class="docs-link" href="https://peopleforbikes.github.io/brokenspoke/docs/overview/overview/">Overview</a></li>
 							                           
 									<li><a class="docs-link" href="https://peopleforbikes.github.io/brokenspoke/docs/overview/developer-setup/">Developer Setup</a></li>
 							                           
-									<li><a class="docs-link" href="https://peopleforbikes.github.io/brokenspoke/docs/overview/glossary/">Glossary</a></li>
+									<li><a class="docs-link active" href="https://peopleforbikes.github.io/brokenspoke/docs/overview/glossary/">Glossary</a></li>
 							
 					</ul>
 					
@@ -277,17 +277,7 @@
   			<nav id="TableOfContents">
   					<ul>
   							
-  							<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/overview/overview/#getting-started">Getting started</a></li>
-  							
-  									<ul>
-  											
-  											<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/overview/overview/#broken-spoke-infrastructure">Broken Spoke Infrastructure</a></li>
-  											
-  											<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/overview/overview/#bna-core">BNA Core</a></li>
-  											
-  											<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/overview/overview/#the-spokes">The Spokes</a></li>
-  											
-  									</ul>
+  							<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/overview/glossary/#incubating">Incubating</a></li>
   							
   							
   					</ul>
@@ -297,29 +287,72 @@
   
 
       <main class="docs-content col-lg-11 col-xl-9">
-        <h1>Overview</h1>
+        <h1>Glossary</h1>
         
-        <p>The Broken Spoke Projects are a collection of software that is used to automate
-process around the BNA.</p>
-<p>They are written in <a href="https://www.rust-lang.org/">Rust</a>, <a href="https://www.python.org/">Python</a>, and <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript">Javascript</a> with <a href="https://reactjs.org/">React</a>/<a href="https://nextjs.org/">Next.js</a>.</p>
-<p>The infrastructure relies heavily on <a href="https://www.docker.com/">Docker</a> containers and <a href="https://kubernetes.io/">Kubernetes</a>.</p>
-<h2 id="getting-started">Getting started</h2>
-<p>Depending on your interesting, you may jump directly to the sub-project that
-interests you. However it is most likely that you will want to start with the
-infrastructure piece.</p>
-<h3 id="broken-spoke-infrastructure">Broken Spoke Infrastructure</h3>
-<p>The infrastructure leverages Kubernetes and Docker to run the services.</p>
-<p>Tools and services can also be run locally, either directly from their
-subdirectory, either using the minikube setup we provide (see the
-<a href="./developer-setup.md">Developer Setup</a> page for more details).</p>
-<h3 id="bna-core">BNA Core</h3>
-<p>BNA Core is the heart of the Broken spoke, but also extends to other BNA
-projects. This library is written in <a href="https://www.rust-lang.org/">Rust</a>, but also provides <a href="https://www.python.org/">Python</a>
-bindings.</p>
-<h3 id="the-spokes">The Spokes</h3>
-<p>The &quot;spokes&quot; are a set of command line utilities based off the &quot;bnacore&quot;
-library. Each tool performs a single action. The goal is to combine them to
-build pipelines that can either run locally or in the cloud.</p>
+        <p>In the BNA Mechanics world, there are a lot of concepts which use a lot of
+words, some times even different ones to say the same thing. The goal of this
+glossary is to reduce the confusion and improve the clarity of the vocabulary
+used in the different projects.</p>
+<hr />
+<p><strong>Bicycle Network Analysis (BNA)</strong>. Software that analyzes the quality and
+connectivity of bike infrastructure in cities.</p>
+<p><strong>BNA Score</strong>. A score out of 100 points representing the quality and
+connectivity of the bike network in a given area (typically a city) generated by
+the BNA.</p>
+<p><strong>BNA Mechanics</strong>. Open-source working group, including volunteers</p>
+<p><strong>Brochure</strong>. A visual document that can be distributed as an image (usually PNG
+or SVG file), a PDF file or a print.</p>
+<p><strong>City Ratings</strong>. A PeopleForBikes program that measures the quality of bike
+infrastructure in cities.</p>
+<p><strong>City rating</strong>. A city’s overall score in the City Ratings program, out of 100
+possible points. For U.S. cities, the city rating consists of two inputs: The
+Community Survey Score, worth 20% of the total, and the Bicycle Network Analysis
+Score, worth 80% of the total score. For international cities, the city rating
+may or may not include a Community Survey Score. If not, the city rating is
+equivalent to the BNA Score.</p>
+<p><strong>City Snapshot</strong>. A survey fielded by PeopleForBikes in which respondents,
+typically city transportation staff, provide input to inform the Bicycle Network
+Analysis and City Ratings, such as local speed limits and initiatives to improve
+bike infrastructure. The City Snapshot is not scored.</p>
+<p><strong>Community Survey</strong>. An opinion survey fielded by PeopleForBikes that measures
+how people feel about bicycling in their city. Anyone can respond for a city
+that they live in, work in, or frequently visit.</p>
+<p><strong>Community Survey Score</strong>. An aggregate score for a city out of 100 points
+based on responses to the Community Survey.</p>
+<p><strong>Rank</strong>. A city’s numerical place among all cities rated (can be subdivided by
+country, region, state, population size), e.g. 4 out of 158 small U.S. cities</p>
+<p><strong>Scorecard</strong>. A specific kind of brochure that summarizes City Ratings data for
+each rated city.</p>
+<p><strong>SPRINT</strong>. Acronym summarizing the main factors that impact the BNA Score.</p>
+<ul>
+<li><strong>S</strong>afe Speeds</li>
+<li><strong>P</strong>rotected Bike Lanes</li>
+<li><strong>R</strong>eallocated Space</li>
+<li><strong>I</strong>ntersection Treatments</li>
+<li><strong>N</strong>etwork Connections</li>
+<li><strong>T</strong>rusted Data</li>
+</ul>
+<p><strong>Infrastructure</strong>. Refers to any facility that is built to allow people to move
+around using a bike or other micromobility device that typically travels under
+20 mph (32 km/h).</p>
+<h3 id="incubating">Incubating</h3>
+<blockquote>
+<p><strong>WARNING: the terms bellow are still waiting to be defined properly. They may
+or may not be included in the glossary.</strong></p>
+</blockquote>
+<p><strong>Shortcode</strong>. A 2 to 4 letter code used in CSV file headers to simplify their
+inclusion in templates during a data-merge operation, typically using SVGGloo.
+The associated values may be rounded to be integers instead of decimals.</p>
+<p><strong>ShortCityRatings</strong>. A version of the <strong>city ratings</strong> where the headers are
+shortcodes and the values are rounded to be integers instead of decimals.</p>
+<p><strong>Shortscorecard</strong>. A <strong>scorecard</strong> with the shortened headers and rounded
+integer values.</p>
+<p><strong>Template</strong>. A file, typically an SVG file but it could be any text-based file
+format, whose goal is to be combined with a shortcode CSV file during a
+data-merge operation.</p>
+<p><strong>City Rating Entry</strong>. A series of values compiled by the city ratings program
+for a specific city. Each value is a score out of 100 for a category like
+&quot;employment&quot;, or &quot;retail&quot; for instance.</p>
 
         
         
