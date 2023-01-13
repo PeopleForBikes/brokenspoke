@@ -6,7 +6,7 @@ lint: lint-md lint-spellcheck
 
 # Lint markown files.
 lint-md:
-    npx --yes markdownlint-cli2 "**/*.md" "#.venv" "#docs/themes"
+    npx --yes markdownlint-cli2 "**/*.md" "#.venv" "#docs/themes" "#target/*" "#target"
 
 # Check spelling.
 lint-spellcheck:
