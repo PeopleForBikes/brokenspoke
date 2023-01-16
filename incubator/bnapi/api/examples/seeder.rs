@@ -31,7 +31,7 @@ async fn main() -> Result<(), Report> {
     let mut infrastructures: Vec<infrastructure::ActiveModel> = Vec::new();
     for scorecard in scorecards {
         let entry_id = sea_orm::prelude::Uuid::parse_str(&scorecard.city.uuid)?;
-        let now = Utc::now().with_timezone(&FixedOffset::east(0));
+        let now = Utc::now().with_timezone(&FixedOffset::east_opt(0).unwrap());
 
         let city_entry = city::ActiveModel {
             id: Set(entry_id),
