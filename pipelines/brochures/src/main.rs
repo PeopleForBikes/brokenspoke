@@ -26,9 +26,9 @@ fn main() -> Result<(), Report> {
     let asset_dir = top_dir.join("assets");
     let output_dir = top_dir.join("pipelines/brochures/output");
     let brochure_template = asset_dir
-        .join("brochures/brochure-v3-p1.svg")
+        .join("brochures/template-brochure-pg1-v23.1.svg")
         .canonicalize()?;
-    let brochure_information_page = asset_dir.join("brochures/brochure-v3-p2.pdf");
+    let brochure_information_page = asset_dir.join("brochures/template-brochure-pg2-v23.1.pdf");
     let city_ratings_15 = asset_dir
         .join("city_ratings/city_ratings_2021_v15.csv")
         .canonicalize()?;
