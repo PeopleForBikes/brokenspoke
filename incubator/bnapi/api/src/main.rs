@@ -138,8 +138,8 @@ impl CityRating {
             rec: self.recreation.unwrap_or_default() as u8,
             tr: self.transit as u8,
             bnasc: self.overall_score as u8,
-            lsm: self.low_stress_miles.unwrap_or_default() as u8,
-            hsm: self.high_stress_miles.unwrap_or_default() as u8,
+            lsm: self.low_stress_miles.unwrap_or_default() as u32,
+            hsm: self.high_stress_miles.unwrap_or_default() as u32,
         }
     }
 }
@@ -207,7 +207,7 @@ async fn main() -> Result<(), Report> {
         .route("/fastratings", get(get_fast_city_ratings))
         .route("/brochure/:city_id", get(get_brochure))
         .route("/task/analysis", post(schedule_task))
-        .nest(
+        .nest_service(
             "/static",
             get_service(ServeDir::new(concat!(
                 env!("CARGO_MANIFEST_DIR"),

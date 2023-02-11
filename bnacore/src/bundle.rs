@@ -1,14 +1,13 @@
 use crate::Error;
 use libflate::gzip::{EncodeOptions, Encoder};
-use regex::Regex;
-
+use std::io::{self, ErrorKind};
 use std::{
     collections::HashMap,
     ffi::OsStr,
     fs,
     fs::File,
     io::{Read, Write},
-    path::PathBuf,
+    path::{Path, PathBuf},
 };
 use walkdir::{DirEntry, WalkDir};
 use zip::{write::FileOptions, ZipWriter};
@@ -58,10 +57,10 @@ impl Bundle {
     /// country_groups.insert(String::from("france"), vec![PathBuf::from("france-idf-paris.pdf")]);
     /// country_groups.insert(String::from("united_states"), vec![PathBuf::from("united_states-ca-arcata.pdf"), PathBuf::from("united_states-fl-altamonte_springs.pdf")]);
     /// let bundle = Bundle {input_dir: PathBuf::from("."), group_by: GroupBy::Country, strict: true, filetype: FileType::Pdf};
-    /// let groups = bundle.group(&files);
+    /// let groups = bundle.group(&files).unwrap();
     /// assert_eq!(country_groups, groups);
     /// ````
-    pub fn group(&self, filenames: &[String]) -> HashMap<String, Vec<PathBuf>> {
+    pub fn group(&self, filenames: &[String]) -> Result<HashMap<String, Vec<PathBuf>>, Error> {
         let paths = filenames
             .iter()
             .map(PathBuf::from)
@@ -93,48 +92,18 @@ impl Bundle {
     /// country_groups.insert(String::from("france"), vec![PathBuf::from("france-idf-paris.pdf")]);
     /// country_groups.insert(String::from("united_states"), vec![PathBuf::from("united_states-ca-arcata.pdf"), PathBuf::from("united_states-fl-altamonte_springs.pdf")]);
     /// let bundle = Bundle {input_dir: PathBuf::from("."), group_by: GroupBy::Country, strict: true, filetype: FileType::Pdf};
-    /// let groups = bundle.group_files(&files);
+    /// let groups = bundle.group_files(&files).unwrap();
     /// assert_eq!(country_groups, groups);
     /// ````
-    pub fn group_files(&self, paths: &[PathBuf]) -> HashMap<String, Vec<PathBuf>> {
+    pub fn group_files(&self, paths: &[PathBuf]) -> Result<HashMap<String, Vec<PathBuf>>, Error> {
         let mut groups: HashMap<String, Vec<PathBuf>> = HashMap::new();
-        let re = Regex::new(
-            r"(?x)
-        (?P<country>([^-]*))# country
-        -
-        (?P<state>([^-]*))  # state (or country)
-        -
-        (?P<city>([^-]*))   # city
-        -?                  # optional separator
-        (.*)?               # optional file name
-        \.
-        (.*)                # file extension
-        $
-      ",
-        )
-        .unwrap();
-
         for path in paths {
             let filename = path.file_name().map(|f| f.to_str()).unwrap().unwrap();
-            let caps = match re.captures(filename) {
-                None => {
-                    if self.strict {
-                        panic!("The file `{filename}` does not have the right format. `<country>-<state>-<city>[-<filename>].<extension>` was expected.")
-                    } else {
-                        continue;
-                    }
-                }
-                Some(c) => c,
-            };
-
+            let bna_filename = BNAFilename::parse(filename)?;
             let key = match self.group_by {
-                GroupBy::City => format!(
-                    "{}-{}",
-                    caps.name("city").unwrap().as_str(),
-                    caps.name("state").unwrap().as_str()
-                ),
-                GroupBy::Country => caps.name("country").unwrap().as_str().to_string(),
-                GroupBy::State => caps.name("state").unwrap().as_str().to_string(),
+                GroupBy::City => format!("{}-{}", bna_filename.city, bna_filename.state,),
+                GroupBy::Country => bna_filename.country,
+                GroupBy::State => bna_filename.state,
             };
 
             groups
@@ -142,7 +111,7 @@ impl Bundle {
                 .and_modify(|g| g.push(path.to_path_buf()))
                 .or_insert_with(|| vec![path.to_path_buf()]);
         }
-        groups
+        Ok(groups)
     }
 
     /// Creates a zip file for each group, as well as a zip file for all the files.
@@ -154,7 +123,7 @@ impl Bundle {
         };
 
         // Group the files.
-        let groups = self.group_files(&collected_files);
+        let groups = self.group_files(&collected_files)?;
 
         // Create a "bundles" directory to store the bundles.
         let bundle_dir = self.input_dir.join("bundles");
@@ -207,7 +176,7 @@ impl Bundle {
         };
 
         // Group the files.
-        let groups = self.group_files(&collected_files);
+        let groups = self.group_files(&collected_files)?;
 
         // Create a "bundles" directory to store the bundles.
         let bundle_dir = self.input_dir.join("bundles");
@@ -276,4 +245,115 @@ pub fn filter_files(entry: &DirEntry) -> bool {
 /// Define the conditions to select a PDF file.
 pub fn filter_pdf_files(entry: &DirEntry) -> bool {
     entry.metadata().unwrap().is_file() && entry.path().extension() == Some(OsStr::new("pdf"))
+}
+
+pub struct BNAFilename {
+    pub country: String,
+    pub state: String,
+    pub city: String,
+    pub description: Option<String>,
+    pub extension: String,
+}
+
+impl BNAFilename {
+    pub fn parse(i: &str) -> Result<Self, Error> {
+        let file = Path::new(i);
+
+        // Extract the extension.
+        let extension = match file.extension() {
+            Some(extension) => match extension.to_str() {
+                Some(extension) => extension.to_string(),
+                None => {
+                    return Err(Error::IOError {
+                        source: io::Error::new(
+                            ErrorKind::InvalidInput,
+                            format!("this extension is not valid UTF-8: {i}"),
+                        ),
+                    })
+                }
+            },
+            None => {
+                return Err(Error::IOError {
+                    source: io::Error::new(
+                        ErrorKind::InvalidInput,
+                        format!("this file has no extension: {i}"),
+                    ),
+                })
+            }
+        };
+
+        // Extract the stem.
+        let stem = match file.file_stem() {
+            Some(stem) => match stem.to_str() {
+                Some(stem) => stem.to_string(),
+                None => {
+                    return Err(Error::IOError {
+                        source: io::Error::new(
+                            ErrorKind::InvalidInput,
+                            format!("this filename is not valid UTF-8: {i}"),
+                        ),
+                    })
+                }
+            },
+            None => {
+                return Err(Error::IOError {
+                    source: io::Error::new(
+                        ErrorKind::InvalidInput,
+                        format!("this file has no stem: {i}"),
+                    ),
+                })
+            }
+        };
+
+        // Process the filename parts.
+        let split_stem = stem.split('-').collect::<Vec<&str>>();
+        let country = match split_stem.first() {
+            Some(country) => country.to_string(),
+            None => {
+                return Err(Error::IOError {
+                    source: io::Error::new(
+                        ErrorKind::InvalidInput,
+                        format!(
+                        "the first part of the file name is expected to be the country name: {i}"
+                    ),
+                    ),
+                })
+            }
+        };
+        let state = match split_stem.get(1) {
+            Some(state) => state.to_string(),
+            None => {
+                return Err(Error::IOError {
+                    source: io::Error::new(
+                        ErrorKind::InvalidInput,
+                        format!(
+                      "the second part of the file name is expected to be the state name: {i}"
+                  ),
+                    ),
+                })
+            }
+        };
+        let city = match split_stem.get(2) {
+            Some(city) => city.to_string(),
+            None => {
+                return Err(Error::IOError {
+                    source: io::Error::new(
+                        ErrorKind::InvalidInput,
+                        format!(
+                            "the third part of the file name is expected to be the city name: {i}"
+                        ),
+                    ),
+                })
+            }
+        };
+        let description = split_stem.get(4).map(|&part| String::from(part));
+
+        Ok(BNAFilename {
+            country,
+            state,
+            city,
+            description,
+            extension,
+        })
+    }
 }
