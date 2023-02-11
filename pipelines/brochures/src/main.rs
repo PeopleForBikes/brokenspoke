@@ -30,7 +30,7 @@ fn main() -> Result<(), Report> {
         .canonicalize()?;
     let brochure_information_page = asset_dir.join("brochures/template-brochure-pg2-v23.1.pdf");
     let city_ratings_15 = asset_dir
-        .join("city_ratings/city_ratings_2021_v15.csv")
+        .join("city_ratings/city_ratings_2022_v7.csv")
         .canonicalize()?;
     let brochure_template_copy = output_dir.join("brochure.svg");
 
@@ -82,6 +82,10 @@ fn main() -> Result<(), Report> {
         let path = entry.into_path();
         if let Some(ext) = path.extension() {
             if ext == OsStr::new("svg") {
+                // Skip the template.
+                if path.file_name() == brochure_template_copy.file_name() {
+                    continue;
+                }
                 let filename = path.file_name().unwrap();
                 let filename_str = filename.to_str().unwrap();
                 svg_files.push(filename_str.to_string())
