@@ -65,7 +65,7 @@ impl Bundle {
             .iter()
             .map(PathBuf::from)
             .collect::<Vec<PathBuf>>();
-        Ok(self.group_files(&paths)?)
+        self.group_files(&paths)
     }
 
     /// Group file names by [`GroupBy`], usually country or state.
@@ -306,8 +306,8 @@ impl BNAFilename {
         };
 
         // Process the filename parts.
-        let split_stem = stem.split("-").collect::<Vec<&str>>();
-        let country = match split_stem.get(0) {
+        let split_stem = stem.split('-').collect::<Vec<&str>>();
+        let country = match split_stem.first() {
             Some(country) => country.to_string(),
             None => {
                 return Err(Error::IOError {
@@ -346,7 +346,7 @@ impl BNAFilename {
                 })
             }
         };
-        let description = split_stem.get(4).and_then(|&part| Some(String::from(part)));
+        let description = split_stem.get(4).map(|&part| String::from(part));
 
         Ok(BNAFilename {
             country,
