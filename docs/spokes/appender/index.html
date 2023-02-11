@@ -299,14 +299,9 @@
 <p>Our main use case is to add general guidelines to all the city rating brochures.</p>
 <pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">appender</span><span> guidelines.pdf brochure-austin-tx.pdf brochure-boulder-co.pdf
 </span></code></pre>
-<p>Would create the following files:</p>
-<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#96b5b4;">.
-</span><span style="color:#bf616a;">├──</span><span> brochure-austin-tx.merged.pdf
-</span><span style="color:#bf616a;">├──</span><span> brochure-austin-tx.pdf
-</span><span style="color:#bf616a;">├──</span><span> brochure-boulder-co.merged.pdf
-</span><span style="color:#bf616a;">├──</span><span> brochure-boulder-co.pdf
-</span><span style="color:#bf616a;">└──</span><span> guidelines.pdf
-</span></code></pre>
+<p>This command would append to content of <code>guidelines.pdf</code> to
+<code>brochure-austin-tx.pdf</code> and <code>brochure-boulder-co.pdf</code>, i.e. modifying the files
+in place.</p>
 
         
         
