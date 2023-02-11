@@ -190,7 +190,7 @@ where
 /// Append the `extra` document to all the `documents`.
 pub fn batch_append(documents: &[&Path], extra: &Path) -> std::io::Result<()> {
     for &document in documents {
-        combine_pdf(&[document, extra], document.with_extension("merged.pdf"))?;
+        combine_pdf(&[document, extra], document)?;
     }
 
     Ok(())
