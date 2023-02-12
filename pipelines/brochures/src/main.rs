@@ -80,12 +80,15 @@ fn main() -> Result<(), Report> {
     let mut svg_files = Vec::new();
     for entry in WalkDir::new(&output_dir).into_iter().filter_map(|e| e.ok()) {
         let path = entry.into_path();
+
+        // Ignore the template itself.
+        if path.file_name() == brochure_template_copy.file_name() {
+            continue;
+        }
+
+        // Otherwise ensure the file is a .svg and add it to the list.
         if let Some(ext) = path.extension() {
             if ext == OsStr::new("svg") {
-                // Skip the template.
-                if path.file_name() == brochure_template_copy.file_name() {
-                    continue;
-                }
                 let filename = path.file_name().unwrap();
                 let filename_str = filename.to_str().unwrap();
                 svg_files.push(filename_str.to_string())
