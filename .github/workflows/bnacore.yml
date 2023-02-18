@@ -17,8 +17,6 @@ on:
     paths:
       - ".github/workflows/bnacore.yml"
       - "bnacore/**"
-    branches:
-      - main
     tags:
       - "[0-9]+.[0-9]+.[0-9]+"
 
@@ -27,48 +25,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - run: rustup component add clippy rustfmt
+          components: clippy, rustfmt
       - uses: Swatinem/rust-cache@v2
-      - uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --manifest-path bnacore/Cargo.toml --check
-      - uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: --manifest-path bnacore/Cargo.toml -- -D warnings
-      - uses: actions-rs/cargo@v1
-        with:
-          command: check
-          args: --manifest-path bnacore/Cargo.toml
+      - run: cargo fmt --check
+      - run: cargo clippy -- -D warnings
+      - run: cargo check
 
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
+      - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --manifest-path bnacore/Cargo.toml
+      - run: cargo test
 
   build:
     name: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --manifest-path bnacore/Cargo.toml
+      - run: cargo build
