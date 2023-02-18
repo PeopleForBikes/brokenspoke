@@ -95,5 +95,5 @@ fn main() -> Result<(), Report> {
     };
 
     // Zip'em.
-    Ok(bundle.gzip()?)
+    Ok(bundle.zip(false)?)
 }

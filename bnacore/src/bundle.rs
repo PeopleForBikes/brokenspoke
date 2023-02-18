@@ -10,7 +10,7 @@ use std::{
     path::{Path, PathBuf},
 };
 use walkdir::{DirEntry, WalkDir};
-use zip::{write::FileOptions, ZipWriter};
+use zip::ZipWriter;
 
 /// Define a structure to handle brochure bundles.
 pub struct Bundle {
@@ -129,6 +129,10 @@ impl Bundle {
         let bundle_dir = self.input_dir.join("bundles");
         fs::create_dir_all(&bundle_dir)?;
 
+        // Define the compression options.
+        let options =
+            zip::write::FileOptions::default().compression_method(zip::CompressionMethod::Stored);
+
         // Zip them all.
         let all_zip_path = bundle_dir.join("all.zip");
         if bundle_all {
@@ -152,13 +156,13 @@ impl Bundle {
 
                 // Add the file object to the archive.
                 let file_name = file.file_name().map(|f| f.to_str()).unwrap().unwrap();
-                group_zip.start_file(file_name, FileOptions::default())?;
+                group_zip.start_file(file_name, options)?;
                 group_zip.write_all(&buffer)?;
 
                 // Add the file to the "all" archive.
                 if bundle_all {
                     let mut all_zip = ZipWriter::new(File::open(&all_zip_path)?);
-                    all_zip.start_file(file_name, FileOptions::default())?;
+                    all_zip.start_file(file_name, options)?;
                     all_zip.write_all(&buffer)?;
                 }
             }

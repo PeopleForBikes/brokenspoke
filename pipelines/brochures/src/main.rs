@@ -30,7 +30,7 @@ fn main() -> Result<(), Report> {
         .canonicalize()?;
     let brochure_information_page = asset_dir.join("visuals/template-scorecard-pg2-v23.1.pdf");
     let city_ratings_15 = asset_dir
-        .join("city_ratings/city_ratings_2021_v15.csv")
+        .join("city_ratings/city_ratings_2022_v7.csv")
         .canonicalize()?;
     let brochure_template_copy = output_dir.join("scorecard.svg");
     let shortcodes = output_dir.join("scorecard.csv");
@@ -81,6 +81,13 @@ fn main() -> Result<(), Report> {
     let mut svg_files = Vec::new();
     for entry in WalkDir::new(&output_dir).into_iter().filter_map(|e| e.ok()) {
         let path = entry.into_path();
+
+        // Ignore the template itself.
+        if path.file_name() == brochure_template_copy.file_name() {
+            continue;
+        }
+
+        // Otherwise ensure the file is a .svg and add it to the list.
         if let Some(ext) = path.extension() {
             if ext == OsStr::new("svg") {
                 let filename = path.file_name().unwrap();
