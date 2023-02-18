@@ -26,12 +26,12 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(City::Ratings).double().not_null())
                     .col(
                         ColumnDef::new(City::CreatedAt)
-                            .timestamp_with_time_zone_len(0)
+                            .timestamp_with_time_zone()
                             .not_null(),
                     )
                     .col(
                         ColumnDef::new(City::UpdatedAt)
-                            .timestamp_with_time_zone_len(0)
+                            .timestamp_with_time_zone()
                             .not_null(),
                     )
                     .to_owned(),
@@ -55,12 +55,12 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Bna::CityId).uuid())
                     .col(
                         ColumnDef::new(Bna::CreatedAt)
-                            .timestamp_with_time_zone_len(0)
+                            .timestamp_with_time_zone()
                             .not_null(),
                     )
                     .col(
                         ColumnDef::new(Bna::UpdatedAt)
-                            .timestamp_with_time_zone_len(0)
+                            .timestamp_with_time_zone()
                             .not_null(),
                     )
                     .foreign_key(
@@ -107,12 +107,12 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(CommunitySurvey::CityId).uuid())
                     .col(
                         ColumnDef::new(CommunitySurvey::CreatedAt)
-                            .timestamp_with_time_zone_len(0)
+                            .timestamp_with_time_zone()
                             .not_null(),
                     )
                     .col(
                         ColumnDef::new(CommunitySurvey::UpdatedAt)
-                            .timestamp_with_time_zone_len(0)
+                            .timestamp_with_time_zone()
                             .not_null(),
                     )
                     .foreign_key(
@@ -143,12 +143,12 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Infrastructure::CityId).uuid())
                     .col(
                         ColumnDef::new(Infrastructure::CreatedAt)
-                            .timestamp_with_time_zone_len(0)
+                            .timestamp_with_time_zone()
                             .not_null(),
                     )
                     .col(
                         ColumnDef::new(Infrastructure::UpdatedAt)
-                            .timestamp_with_time_zone_len(0)
+                            .timestamp_with_time_zone()
                             .not_null(),
                     )
                     .foreign_key(
