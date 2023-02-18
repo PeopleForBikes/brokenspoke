@@ -28,9 +28,9 @@ fn main() -> Result<(), Report> {
     let brochure_template = asset_dir
         .join("visuals/template-scorecard-pg1-v23.1.svg")
         .canonicalize()?;
-    let _brochure_information_page = asset_dir.join("visuals/template-scorecard-pg2-v23.1.pdf");
+    let brochure_information_page = asset_dir.join("brochures/template-brochure-pg2-v23.1.pdf");
     let city_ratings_15 = asset_dir
-        .join("city_ratings/city_ratings_2021_v15.csv")
+        .join("city_ratings/city_ratings_2022_v7.csv")
         .canonicalize()?;
     let brochure_template_copy = output_dir.join("scorecard.svg");
     let shortcodes = output_dir.join("scorecard.csv");
@@ -81,6 +81,13 @@ fn main() -> Result<(), Report> {
     let mut svg_files = Vec::new();
     for entry in WalkDir::new(&output_dir).into_iter().filter_map(|e| e.ok()) {
         let path = entry.into_path();
+
+        // Ignore the template itself.
+        if path.file_name() == brochure_template_copy.file_name() {
+            continue;
+        }
+
+        // Otherwise ensure the file is a .svg and add it to the list.
         if let Some(ext) = path.extension() {
             if ext == OsStr::new("svg") {
                 let filename = path.file_name().unwrap();
@@ -92,7 +99,41 @@ fn main() -> Result<(), Report> {
 
     // Generate the PDF files.
     info!("📃 Generating PDF files...");
-    generate_pdf(&svg_files, output_dir)?;
+    generate_pdf(&svg_files, &output_dir)?;
+
+    // Append information page.
+    info!("📎 Append information page");
+    let pdf_files = svg_files
+        .iter()
+        .map(|f| output_dir.join(f))
+        .map(|f| f.with_extension("pdf"))
+        .map(|f| f.to_str().unwrap().to_string())
+        .collect::<Vec<String>>();
+    let output = Command::new("cargo")
+        .arg("run")
+        .arg("-p")
+        .arg("spokes")
+        .arg("--bin")
+        .arg("appender")
+        .arg(brochure_information_page)
+        .args(pdf_files)
+        .output()?;
+    process_output(&output)?;
+
+    // Bundle the brochures.
+    info!("📦 Bundling the brochures...");
+    let output = Command::new("cargo")
+        .arg("run")
+        .arg("-p")
+        .arg("spokes")
+        .arg("--bin")
+        .arg("bundler")
+        .arg("--")
+        .arg("pdf")
+        .arg("country")
+        .arg(&output_dir.canonicalize()?)
+        .output()?;
+    process_output(&output)?;
 
     info!("✅ Done");
     Ok(())
@@ -125,7 +166,7 @@ fn process_output(output: &Output) -> Result<(), Report> {
 }
 
 #[cfg(windows)]
-fn generate_pdf(batch: &[String], output_dir: PathBuf) -> Result<(), Report> {
+fn generate_pdf(batch: &[String], output_dir: &PathBuf) -> Result<(), Report> {
     // Generate batches of files to circumvent the Windows limitations.
     // See PeopleForBikes/brokenspoke#34 for reference.
     const CLI_MAX_LENGTH: usize = 8000;
@@ -159,13 +200,13 @@ fn generate_pdf(batch: &[String], output_dir: PathBuf) -> Result<(), Report> {
 }
 
 #[cfg(unix)]
-fn generate_pdf(batch: &[String], output_dir: PathBuf) -> Result<(), Report> {
+fn generate_pdf(batch: &[String], output_dir: &PathBuf) -> Result<(), Report> {
     let mut cmd = Command::new("inkscape");
     cmd.arg("--export-area-drawing")
         .arg("--batch-process")
         .arg("--export-type=pdf")
         .args(batch)
-        .current_dir(&output_dir);
+        .current_dir(output_dir);
     let output = cmd.output().map_err(Report::new)?;
     process_output_with_command(&output, &cmd)
 }
