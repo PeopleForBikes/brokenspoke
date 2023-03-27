@@ -213,12 +213,12 @@ async fn main() -> Result<(), Report> {
                 env!("CARGO_MANIFEST_DIR"),
                 "/static"
             )))
-            .handle_error(|error: std::io::Error| async move {
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    format!("Unhandled internal error: {}", error),
-                )
-            }),
+            // .handle_error(|error: std::io::Error| async move {
+            //     (
+            //         StatusCode::INTERNAL_SERVER_ERROR,
+            //         format!("Unhandled internal error: {}", error),
+            //     )
+            // }),
         )
         .layer(ServiceBuilder::new().layer(CookieManagerLayer::new()))
         .layer(

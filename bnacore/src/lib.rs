@@ -16,6 +16,15 @@ const PFB_S3_STORAGE_BASE_URL: &str =
 /// Represent the PFB S3 base URL for public documents.
 const PFB_S3_PUBLIC_DOCUMENTS: &str = "https://s3.amazonaws.com/pfb-public-documents";
 
+#[cfg(windows)]
+/// Represent the maximum length for the command prompt on a Windows platform.
+/// Ref: https://learn.microsoft.com/en-us/troubleshoot/windows-client/shell-experience/command-line-string-limitation#more-information
+pub const MAX_PROMPT_LENGTH: usize = 8191;
+
+#[cfg(unix)]
+/// There is no length limit for the command prompt on Unix platforms.
+pub const MAX_PROMPT_LENGTH: usize = usize::MAX;
+
 /// Errors that can happen when using pfbcore.
 #[derive(Error, Debug)]
 pub enum Error {
@@ -34,6 +43,9 @@ pub enum Error {
         #[from]
         source: csv::Error,
     },
+    /// Line too long.
+    #[error("Invalid argument: {0}")]
+    InvalidArgument(String),
     /// I/O Error.
     #[error("I/O error")]
     IOError {
@@ -46,6 +58,9 @@ pub enum Error {
         #[from]
         source: minijinja::Error,
     },
+    /// Windows prompt too long.
+    #[error("The length of the command prompt exceeds the maximum permitted by the platform (8191 characters).")]
+    PromptTooLong,
     /// Zip Error.
     #[error("Zip error")]
     ZipError {
@@ -129,4 +144,140 @@ fn bnacore(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_class::<ScoreCard>()?;
     m.add_class::<BNA>()?;
     Ok(())
+}
+
+/// Build commands.
+///
+/// ```
+/// use bnacore::build_cmd_args;
+/// let cmds = build_cmd_args(
+///   "inkscape",
+///   &[
+///       "--export-area-drawing".to_string(),
+///       "--batch-process".to_string(),
+///       "--export-type=pdf".to_string(),
+///   ],
+///   &[
+///       "canada-on-toronto.svg".to_string(),
+///       "united_states-co-boulder.svg".to_string(),
+///       "united_states-tx-austin.svg".to_string(),
+///       "united_states-tx-houston.svg".to_string(),
+///   ],
+///   112,
+/// ).unwrap();
+/// assert_eq!(
+///   cmds,
+///     vec![
+///         vec![
+///             "--export-area-drawing".to_string(),
+///             "--batch-process".to_string(),
+///             "--export-type=pdf".to_string(),
+///             "canada-on-toronto.svg".to_string(),
+///         ],
+///         vec![
+///             "--export-area-drawing".to_string(),
+///             "--batch-process".to_string(),
+///             "--export-type=pdf".to_string(),
+///             "united_states-co-boulder.svg".to_string(),
+///             "united_states-tx-austin.svg".to_string(),
+///         ],
+///         vec![
+///             "--export-area-drawing".to_string(),
+///             "--batch-process".to_string(),
+///             "--export-type=pdf".to_string(),
+///             "united_states-tx-houston.svg".to_string(),
+///         ],
+///     ]
+/// );
+/// ```
+pub fn build_cmd_args(
+    program: &str,
+    flags: &[String],
+    positionals: &[String],
+    limit: usize,
+) -> Result<Vec<Vec<String>>, Error> {
+    let program_len = program.len();
+    let flags_len: usize = flags.iter().map(|f| f.len()).sum();
+    let base_len = program_len + flags_len + flags.len();
+
+    let cmd_limit = limit - base_len;
+    let positional_groups = word_chunks(positionals, cmd_limit)?;
+
+    let mut cmds: Vec<Vec<String>> = Vec::new();
+
+    for positional_group in positional_groups {
+        let mut cmd: Vec<String> = Vec::new();
+        cmd.extend(flags.iter().map(String::from));
+        cmd.extend(positional_group);
+        cmds.push(cmd);
+    }
+
+    Ok(cmds)
+}
+
+/// Group words into chunks of a certain size.
+///
+/// The size of the chunks account for the space between the words.
+///
+/// ```
+/// use bnacore::word_chunks;
+/// let chunks = word_chunks(
+///   &[
+///     "gastropub".to_string(),
+///     "shaman".to_string(),
+///     "skateboard".to_string(),
+///     "succulents".to_string(),
+///     "meditation".to_string(),
+///     "street".to_string(),
+///   ],
+///   23,
+/// ).unwrap();
+/// assert_eq!(
+///   chunks,
+///   vec![
+///     vec!["gastropub".to_string(), "shaman".to_string()],
+///     vec!["skateboard".to_string(),"succulents".to_string(),"meditation".to_string()],
+///     vec!["street".to_string()]
+///   ]
+/// );
+/// ```
+pub fn word_chunks(words: &[String], limit: usize) -> Result<Vec<Vec<String>>, Error> {
+    let mut chunks: Vec<Vec<String>> = Vec::new();
+    let mut chunk: Vec<String> = Vec::new();
+    let mut chunk_len: usize = 0;
+
+    // Process the words.
+    for word in words {
+        // Validate the word size.
+        let word_len = word.len();
+        if word.len() > limit {
+            return Err(Error::Internal(format!(
+                "The length of the word (\"{word}\" ({word_len})) exceeds the limit defined({limit})."
+            )));
+        }
+        if (chunk_len + word.len() + 1) < limit {
+            chunk.push(word.clone());
+            chunk_len += word.len() + 1;
+        } else {
+            chunks.push(chunk);
+            chunk = vec![word.clone()];
+            chunk_len = 0;
+        }
+    }
+    chunks.push(chunk);
+
+    Ok(chunks)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[should_panic(
+        expected = "The length of the word (\\\"gastropub\\\" (9)) exceeds the limit defined(5)."
+    )]
+    fn test_word_chunks_too_long() {
+        let _chunks = word_chunks(&["gastropub".to_string()], 5).unwrap();
+    }
 }
