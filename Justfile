@@ -8,6 +8,10 @@ lint: lint-md lint-spellcheck
 lint-md:
     npx --yes markdownlint-cli2 "**/*.md" "#.venv" "#docs/themes" "#target/*" "#target"
 
+# Lint sass files.
+lint-sass:
+  npx --yes prettier --check "**/*.scss"
+
 # Check spelling.
 lint-spellcheck:
     npx --yes cspell --no-progress --show-suggestions --show-context "**/*.md"
@@ -22,6 +26,10 @@ fmt-just:
 # Format markdown files.
 fmt-md:
     npx --yes prettier --write --prose-wrap always "**/*.md"
+
+# Format SASS files.
+fmt-sass:
+  npx --yes prettier --write "**/*.scss"
 
 # Build the documentation
 docs:

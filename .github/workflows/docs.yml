@@ -23,47 +23,17 @@ on:
       - "[0-9]+.[0-9]+.[0-9]+"
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: extractions/setup-just@v1
-      - name: Lint markdown files
-        run: just lint
+  docs-zola:
+    uses: PeopleForBikes/.github/.github/workflows/docs-zola.yml@main
 
+  # Noop job to statisfy the branch protection.
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: build
-        uses: shalzz/zola-deploy-action@v0.16.1-1
-        env:
-          BUILD_DIR: docs
-          BUILD_ONLY: true
-      - uses: actions/upload-artifact@v3
-        with:
-          name: docs
-          path: docs/public
 
-  # Noop job to statisfy the branch protection.
-  test:
+  # Noop job to statisfy the branch protection..
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs:
-      - lint
-      - build
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - uses: actions/download-artifact@v3
-        with:
-          name: docs
-          path: docs/public
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/public
