@@ -30,7 +30,7 @@ fn main() -> Result<(), Report> {
         .canonicalize()?;
     let brochure_information_page = asset_dir.join("visuals/template-scorecard-pg2-v23.1.pdf");
     let city_ratings_15 = asset_dir
-        .join("city_ratings/city_ratings_2022_v7.csv")
+        .join("city_ratings/city_ratings_v22.7.csv")
         .canonicalize()?;
     let brochure_template_copy = output_dir.join("scorecard.svg");
     let shortcodes = output_dir.join("scorecard.csv");
