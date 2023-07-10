@@ -15,7 +15,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 csv = "1.1"
-libflate = "1.2.0"
+libflate = "2.0.0"
 lopdf = "0.31.0"
 minijinja = "1.0.0"
 pyo3 = { version = "0.19.0" }
