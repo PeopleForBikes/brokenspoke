@@ -5,7 +5,7 @@ pub mod combine;
 pub mod scorecard;
 pub mod template;
 
-use crate::scorecard::{City, CommunitySurvey, ScoreCard, BNA};
+// use crate::scorecard::{City, CommunitySurvey, ScoreCard, BNA};
 use pyo3::{exceptions::PyOSError, prelude::*};
 use std::{fmt, io};
 use thiserror::Error;
@@ -137,14 +137,14 @@ impl Dataset {
 }
 
 /// Decribes all the objects to export to the Python bnacore module.
-#[pymodule]
-fn bnacore(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
-    m.add_class::<City>()?;
-    m.add_class::<CommunitySurvey>()?;
-    m.add_class::<ScoreCard>()?;
-    m.add_class::<BNA>()?;
-    Ok(())
-}
+// #[pymodule]
+// fn bnacore(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+//     m.add_class::<City>()?;
+//     m.add_class::<CommunitySurvey>()?;
+//     m.add_class::<ScoreCard>()?;
+//     m.add_class::<BNA>()?;
+//     Ok(())
+// }
 
 /// Build commands.
 ///

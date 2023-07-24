@@ -1,7 +1,34 @@
-use bnacore::scorecard::{ScoreCard, ShortScoreCard};
-use clap::{crate_name, ArgAction, Parser, ValueHint};
+use bnacore::scorecard::{
+    scorecard21::ScoreCard21, scorecard23::ScoreCard23, shortscorecard::ShortScoreCard, CsvExt,
+    Format, ScoreCardVersion,
+};
+use clap::{crate_name, ArgAction, Parser, ValueEnum, ValueHint};
 use color_eyre::{eyre::Report, Result};
 use std::{fs, path::PathBuf};
+
+#[derive(Debug, Clone, ValueEnum)]
+pub enum CliFormat {
+    V21,
+    V23,
+}
+
+impl From<Format> for CliFormat {
+    fn from(value: Format) -> Self {
+        match value {
+            Format::V21 => CliFormat::V21,
+            Format::V23 => CliFormat::V23,
+        }
+    }
+}
+
+impl From<CliFormat> for Format {
+    fn from(value: CliFormat) -> Self {
+        match value {
+            CliFormat::V21 => Format::V21,
+            CliFormat::V23 => Format::V23,
+        }
+    }
+}
 
 #[derive(Parser, Debug)]
 #[clap(name = crate_name!(), author, about, version)]
@@ -9,6 +36,9 @@ pub struct Opts {
     /// Sets the verbosity level
     #[clap(short, long, action = ArgAction::Count)]
     pub verbose: u8,
+    /// ScoreCard format to use
+    #[clap(value_enum)]
+    pub format: CliFormat,
     /// Specify the template
     #[clap(value_parser, value_hint = ValueHint::FilePath)]
     pub city_ratings: PathBuf,
@@ -25,7 +55,16 @@ fn main() -> Result<(), Report> {
     let opts: Opts = Opts::parse();
 
     // Convert to shortcode.
-    let scorecards = ScoreCard::from_csv(opts.city_ratings)?;
+    let scorecards: Vec<ScoreCardVersion> = match opts.format {
+        CliFormat::V21 => ScoreCard21::from_csv(opts.city_ratings)?
+            .iter()
+            .map(|e| ScoreCardVersion::V21(e.clone()))
+            .collect(),
+        CliFormat::V23 => ScoreCard23::from_csv(opts.city_ratings)?
+            .iter()
+            .map(|e| ScoreCardVersion::V23(e.clone()))
+            .collect(),
+    };
     let short_scorecards = scorecards
         .iter()
         .map(ShortScoreCard::from)
