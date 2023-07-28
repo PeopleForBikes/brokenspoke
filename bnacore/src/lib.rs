@@ -5,7 +5,6 @@ pub mod combine;
 pub mod scorecard;
 pub mod template;
 
-// use crate::scorecard::{City, CommunitySurvey, ScoreCard, BNA};
 use pyo3::{exceptions::PyOSError, prelude::*};
 use std::{fmt, io};
 use thiserror::Error;

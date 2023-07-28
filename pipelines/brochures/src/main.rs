@@ -21,6 +21,10 @@ fn main() -> Result<(), Report> {
         .with_max_level(tracing::Level::DEBUG)
         .init();
 
+    // Parameters
+    let format = "v23";
+    let city_rating_version = "v23.2";
+
     // Get the paths.
     let top_dir = PathBuf::from("../../").canonicalize()?;
     let asset_dir = top_dir.join("assets");
@@ -30,7 +34,9 @@ fn main() -> Result<(), Report> {
         .canonicalize()?;
     let brochure_information_page = asset_dir.join("visuals/template-scorecard-pg2-v23.1.pdf");
     let city_ratings = asset_dir
-        .join("city-ratings/city-ratings-v23.2-sample.csv")
+        .join(format!(
+            "city-ratings/city-ratings-{city_rating_version}.csv"
+        ))
         .canonicalize()?;
     let brochure_template_copy = output_dir.join("scorecard.svg");
     let shortcodes = output_dir.join("scorecard.csv");
@@ -51,7 +57,7 @@ fn main() -> Result<(), Report> {
         .arg("spokes")
         .arg("--bin")
         .arg("shortcodes")
-        .arg("v23")
+        .arg(format)
         .arg(&city_ratings)
         .arg(&shortcodes)
         .output()?;
