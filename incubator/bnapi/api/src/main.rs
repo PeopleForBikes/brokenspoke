@@ -5,7 +5,7 @@ use axum::{
     routing::{get, get_service, post},
     Json, Router, Server,
 };
-use bnacore::{scorecard::ShortScoreCard, template::render_record};
+use bnacore::{scorecard::shortscorecard::ShortScoreCard, template::render_record};
 use color_eyre::{eyre::eyre, eyre::Report, Result};
 use dotenv::dotenv;
 use entity::{bna, city, community_survey, infrastructure};
@@ -212,13 +212,12 @@ async fn main() -> Result<(), Report> {
             get_service(ServeDir::new(concat!(
                 env!("CARGO_MANIFEST_DIR"),
                 "/static"
-            )))
-            // .handle_error(|error: std::io::Error| async move {
-            //     (
-            //         StatusCode::INTERNAL_SERVER_ERROR,
-            //         format!("Unhandled internal error: {}", error),
-            //     )
-            // }),
+            ))), // .handle_error(|error: std::io::Error| async move {
+                 //     (
+                 //         StatusCode::INTERNAL_SERVER_ERROR,
+                 //         format!("Unhandled internal error: {}", error),
+                 //     )
+                 // }),
         )
         .layer(ServiceBuilder::new().layer(CookieManagerLayer::new()))
         .layer(

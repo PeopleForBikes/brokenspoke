@@ -11,16 +11,16 @@
 //! [Mapping of Rust types to Python types](https://pyo3.rs/v0.16.3/conversions/tables.html)
 //! chapter of the Py03 book for more details.
 use crate::{Dataset, Error, PFB_S3_PUBLIC_DOCUMENTS, PFB_S3_STORAGE_BASE_URL};
-use csv::Reader;
 use pyo3::prelude::*;
-use serde::{Deserialize, Serialize};
-use std::path::Path;
+use serde::Deserialize;
 use url::Url;
+
+use super::{CsvExt, ScorecardExt};
 
 /// Represent a PeopleForBikes city.
 #[pyclass]
 #[derive(Debug, Deserialize, Clone)]
-pub struct City {
+pub struct City21 {
     /// City name.
     #[pyo3(get, set)]
     #[serde(rename = "City")]
@@ -55,7 +55,7 @@ pub struct City {
 
 /// Define Python compatible methods.
 #[pymethods]
-impl City {
+impl City21 {
     /// Create a new City.
     ///
     /// If the `state` is not specified (a lot of countries do not have states),
@@ -70,7 +70,7 @@ impl City {
         ratings_rounded: u8,
         state: Option<&str>,
     ) -> Self {
-        City {
+        City21 {
             name: name.into(),
             country: country.into(),
             state: if let Some(s) = state {
@@ -86,23 +86,26 @@ impl City {
     }
 }
 
-impl City {
+impl ScorecardExt for ScoreCard21 {
     /// Return the full name of the city.
     ///
     /// The full name has the following format: `{COUNTRY}-{STATE}-{CITY_NAME}`.
-    pub fn full_name(&self) -> String {
-        format!("{}-{}-{}", self.country, self.state, self.name)
+    fn full_name(&self) -> String {
+        format!(
+            "{}-{}-{}",
+            self.city.country, self.city.state, self.city.name
+        )
     }
 
     /// Return the URL of the specified dataset.
-    pub fn url(&self, dataset: &Dataset) -> Result<Url, Error> {
+    fn url(&self, dataset: &Dataset) -> Result<Url, Error> {
         let mut dataset_url: String = String::new();
         if *dataset == Dataset::DataDictionary {
             dataset_url.push_str(PFB_S3_PUBLIC_DOCUMENTS);
         } else {
             dataset_url.push_str(PFB_S3_STORAGE_BASE_URL);
             dataset_url.push('/');
-            dataset_url.push_str(&self.uuid);
+            dataset_url.push_str(&self.city.uuid);
         }
         dataset_url.push('/');
         dataset_url.push_str(&dataset.to_string());
@@ -110,26 +113,14 @@ impl City {
         dataset_url.push_str(&dataset.extension());
         Ok(Url::parse(&dataset_url)?)
     }
-
-    /// Read a CSV file and populate a Vector of Cities.
-    pub fn from_csv<P>(path: P) -> Result<Vec<City>, Error>
-    where
-        P: AsRef<Path>,
-    {
-        let mut csv_reader = Reader::from_path(path)?;
-        let mut cities: Vec<City> = vec![];
-        for record in csv_reader.deserialize() {
-            cities.push(record?);
-        }
-
-        Ok(cities)
-    }
 }
+
+impl CsvExt for City21 {}
 
 /// Represent the results from the community survey.
 #[pyclass]
 #[derive(Debug, Deserialize, Clone)]
-pub struct CommunitySurvey {
+pub struct CommunitySurvey21 {
     /// Perception of the quality of the bicycle network in the city.
     #[pyo3(get, set)]
     #[serde(rename = "Community Survey - Network")]
@@ -163,7 +154,7 @@ pub struct CommunitySurvey {
 /// Represent the results from the BNA.
 #[derive(Debug, Deserialize, Clone)]
 #[pyclass]
-pub struct BNA {
+pub struct BNA21 {
     /// How well people can reach other people by bike.
     #[pyo3(get, set)]
     #[serde(rename = "BNA - neighborhoods")]
@@ -199,7 +190,7 @@ pub struct BNA {
 /// Represent a city bike infrastructure.
 #[pyclass]
 #[derive(Debug, Deserialize, Clone)]
-pub struct Infrastructure {
+pub struct Infrastructure21 {
     /// Miles of low stress infrstructure.
     #[pyo3(get, set)]
     #[serde(rename = "total_low_stress_miles")]
@@ -215,171 +206,33 @@ pub struct Infrastructure {
 /// Represent a city scorecard.
 #[pyclass]
 #[derive(Debug, Deserialize, Clone)]
-pub struct ScoreCard {
+pub struct ScoreCard21 {
     /// City details.
     #[pyo3(get, set)]
     #[serde(flatten)]
-    pub city: City,
+    pub city: City21,
     /// Community survey results.
     #[pyo3(get, set)]
     #[serde(flatten)]
-    pub community_survey: CommunitySurvey,
+    pub community_survey: CommunitySurvey21,
     /// BNA results.
     #[pyo3(get, set)]
     #[serde(flatten)]
-    pub bna: BNA,
+    pub bna: BNA21,
     /// Infrastructure details.
     #[pyo3(get, set)]
     #[serde(flatten)]
-    pub infrastructure: Infrastructure,
+    pub infrastructure: Infrastructure21,
 }
 
-impl ScoreCard {
-    /// Read a CSV file and populate a Vector of ScoreCards.
-    pub fn from_csv<P>(path: P) -> Result<Vec<ScoreCard>, Error>
-    where
-        P: AsRef<Path>,
-    {
-        let mut csv_reader = Reader::from_path(path)?;
-        let mut scorecards: Vec<ScoreCard> = vec![];
-        for record in csv_reader.deserialize() {
-            scorecards.push(record?);
-        }
-
-        Ok(scorecards)
-    }
-}
+impl CsvExt for ScoreCard21 {}
 
 /// Define Python compatible methods.
 #[pymethods]
-impl ScoreCard {
+impl ScoreCard21 {
     /// Python wrapper for the [`ScoreCard::from_csv`] method.
     #[staticmethod]
-    pub fn load_csv(path: &str) -> PyResult<Vec<ScoreCard>> {
-        Ok(ScoreCard::from_csv(path)?)
-    }
-}
-
-/// Represent a ScoreCard to be passed to `svggloo`.
-///
-/// The fields must match all the fields from ScoreCard, and be represented by
-/// their short forms.
-#[pyclass]
-#[derive(Debug, Serialize, Clone)]
-pub struct ShortScoreCard {
-    /// City
-    #[pyo3(get, set)]
-    pub ci: String,
-    #[pyo3(get, set)]
-    pub co: String,
-    #[pyo3(get, set)]
-    pub st: String,
-    #[pyo3(get, set)]
-    pub uuid: String,
-    #[pyo3(get, set)]
-    pub po: u32,
-    #[pyo3(get, set)]
-    pub ra: f64,
-    #[pyo3(get, set)]
-    pub rasc: u8,
-
-    // Community Survey
-    #[pyo3(get, set)]
-    pub nw: u8,
-    #[pyo3(get, set)]
-    pub aw: u8,
-    #[pyo3(get, set)]
-    pub sf: u8,
-    #[pyo3(get, set)]
-    pub rs: u8,
-    #[pyo3(get, set)]
-    pub total: u8,
-    #[pyo3(get, set)]
-    pub cssc: u8,
-    #[pyo3(get, set)]
-    pub responses: u32,
-
-    // BNA
-    #[pyo3(get, set)]
-    pub nh: u8,
-    #[pyo3(get, set)]
-    pub op: u8,
-    #[pyo3(get, set)]
-    pub es: u8,
-    #[pyo3(get, set)]
-    pub ret: u8,
-    #[pyo3(get, set)]
-    pub rec: u8,
-    #[pyo3(get, set)]
-    pub tr: u8,
-    #[pyo3(get, set)]
-    pub bnasc: u8,
-
-    // Infrastructure
-    #[pyo3(get, set)]
-    pub lsm: u32,
-    #[pyo3(get, set)]
-    pub hsm: u32,
-}
-
-impl From<&ScoreCard> for ShortScoreCard {
-    fn from(sc: &ScoreCard) -> Self {
-        ShortScoreCard {
-            ci: sc.city.name.clone(),
-            co: sc.city.country.clone(),
-            st: sc.city.state.clone(),
-            uuid: sc.city.uuid.clone(),
-            po: sc.city.population,
-            ra: sc.city.ratings,
-            rasc: sc.city.ratings_rounded,
-            nw: sc.community_survey.network.round() as u8,
-            aw: sc.community_survey.awareness.round() as u8,
-            sf: sc.community_survey.safety.round() as u8,
-            rs: sc.community_survey.ridership.round() as u8,
-            total: sc.community_survey.total.round() as u8,
-            cssc: sc.community_survey.total_rounded as u8,
-            responses: sc.community_survey.responses,
-            nh: sc.bna.neighborhoods.round() as u8,
-            op: sc.bna.opportunity.round() as u8,
-            es: sc.bna.essential_services.unwrap_or_default().round() as u8,
-            ret: sc.bna.retail.round() as u8,
-            rec: sc.bna.recreation.unwrap_or_default().round() as u8,
-            tr: sc.bna.transit.round() as u8,
-            bnasc: sc.bna.overall_score.round() as u8,
-            lsm: sc
-                .infrastructure
-                .low_stress_miles
-                .unwrap_or_default()
-                .round() as u32,
-            hsm: sc
-                .infrastructure
-                .high_stress_miles
-                .unwrap_or_default()
-                .round() as u32,
-        }
-    }
-}
-
-impl ShortScoreCard {
-    // Saves a slice of ShortScoreCards to a CSV file.
-    pub fn to_csv<P>(path: P, entries: &[ShortScoreCard]) -> Result<(), Error>
-    where
-        P: AsRef<Path>,
-    {
-        let mut w = csv::Writer::from_path(path)?;
-        for entry in entries {
-            w.serialize(entry)?;
-        }
-        Ok(w.flush()?)
-    }
-}
-
-/// Define Python compatible methods.
-#[pymethods]
-impl ShortScoreCard {
-    /// Python wrapper for the [`ShortScoreCard::to_csv`] method.
-    #[staticmethod]
-    pub fn save_csv(path: &str, entries: Vec<ShortScoreCard>) -> PyResult<()> {
-        Ok(ShortScoreCard::to_csv(path, &entries)?)
+    pub fn load_csv(path: &str) -> PyResult<Vec<ScoreCard21>> {
+        Ok(ScoreCard21::from_csv(path)?)
     }
 }
