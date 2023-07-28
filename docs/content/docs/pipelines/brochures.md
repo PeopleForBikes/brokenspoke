@@ -15,7 +15,9 @@ Ratings Results.
 
 The pipeline starts by converting the original city ratings file, to the
 shortcode version. Basically, that just means converting the headers to a 2-5
-letter code. For instance "opportunity" becomes "op".
+letter code, and performing some minor conversions and validation of the data.
+For instance "opportunity" becomes "op" and the value gets converted from
+"45.11" to "45".
 
 The next step is to perform a data-merge operation between the shortcode file
 which was just created and the brochure template. This step will generate one
@@ -74,4 +76,19 @@ This will produce the following output:
 2022-10-05T01:53:21.348323Z  INFO brochures: 📃 Generating PDF files...
 2022-10-05T01:54:14.165587Z  INFO brochures: 📦 Bundling the brochures...
 2022-10-05T01:54:26.702501Z  INFO brochures: ✅ Done
+```
+
+### Remark
+
+By default, the pipeline is configured to process the latest City Ratings file
+with the latest version fo the template.
+
+If another data set needs to be processed, the parameters may need to be
+adjusted. This can be done at the top of the script, in the `parameters`
+section:
+
+```rs
+// Parameters
+let format = "v23";
+let city_rating_version = "v23.2";
 ```
