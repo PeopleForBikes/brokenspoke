@@ -291,6 +291,8 @@
   											
   											<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/pipelines/brochures/#run-it">Run it</a></li>
   											
+  											<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/pipelines/brochures/#remark">Remark</a></li>
+  											
   									</ul>
   							
   							
@@ -308,7 +310,9 @@ Ratings Results.</p>
 <h2 id="how-it-works">How it works</h2>
 <p>The pipeline starts by converting the original city ratings file, to the
 shortcode version. Basically, that just means converting the headers to a 2-5
-letter code. For instance &quot;opportunity&quot; becomes &quot;op&quot;.</p>
+letter code, and performing some minor conversions and validation of the data.
+For instance &quot;opportunity&quot; becomes &quot;op&quot; and the value gets converted from
+&quot;45.11&quot; to &quot;45&quot;.</p>
 <p>The next step is to perform a data-merge operation between the shortcode file
 which was just created and the brochure template. This step will generate one
 SVG file per city. At this point the SVG itself is completely distributable if
@@ -351,6 +355,16 @@ commands:</p>
 </span><span style="color:#bf616a;">2022-10-05T01:53:21.348323Z</span><span>  INFO brochures: 📃 Generating PDF files...
 </span><span style="color:#bf616a;">2022-10-05T01:54:14.165587Z</span><span>  INFO brochures: 📦 Bundling the brochures...
 </span><span style="color:#bf616a;">2022-10-05T01:54:26.702501Z</span><span>  INFO brochures: ✅ Done
+</span></code></pre>
+<h3 id="remark">Remark</h3>
+<p>By default, the pipeline is configured to process the latest City Ratings file
+with the latest version fo the template.</p>
+<p>If another data set needs to be processed, the parameters may need to be
+adjusted. This can be done at the top of the script, in the <code>parameters</code>
+section:</p>
+<pre data-lang="rs" style="background-color:#2b303b;color:#c0c5ce;" class="language-rs "><code class="language-rs" data-lang="rs"><span style="color:#65737e;">// Parameters
+</span><span style="color:#b48ead;">let</span><span> format = &quot;</span><span style="color:#a3be8c;">v23</span><span>&quot;;
+</span><span style="color:#b48ead;">let</span><span> city_rating_version = &quot;</span><span style="color:#a3be8c;">v23.2</span><span>&quot;;
 </span></code></pre>
 
         

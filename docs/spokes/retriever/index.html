@@ -281,7 +281,7 @@
   							
   									<ul>
   											
-  											<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/spokes/retriever/#remark">Remark</a></li>
+  											<li><a href="https://peopleforbikes.github.io/brokenspoke/docs/spokes/retriever/#remarks">Remarks</a></li>
   											
   									</ul>
   							
@@ -302,12 +302,20 @@
 <h2 id="goal">Goal</h2>
 <p>The goal is to download all the public datasets for a given city.</p>
 <p>The input is a CSV file containing one or more city ratings entries.</p>
-<h3 id="remark">Remark</h3>
+<h3 id="remarks">Remarks</h3>
+<h4 id="data-volume">Data volume</h4>
 <p>For 2021, there is about 11GB of datasets. Therefore retrieving them for a large
 number of cities can take a while.</p>
+<h4 id="data-format">Data format</h4>
+<p>The retriever can read several data format, depending on the year the results
+were collected:</p>
+<table><thead><tr><th style="text-align: center">Format</th><th style="text-align: center">Years</th></tr></thead><tbody>
+<tr><td style="text-align: center">v21</td><td style="text-align: center">2021, 2022</td></tr>
+<tr><td style="text-align: center">v23</td><td style="text-align: center">2023</td></tr>
+</tbody></table>
 <h2 id="example">Example</h2>
 <p>Given the following command:</p>
-<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">retriever --from-csv</span><span> examples/retriever/single_city_rating.csv \
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">retriever</span><span> v21 examples/retriever/single_city_rating.csv \
 </span><span>  census-block connected-census-block data-dictionary overall-scores ways
 </span></code></pre>
 <p>And the following CSV file:</p>
