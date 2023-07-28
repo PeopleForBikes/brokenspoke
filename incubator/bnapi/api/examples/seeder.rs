@@ -1,7 +1,7 @@
 //! Utility to seed the database using the City Ratings CSV file provided in the
 //! assets directory.
 //!
-use bnacore::scorecard::ScoreCard;
+use bnacore::scorecard::{scorecard21::ScoreCard21, CsvExt};
 use chrono::prelude::*;
 use color_eyre::{eyre::Report, Result};
 use dotenv::dotenv;
@@ -22,7 +22,7 @@ async fn main() -> Result<(), Report> {
     let db = DATABASE_CONNECTION.get().unwrap();
 
     // Load the scorecards.
-    let scorecards = ScoreCard::from_csv("assets/city_ratings_2021_v15.csv")?;
+    let scorecards = ScoreCard21::from_csv("assets/city_ratings_2021_v15.csv")?;
 
     // Populate entities.
     let mut bnas: Vec<bna::ActiveModel> = Vec::new();

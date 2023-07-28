@@ -1,4 +1,10 @@
-use bnacore::{scorecard::City, Dataset};
+use bnacore::{
+    scorecard::{
+        scorecard21::ScoreCard21, scorecard23::ScoreCard23, CsvExt, Format, ScoreCardVersion,
+        ScorecardExt,
+    },
+    Dataset,
+};
 use clap::{Parser, ValueEnum, ValueHint};
 use color_eyre::{eyre::Report, Result};
 use std::{convert::From, fs, path::PathBuf};
@@ -49,13 +55,33 @@ impl From<CliDataset> for Dataset {
     }
 }
 
+#[derive(Debug, Clone, ValueEnum)]
+pub enum CliFormat {
+    V21,
+    V23,
+}
+
+impl From<Format> for CliFormat {
+    fn from(value: Format) -> Self {
+        match value {
+            Format::V21 => CliFormat::V21,
+            Format::V23 => CliFormat::V23,
+        }
+    }
+}
+
+impl From<CliFormat> for Format {
+    fn from(value: CliFormat) -> Self {
+        match value {
+            CliFormat::V21 => Format::V21,
+            CliFormat::V23 => Format::V23,
+        }
+    }
+}
+
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
 pub struct Opts {
-    /// CSV file containing the list of city datasets to download
-    #[clap(long)]
-    pub from_csv: Option<String>,
-
     /// Number of files to download simultaneously
     #[clap(short, long, default_value_t = 32)]
     pub parallel_requests: u16,
@@ -67,6 +93,14 @@ pub struct Opts {
     /// Destination directory
     #[clap(short, long,value_parser, value_hint = ValueHint::DirPath, default_value = "output")]
     pub destination_folder: PathBuf,
+
+    /// ScoreCard format to use
+    #[clap(value_enum)]
+    pub format: CliFormat,
+
+    /// CSV file containing the list of city datasets to download
+    #[clap()]
+    pub from_csv: String,
 
     /// Dataset(s) to retrieve
     #[clap(value_enum)]
@@ -82,12 +116,19 @@ async fn main() -> Result<(), Report> {
     let opts = Opts::parse();
 
     // Prepare the variable holding the list of cities to process.
-    let mut cities: Vec<City> = Vec::new();
+    // let mut cities: Vec<ScoreCardVersion> = Vec::new();
 
-    // Prepare the list of items to retrieve from a CSV file.
-    if let Some(csv) = opts.from_csv {
-        cities = City::from_csv(csv)?;
-    }
+    // Prepare the list of scorecards to retrieve from a CSV file.
+    let scorecards: Vec<ScoreCardVersion> = match opts.format {
+        CliFormat::V21 => ScoreCard21::from_csv(opts.from_csv)?
+            .iter()
+            .map(|e| ScoreCardVersion::V21(e.clone()))
+            .collect(),
+        CliFormat::V23 => ScoreCard23::from_csv(opts.from_csv)?
+            .iter()
+            .map(|e| ScoreCardVersion::V23(e.clone()))
+            .collect(),
+    };
 
     // Ensure the output folder exists.
     if !opts.destination_folder.exists() {
@@ -101,7 +142,7 @@ async fn main() -> Result<(), Report> {
 
     // Prepare the downloads for each city.
     let mut downloads: Vec<Download> = Vec::new();
-    for city in cities {
+    for city in scorecards {
         // Prepare the dataset downloads for this city.
         for dataset in &opts.datasets {
             let ds: Dataset = dataset.into();
