@@ -16,17 +16,29 @@ The goal is to download all the public datasets for a given city.
 
 The input is a CSV file containing one or more city ratings entries.
 
-### Remark
+### Remarks
+
+#### Data volume
 
 For 2021, there is about 11GB of datasets. Therefore retrieving them for a large
 number of cities can take a while.
+
+#### Data format
+
+The retriever can read several data format, depending on the year the results
+were collected:
+
+| Format |   Years    |
+| :----: | :--------: |
+|  v21   | 2021, 2022 |
+|  v23   |    2023    |
 
 ## Example
 
 Given the following command:
 
 ```bash
-retriever --from-csv examples/retriever/single_city_rating.csv \
+retriever v21 examples/retriever/single_city_rating.csv \
   census-block connected-census-block data-dictionary overall-scores ways
 ```
 

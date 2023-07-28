@@ -4,7 +4,6 @@ use serde::Deserialize;
 use url::Url;
 
 /// Represent a PeopleForBikes city.
-/// city,state,state_full,country,region,census_fips_code,census_latitude,census_longitude
 #[derive(Debug, Deserialize, Clone)]
 pub struct City23 {
     /// City name.
@@ -32,7 +31,7 @@ pub struct BNA23 {
     pub year: u32,
     /// Population.
     pub census_population: u32,
-    ///
+    /// Residential speed limit.
     pub residential_speed_limit: u8,
     ///
     pub bna_id: String,
@@ -42,63 +41,63 @@ pub struct BNA23 {
     /// should be assimilated to a version number (each run will generate a
     /// new identifier).
     pub bna_uuid: String,
-    ///
+    /// How well people can reach other people by bike.
     pub bna_people: f64,
-    ///
+    /// How well people can reach jobs by bike.
     pub bna_opportunity_employment: f64,
-    ///
+    ///How well people can reach K-12 schools by bike.
     pub bna_opportunity_k12_education: f64,
-    ///
+    /// How well people can reach a technical vocational college by bike.
     pub bna_opportunity_technical_vocational_college: f64,
-    ///
+    /// How well people can reach university people by bike.
     pub bna_opportunity_higher_education: f64,
-    ///
+    /// How well people can reach employment and educational opportunities by bike.
     pub bna_opportunity: f64,
-    ///
+    /// How well people can reach doctors by bike.
     pub bna_core_services_doctors: f64,
-    ///
+    /// How well people can reach dentists by bike.
     pub bna_core_services_dentists: f64,
-    ///
+    /// How well people can reach hospitals by bike.
     pub bna_core_services_hospitals: f64,
-    ///
+    /// How well people can reach pharmacies by bike.
     pub bna_core_services_pharmacies: f64,
-    ///
+    /// How well people can reach grocery stores by bike.
     pub bna_core_services_grocery: f64,
-    ///
+    /// How well people can reach social services by bike.
     pub bna_core_services_social_services: f64,
-    ///
+    /// How well people can reach Core Services by bike.
     pub bna_core_services: f64,
-    ///
+    /// How well people can reach retail shopping by bike.
     pub bna_retail: f64,
-    ///
+    /// How well people can reach parks by bike.
     pub bna_recreation_parks: f64,
-    ///
+    /// How well people can reach trails by bike.
     pub bna_recreation_trails: f64,
-    ///
+    /// How well people can reach community centers by bike.
     pub bna_recreation_community_centers: f64,
-    ///
+    /// How well people can reach recreation opportunities by bike.
     pub bna_recreation: f64,
-    ///
+    /// How well people can reach major tansit hubs by bike.
     pub bna_transit: f64,
-    ///
+    /// City rating.
     pub bna_overall_score: f64,
-    ///
+    /// Rounded city rating.
     pub bna_rounded_score: u8,
-    ///
+    /// Miles of low stress infrstructure.
     pub bna_total_low_stress_miles: f64,
-    ///
+    /// Miles of high stress infrastructure.
     pub bna_total_high_stress_miles: f64,
-    ///
+    /// City size category based on the population.
     pub pop_size: Size,
-    ///
+    /// Ranking amongst all cities.
     pub rank: u32,
-    ///
+    /// Ranking by size.
     pub rank_size: u32,
-    ///
+    /// Ranking amongst cities in the same state.
     pub rank_state: u32,
-    ///
+    /// Ranking amongst cities in the same countries
     pub rank_country: u32,
-    ///
+    /// Ranking amongst cities of the same size category.
     pub rank_country_size: u32,
 }
 
