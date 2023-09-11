@@ -312,8 +312,19 @@ variables in the template must be surrounded by <code>{{}}</code>, for instance 
 <h4 id="svg-export">SVG Export</h4>
 <p>The SVG export is done using <a href="https://inkscape.org/">inkscape</a>, <a href="https://cairosvg.org/">cairosvg</a>, or <a href="https://docs.rs/svg2pdf/latest/svg2pdf/">svg2pdf</a>. If the
 exporter program is not found svggloo will abort the operation.</p>
+<h5 id="inkscape">Inkscape</h5>
+<p>When installing <a href="https://inkscape.org/">inkscape</a> on Windows, you will be prompted to whether or not
+add it to the system PATH:</p>
+<p><img src="../../../images/spokes/svggloo/inkscape-win-install-system-path.png"
+alt="Inkscape System PATH install" width="100%"></p>
+<p>We recommend choosing the option saying <em>&quot;Add Inkscape to the system PATH for
+all users&quot;</em>.</p>
+<blockquote>
+<p><strong>Note that if you chose the option saying &quot;Do not add Inkscape to the system
+PATH&quot;, this spoke will not work.</strong></p>
+</blockquote>
 <h2 id="example">Example</h2>
-<p>Usage:</p>
+<p>Rendering brochures with <a href="https://inkscape.org/">inkscape</a>:</p>
 <pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">svggloo --field</span><span> country</span><span style="color:#bf616a;"> --field</span><span> state</span><span style="color:#bf616a;"> --field</span><span> city</span><span style="color:#bf616a;"> --export</span><span> Inkscape \
 </span><span>  examples/brochures/brochure.svg
 </span></code></pre>
