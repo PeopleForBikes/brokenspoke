@@ -32,9 +32,23 @@ The data file must be a CSV file.
 The SVG export is done using [inkscape], [cairosvg], or [svg2pdf]. If the
 exporter program is not found svggloo will abort the operation.
 
+##### Inkscape
+
+When installing [inkscape] on Windows, you will be prompted to whether or not
+add it to the system PATH:
+
+<img src="../../../images/spokes/svggloo/inkscape-win-install-system-path.png"
+alt="Inkscape System PATH install" width="100%">
+
+We recommend choosing the option saying _"Add Inkscape to the system PATH for
+all users"_.
+
+> **Note that if you chose the option saying "Do not add Inkscape to the system
+> PATH", this spoke will not work.**
+
 ## Example
 
-Usage:
+Rendering brochures with [inkscape]:
 
 ```bash
 svggloo --field country --field state --field city --export Inkscape \
