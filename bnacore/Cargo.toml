@@ -18,16 +18,28 @@ csv = "1.1"
 libflate = "2.0.0"
 lopdf = "0.31.0"
 minijinja = "1.0.0"
-pyo3 = { version = "0.19.0" }
+pyo3 = { version = "0.20.0" }
 regex = "1.6.0"
+reqwest = { version = "0.11.22", features = [
+  "json",
+  "native-tls-vendored",
+  "rustls",
+] }
 serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0.107"
 thiserror = "1.0"
+time = { version = "0.3.29", features = ["serde-well-known"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 url = "2.0"
 walkdir = "2.3.2"
 zip = "0.6.4"
 
 [dev-dependencies]
 color-eyre = "0.6"
+tracing = { version = "0.1", features = ["log"] }
+tracing-subscriber = { version = "0.3", default-features = false, features = [
+  "fmt",
+] }
 
 [features]
 extension-module = ["pyo3/extension-module"]

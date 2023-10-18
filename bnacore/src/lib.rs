@@ -2,6 +2,7 @@
 //! the PFB projects.
 pub mod bundle;
 pub mod combine;
+pub mod neon;
 pub mod scorecard;
 pub mod template;
 

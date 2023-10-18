@@ -8,3 +8,4 @@ members = [
   "pipelines/retrieve",
   "spokes",
 ]
+resolver = "2"
