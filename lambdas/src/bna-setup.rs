@@ -153,6 +153,7 @@ async fn function_handler(_event: LambdaEvent<Value>) -> Result<(), Error> {
     let vpc_subnets = get_aws_parameter("PRIVATE_SUBNETS").await?;
     let vpc_security_groups = get_aws_parameter("BNA_TASK_SECURITY_GROUP").await?;
     let task_definition = get_aws_parameter("BNA_TASK_DEFINITION").await?;
+    let s3_bucket = get_aws_parameter("BNA_BUCKET").await?;
 
     // Start the Fargate task.
     info!("Starting the Fargate task...");
@@ -174,6 +175,8 @@ async fn function_handler(_event: LambdaEvent<Value>) -> Result<(), Error> {
         "run".to_string(),
         "--with-export".to_string(),
         "s3".to_string(),
+        "--s3-bucket".to_string(),
+        s3_bucket,
         analysis_parameters.country.clone(),
         analysis_parameters.city.clone(),
     ];
