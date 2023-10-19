@@ -4,6 +4,7 @@ members = [
   "incubator/bnapi/api",
   "incubator/bnapi/entity",
   "incubator/bnapi/migration",
+  "lambdas",
   "pipelines/brochures",
   "pipelines/retrieve",
   "spokes",
