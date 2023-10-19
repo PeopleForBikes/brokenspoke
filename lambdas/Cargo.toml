@@ -1,0 +1,43 @@
+[package]
+name = "bnalambdas"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+aws-config = "0.56.1"
+aws-sdk-ecs = "0.33.0"
+aws-sdk-sqs = "0.33.0"
+bnacore = { path = "../bnacore" }
+lambda_http = "0.8.1"
+lambda_runtime = "0.8.1"
+reqwest = { version = "0.11.22", features = [
+  "json",
+  "native-tls-vendored",
+  "rustls",
+] }
+serde = { version = "1.0.188", features = ["derive"] }
+serde_json = "1.0.107"
+simple-error = "0.3.0"
+time = { version = "0.3.29", features = ["serde-well-known"] }
+tokio = { version = "1", features = ["macros"] }
+tracing = { version = "0.1", features = ["log"] }
+tracing-subscriber = { version = "0.3", default-features = false, features = [
+  "fmt",
+] }
+url = { version = "2.4.1", features = ["serde"] }
+
+[[bin]]
+name = "bna-setup"
+path = "src/bna-setup.rs"
+
+[[bin]]
+name = "bna-teardown"
+path = "src/bna-teardown.rs"
+
+[package.metadata.lambda.deploy]
+memory = 128
+timeout = 30
+tracing = "active"
+layers = [
+  "arn:aws:lambda:us-west-2:345057560386:layer:AWS-Parameters-and-Secrets-Lambda-Extension:4",
+]
