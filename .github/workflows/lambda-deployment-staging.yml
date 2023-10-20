@@ -39,3 +39,7 @@ jobs:
           cargo lambda deploy
           --iam-role ${{ secrets.LAMBDA_ROLE_ARN_STAGING }}
           bna-setup
+      - run: >
+          cargo lambda deploy
+          --iam-role ${{ secrets.LAMBDA_ROLE_ARN_STAGING }}
+          bna-teardown
