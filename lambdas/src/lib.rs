@@ -1,3 +1,5 @@
+pub mod neon;
+
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, env};
 use time::OffsetDateTime;
@@ -138,7 +140,7 @@ pub async fn get_aws_parameter(name: &str) -> Result<String, String> {
     Ok(param.parameter.value)
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct AnalysisParameters {
     pub country: String,
     pub city: String,
