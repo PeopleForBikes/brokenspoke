@@ -43,4 +43,8 @@ jobs:
       - run: >
           cargo lambda deploy
           --iam-role ${{ secrets.LAMBDA_ROLE_ARN_STAGING }}
+          bna-sqs-parse
+      - run: >
+          cargo lambda deploy
+          --iam-role ${{ secrets.LAMBDA_ROLE_ARN_STAGING }}
           bna-teardown
