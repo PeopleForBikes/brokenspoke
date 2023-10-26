@@ -21,7 +21,13 @@ struct TaskInput {
 
 #[derive(Serialize)]
 struct TaskOutput {
-    neon_branch_id: String,
+    neon: Neon,
+}
+
+#[derive(Serialize)]
+struct Neon {
+    branch_id: String,
+    host: String,
 }
 
 async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, Error> {
@@ -106,9 +112,21 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
     info!("{:#?}", create_branch_response);
 
     let neon_branch_id = create_branch_response.branch.id.unwrap();
+    let neon_host = create_branch_response
+        .endpoints
+        .first()
+        .unwrap()
+        .host
+        .clone()
+        .unwrap();
 
     // Return the ID of the created database branch.
-    Ok(TaskOutput { neon_branch_id })
+    Ok(TaskOutput {
+        neon: Neon {
+            branch_id: neon_branch_id,
+            host: neon_host,
+        },
+    })
 }
 
 #[tokio::main]
