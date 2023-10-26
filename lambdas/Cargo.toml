@@ -30,12 +30,20 @@ tracing-subscriber = { version = "0.3", default-features = false, features = [
 url = { version = "2.4.1", features = ["serde"] }
 
 [[bin]]
-name = "bna-sqs-parse"
-path = "src/bna-sqs-parse.rs"
+name = "bna-fargate-run"
+path = "src/bna-fargate-run.rs"
+
+[[bin]]
+name = "bna-fargate-status"
+path = "src/bna-fargate-status.rs"
 
 [[bin]]
 name = "bna-setup"
 path = "src/bna-setup.rs"
+
+[[bin]]
+name = "bna-sqs-parse"
+path = "src/bna-sqs-parse.rs"
 
 [[bin]]
 name = "bna-teardown"

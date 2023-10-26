@@ -9,17 +9,19 @@ struct TaskInput {
     setup: Setup,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Setup {
+    neon: Neon,
+}
+
 #[derive(Debug, Serialize, Deserialize)]
-struct Setup {
-    neon_branch_id: String,
+struct Neon {
+    branch_id: String,
 }
 
 async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     // Read the task inputs.
-    let payload = &event.payload;
-    dbg!(&payload);
-    let neon_branch_id = &event.payload.setup.neon_branch_id;
-    dbg!(&neon_branch_id);
+    let neon_branch_id = &event.payload.setup.neon.branch_id;
 
     // Create the Neon HTTP client.
     let neon_api_key = get_aws_secrets("NEON_API_KEY").await?;
@@ -74,7 +76,9 @@ mod tests {
 
         let payload = TaskInput {
             setup: Setup {
-                neon_branch_id: "br-bold-mode-48632613".to_string(),
+                neon: Neon {
+                    branch_id: "br-bold-mode-48632613".to_string(),
+                },
             },
         };
         let _event = LambdaEvent { payload, context };
@@ -96,11 +100,14 @@ mod tests {
             },
             "receipt_handle": "AQEB1tiDaN1qwFbZXhWBUwQmTRsUx06pGNOhVdZe86LABsb95D8oLIbFFcOTWQzc27SbKQ4xWtomueKwT8LjTv60SnjoTIm+bhM52w0LYRhadhdyRzQUNyOBEU18QLM8W2psRUm1bhyfRkPNPCl65uhrdJs1ta62d3n2rVOcLvNHp+EEGNnCenze8Cc9qvptMFohe9p56YBxKubA3f3Btv70FLpTZOSPHIa4aDBADLm9eZ16jN1Jc9GU4JMxeNBp3QAunPVFm94vrLCrprffJj4D83IfcQYIf1T7eYlH/LVQcp+Ihaxtas7qnjxa1W756olM3ppxq6ZjRcbVeAtQtrT/+M6YsAqXrBSS+TTOLqNS8Zn0R8/YqSdE31AUFUPeI6LIaF654LabYh/54hju6xRcyQ==",
             "setup": {
-              "neon_branch_id": "br-bold-mode-48632613"
+              "neon": {
+                "branch_id": "br-bold-mode-48632613",
+                "host": "ep-sweet-recipe-68291618.us-west-2.aws.neon.tech"
+              }
             }
           }"#;
         let deserialized = serde_json::from_str::<TaskInput>(&json_input).unwrap();
-        assert_eq!(deserialized.setup.neon_branch_id, "br-bold-mode-48632613");
+        assert_eq!(deserialized.setup.neon.branch_id, "br-bold-mode-48632613");
         let _serialized = serde_json::to_string(&deserialized).unwrap();
     }
 }
