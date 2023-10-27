@@ -1,4 +1,7 @@
-use bnalambdas::{get_aws_parameter, get_aws_secrets, neon::NEON_PROJECTS_URL};
+use bnacore::{
+    aws::{get_aws_parameter, get_aws_secrets},
+    neon::NEON_PROJECTS_URL,
+};
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use reqwest::header::{self, HeaderValue};
 use serde::{Deserialize, Serialize};

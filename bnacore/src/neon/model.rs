@@ -335,11 +335,11 @@ pub struct NeonCreateBranchRequest {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct NeonCreateBranchResponse {
-    branch: NeonBranch,
+    pub branch: NeonBranch,
     pub endpoints: Vec<NeonEndpoint>,
-    operations: Vec<NeonOperation>,
-    roles: Vec<NeonRole>,
-    databases: Vec<NeonDatabase>,
+    pub operations: Vec<NeonOperation>,
+    pub roles: Vec<NeonRole>,
+    pub databases: Vec<NeonDatabase>,
 }
 
 #[cfg(test)]

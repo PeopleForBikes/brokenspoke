@@ -5,11 +5,11 @@ edition = "2021"
 
 [dependencies]
 aws-config = "0.56.1"
-aws-sdk-ecs = "0.33.0"
-aws-sdk-sqs = "0.33.0"
+aws-sdk-ecs = "0.34.0"
+aws-sdk-sqs = "0.34.0"
 # aws_lambda_events = "0.11.1"
 aws_lambda_events = { git = "https://github.com/awslabs/aws-lambda-rust-runtime", rev = "45525e0dfe1196315dd130101b9cec64ac6b67f0" }
-# bnacore = { path = "../bnacore" }
+bnacore = { path = "../bnacore" }
 lambda_http = "0.8.1"
 lambda_runtime = "0.8.1"
 reqwest = { version = "0.11.22", features = [

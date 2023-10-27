@@ -2,7 +2,8 @@ use aws_sdk_ecs::types::{
     AssignPublicIp, AwsVpcConfiguration, ContainerOverride, KeyValuePair, NetworkConfiguration,
     TaskOverride,
 };
-use bnalambdas::{get_aws_parameter, get_aws_secrets, AnalysisParameters};
+use bnacore::aws::{get_aws_parameter, get_aws_secrets};
+use bnalambdas::AnalysisParameters;
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use serde::{Deserialize, Serialize};
 use url::Url;
