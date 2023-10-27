@@ -1,11 +1,14 @@
-use bnalambdas::neon::{
-    model::{
-        NeonBranch, NeonCreateBranchRequest, NeonCreateBranchResponse, NeonEndpoint,
-        NeonEndpointType, NeonListBranchResponses,
+use bnacore::{
+    aws::{get_aws_parameter, get_aws_secrets},
+    neon::{
+        model::{
+            NeonBranch, NeonCreateBranchRequest, NeonCreateBranchResponse, NeonEndpoint,
+            NeonEndpointType, NeonListBranchResponses,
+        },
+        NEON_PROJECTS_URL,
     },
-    NEON_PROJECTS_URL,
 };
-use bnalambdas::{get_aws_parameter, get_aws_secrets, AnalysisParameters};
+use bnalambdas::AnalysisParameters;
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use reqwest::header::{self, HeaderValue};
 use serde::{Deserialize, Serialize};
