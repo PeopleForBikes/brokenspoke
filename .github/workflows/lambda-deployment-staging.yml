@@ -37,14 +37,12 @@ jobs:
       - name: Build all lambdas
         run: cd lambdas && cargo lambda build --release
       - run: >
-          echo "
-            bna-fargate-run
+          echo "bna-fargate-run
             bna-fargate-status
             bna-setup
             bna-sqs-parse
             bna-teardown
-            scorecard
-          "
+            scorecard"
           | xargs -n1
             cargo lambda deploy
             --iam-role ${{ secrets.LAMBDA_ROLE_ARN_STAGING }}
