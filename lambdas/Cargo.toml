@@ -11,6 +11,8 @@ aws-sdk-sqs = "0.34.0"
 # aws_lambda_events = "0.11.1"
 aws_lambda_events = { git = "https://github.com/awslabs/aws-lambda-rust-runtime", rev = "45525e0dfe1196315dd130101b9cec64ac6b67f0" }
 bnacore = { path = "../bnacore" }
+fontdb = "0.15.0"
+image = "0.24.7"
 lambda_http = "0.8.1"
 lambda_runtime = "0.8.1"
 minijinja = "1.0.9"
@@ -23,7 +25,7 @@ serde = { version = "1.0.188", features = ["derive"] }
 serde_json = "1.0.107"
 serde_with = "3.4.0"
 simple-error = "0.3.0"
-svg2pdf = "0.9.0"
+svg2pdf = { "version" = "0.9.0" }
 time = { version = "0.3.29", features = ["serde-well-known"] }
 tokio = { version = "1", features = ["macros"] }
 tracing = { version = "0.1", features = ["log"] }
@@ -31,6 +33,7 @@ tracing-subscriber = { version = "0.3", default-features = false, features = [
   "fmt",
 ] }
 url = { version = "2.4.1", features = ["serde"] }
+usvg = "0.36.0"
 
 [[bin]]
 name = "bna-fargate-run"

@@ -36,13 +36,14 @@ jobs:
       # Build the lambdas in release mode and deploy them.
       - name: Build all lambdas
         run: cd lambdas && cargo lambda build --release
-      - run: >
+      - name: deploy lambdas
+        run: >
           echo "bna-fargate-run
             bna-fargate-status
             bna-setup
             bna-sqs-parse
             bna-teardown
-            scorecard"
-          | xargs -n1
+            scorecard" |
+          xargs -n1 -t
             cargo lambda deploy
             --iam-role ${{ secrets.LAMBDA_ROLE_ARN_STAGING }}
