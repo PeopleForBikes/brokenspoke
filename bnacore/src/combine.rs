@@ -1,20 +1,12 @@
 use lopdf::{Bookmark, Document, Object, ObjectId};
-use std::{collections::BTreeMap, path::Path};
+use std::{collections::BTreeMap, io::Result, path::Path};
 
 /// Merge PDF files together, in the order they are being provided.
 ///
 /// This function comes almost straight from the "Merge PDF documents" example
 /// from the `lopdf` README.md:
 /// https://github.com/J-F-Liu/lopdf/blob/850b150461245cbf7c8dd780b31c76837769a0f5/README.md
-pub fn combine_pdf<P>(documents: &[&Path], output: P) -> std::io::Result<()>
-where
-    P: AsRef<Path>,
-{
-    let docs = documents
-        .iter()
-        .map(|d| Document::load(d).unwrap())
-        .collect::<Vec<Document>>();
-
+pub fn combine_documents(documents: Vec<Document>) -> Result<Document> {
     // Define a starting max_id (will be used as start index for object_ids)
     let mut max_id = 1;
     let mut pagenum = 1;
@@ -24,7 +16,7 @@ where
     let mut documents_objects = BTreeMap::new();
     let mut document = Document::with_version("1.5");
 
-    for mut doc in docs {
+    for mut doc in documents {
         let mut first = false;
         doc.renumber_objects_with(max_id);
 
@@ -105,9 +97,10 @@ where
 
     // If no "Pages" found abort
     if pages_object.is_none() {
-        println!("Pages root not found.");
-
-        return Ok(());
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::InvalidData,
+            "Pages root not found.",
+        ));
     }
 
     // Iter over all "Page" and collect with the parent "Pages" created before
@@ -124,9 +117,10 @@ where
 
     // If no "Catalog" found abort
     if catalog_object.is_none() {
-        println!("Catalog root not found.");
-
-        return Ok(());
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::InvalidData,
+            "Catalog root not found.",
+        ));
     }
 
     let catalog_object = catalog_object.unwrap();
@@ -181,14 +175,39 @@ where
     }
     document.compress();
 
-    // Save the merged PDF.
-    document.save(output).unwrap();
+    Ok(document)
+}
 
+pub fn combine_mem(documents: &[&[u8]]) -> Result<Document> {
+    // Load the buffers.
+    let docs = documents
+        .iter()
+        .map(|buffer| Document::load_mem(buffer).unwrap())
+        .collect::<Vec<Document>>();
+
+    combine_documents(docs)
+}
+
+pub fn combine_pdf<P>(documents: &[&Path], output: P) -> Result<()>
+where
+    P: AsRef<Path>,
+{
+    // Load the files.
+    let docs = documents
+        .iter()
+        .map(|d| Document::load(d).unwrap())
+        .collect::<Vec<Document>>();
+
+    // Merge the files.
+    let mut combined = combine_documents(docs)?;
+
+    // Save the merged PDF.
+    combined.save(output)?;
     Ok(())
 }
 
 /// Append the `extra` document to all the `documents`.
-pub fn batch_append(documents: &[&Path], extra: &Path) -> std::io::Result<()> {
+pub fn batch_append(documents: &[&Path], extra: &Path) -> Result<()> {
     for &document in documents {
         combine_pdf(&[document, extra], document)?;
     }
