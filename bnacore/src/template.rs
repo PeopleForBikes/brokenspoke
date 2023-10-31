@@ -87,20 +87,20 @@ pub fn render(
     let mut files: Vec<PathBuf> = Vec::new();
     for result in csv_reader.deserialize() {
         let record: Record = result?;
-
-        // Construct the name of the output file.
-        let item_name = match field_based_name.clone() {
-            Some(fields) => {
-                let v = fields
-                    .clone()
-                    .iter()
-                    .map(|f| record[f].clone())
-                    .map(|f| f.replace(' ', "_"))
-                    .collect::<Vec<String>>();
-                v.join(sep).to_lowercase()
-            }
-            None => record.values().next().unwrap().to_owned().to_lowercase(),
-        };
+        let mut item_name = String::new();
+        if let Some(fields) = &field_based_name {
+            let field_values = fields
+                .iter()
+                .map(|f| record[f].clone())
+                .collect::<Vec<String>>();
+            let name = field_values.join(sep);
+            item_name = name
+                .to_lowercase()
+                .replace(' ', "_")
+                .chars()
+                .filter(|c| c.is_alphabetic() || *c == '-' || *c == '_' || *c == '.')
+                .collect::<String>();
+        }
         let mut item = item_name.clone();
         item.push_str(".svg");
 
@@ -225,11 +225,11 @@ pub fn export_with_cairosvg(srcs: &[PathBuf]) {
 pub fn export_with_svg2pdf(srcs: &[PathBuf]) {
     for src in srcs {
         // Prepare the input/output values from the src argument.
-        let (in_svg, _out_pdf) = get_in_out_file(src);
+        let (in_svg, out_pdf) = get_in_out_file(src);
 
         // Prepare the command.
         let program = "svg2pdf";
-        let args = vec![in_svg];
+        let args = vec![in_svg, out_pdf];
 
         export_with(program, &args);
     }

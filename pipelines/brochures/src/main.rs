@@ -30,7 +30,7 @@ fn main() -> Result<(), Report> {
     let asset_dir = top_dir.join("assets");
     let output_dir = top_dir.join("pipelines/brochures/output");
     let brochure_template = asset_dir
-        .join("visuals/template-scorecard-pg1-v23.1.svg")
+        .join("visuals/template-scorecard-pg1-v23.2.svg")
         .canonicalize()?;
     let brochure_information_page = asset_dir.join("visuals/template-scorecard-pg2-v23.1.pdf");
     let city_ratings = asset_dir
@@ -78,6 +78,8 @@ fn main() -> Result<(), Report> {
         .arg("st")
         .arg("--field")
         .arg("ci")
+        .arg("--exporter")
+        .arg("svg2pdf")
         .arg(&brochure_template_copy)
         .arg(&output_dir)
         .output()?;
@@ -104,25 +106,25 @@ fn main() -> Result<(), Report> {
         }
     }
 
-    // Generate the PDF files.
-    info!("📃 Generating PDF files...");
-    // generate_pdf(&svg_files, &output_dir)?;
-    let cmd_args_groups = build_cmd_args(
-        "inkscape",
-        &[
-            "--export-area-drawing".to_string(),
-            "--batch-process".to_string(),
-            "--export-type=pdf".to_string(),
-        ],
-        &svg_files,
-        bnacore::MAX_PROMPT_LENGTH,
-    )?;
-    for cmd_args in cmd_args_groups {
-        let mut cmd = Command::new("inkscape");
-        cmd.args(cmd_args).current_dir(&output_dir);
-        let output = cmd.output().map_err(Report::new)?;
-        process_output_with_command(&output, &cmd)?
-    }
+    // // Generate the PDF files.
+    // info!("📃 Generating PDF files...");
+    // // generate_pdf(&svg_files, &output_dir)?;
+    // let cmd_args_groups = build_cmd_args(
+    //     "inkscape",
+    //     &[
+    //         "--export-area-drawing".to_string(),
+    //         "--batch-process".to_string(),
+    //         "--export-type=pdf".to_string(),
+    //     ],
+    //     &svg_files,
+    //     bnacore::MAX_PROMPT_LENGTH,
+    // )?;
+    // for cmd_args in cmd_args_groups {
+    //     let mut cmd = Command::new("inkscape");
+    //     cmd.args(cmd_args).current_dir(&output_dir);
+    //     let output = cmd.output().map_err(Report::new)?;
+    //     process_output_with_command(&output, &cmd)?
+    // }
 
     // Append information page.
     info!("📎 Append information page");
