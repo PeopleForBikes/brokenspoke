@@ -24,7 +24,7 @@ export PYO3_CROSS_PYTHON_VERSION=3.11
 Then compile again:
 
 ```bash
-cargo lambda build --release
+PYO3_CROSS_PYTHON_VERSION=3.11 cargo lambda build --release
 ```
 
 And it works!
