@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-aws-config = "0.56.1"
+aws-config = "0.57.1"
 aws-sdk-ecs = "0.34.0"
 aws-sdk-s3 = "0.34.0"
 aws-sdk-sqs = "0.34.0"
