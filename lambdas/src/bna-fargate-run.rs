@@ -89,7 +89,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
         .subnets(vpc_subnets)
         .security_groups(vpc_security_groups)
         .assign_public_ip(AssignPublicIp::Enabled)
-        .build();
+        .build()?;
     let network_configuration = NetworkConfiguration::builder()
         .awsvpc_configuration(aws_vpc_configuration)
         .build();
@@ -105,7 +105,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
         .await?;
 
     // Prepare the output.
-    let task = run_task_output.tasks().unwrap().first().unwrap();
+    let task = run_task_output.tasks().first().unwrap();
     let output = TaskOutput {
         ecs_cluster_arn: task.cluster_arn().unwrap().into(),
         task_arn: task.task_arn().unwrap().into(),

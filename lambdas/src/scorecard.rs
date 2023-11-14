@@ -26,7 +26,7 @@ async fn function_handler(event: LambdaEvent<SqsEvent>) -> Result<(), Error> {
     let key = format!("{}/{}-{}-{}.pdf", year, country, region, city);
 
     // Prepare the font database.
-    let mut fontdb = fontdb::Database::new();
+    let mut fontdb = usvg::fontdb::Database::new();
     dbg!(fontdb.len());
     // fontdb.load_system_fonts();
     // dbg!(fontdb.len());
@@ -81,7 +81,7 @@ async fn function_handler(event: LambdaEvent<SqsEvent>) -> Result<(), Error> {
     Ok(())
 }
 
-fn pdf_convert(svg: &str, fontdb: &fontdb::Database) -> Result<Vec<u8>, String> {
+fn pdf_convert(svg: &str, fontdb: &usvg::fontdb::Database) -> Result<Vec<u8>, String> {
     let options = usvg::Options::default();
 
     let mut tree = usvg::Tree::from_str(svg, &options).map_err(|err| err.to_string())?;
