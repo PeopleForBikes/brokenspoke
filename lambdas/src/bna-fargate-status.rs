@@ -38,7 +38,6 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
         .await?;
     let last_status = task
         .tasks()
-        .unwrap()
         .first()
         .unwrap()
         .last_status()
