@@ -7,7 +7,7 @@ edition = "2021"
 aws-config = "0.57.1"
 aws-sdk-ecs = "0.35.0"
 aws-sdk-s3 = "0.35.0"
-aws-sdk-sqs = "0.35.0"
+aws-sdk-sqs = "0.38.0"
 aws_lambda_events = "0.12.1"
 bnacore = { path = "../bnacore" }
 fontdb = "0.16.0"
