@@ -1,3 +1,4 @@
+use aws_config::BehaviorVersion;
 use aws_lambda_events::event::sqs::SqsEvent;
 use aws_sdk_s3::primitives::ByteStream;
 use bnacore::combine::combine_mem;
@@ -67,7 +68,7 @@ async fn function_handler(event: LambdaEvent<SqsEvent>) -> Result<(), Error> {
     scorecard.save("scorecard_test.pdf")?;
 
     // Upload to S3.
-    let config = aws_config::load_from_env().await;
+    let config = aws_config::load_defaults(BehaviorVersion::latest()).await;
     let client = aws_sdk_s3::Client::new(&config);
     let body = ByteStream::from(buffer);
     client
