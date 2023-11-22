@@ -207,25 +207,23 @@ async fn main() -> Result<(), Report> {
         .route("/fastratings", get(get_fast_city_ratings))
         .route("/brochure/:city_id", get(get_brochure))
         .route("/task/analysis", post(schedule_task))
-        .nest_service(
-            "/static",
-            get_service(ServeDir::new(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/static"
-            ))), // .handle_error(|error: std::io::Error| async move {
-                 //     (
-                 //         StatusCode::INTERNAL_SERVER_ERROR,
-                 //         format!("Unhandled internal error: {}", error),
-                 //     )
-                 // }),
-        )
-        .layer(ServiceBuilder::new().layer(CookieManagerLayer::new()))
-        .layer(
-            CorsLayer::new()
-                .allow_origin("http://localhost:3000".parse::<HeaderValue>().unwrap())
-                .allow_headers([http::header::CONTENT_TYPE])
-                .allow_methods(vec![Method::GET, Method::POST]),
-        );
+        // .nest_service(
+        //     "/static",
+        //     ServeDir::new(concat!(env!("CARGO_MANIFEST_DIR"), "/static")),
+        //     // .handle_error(|error: std::io::Error| async move {
+        //                                                                    //     (
+        //                                                                    //         StatusCode::INTERNAL_SERVER_ERROR,
+        //                                                                    //         format!("Unhandled internal error: {}", error),
+        //                                                                    //     )
+        //                                                                    // }),
+        // )
+        .layer(ServiceBuilder::new().layer(CookieManagerLayer::new()));
+    // .layer(
+    //     CorsLayer::new()
+    //         .allow_origin("http://localhost:3000".parse::<HeaderValue>().unwrap())
+    //         .allow_headers([http::header::CONTENT_TYPE])
+    //         .allow_methods(vec![Method::GET, Method::POST]),
+    // );
 
     // Serve the route.
     let addr = SocketAddr::from(([127, 0, 0, 1], 8080));

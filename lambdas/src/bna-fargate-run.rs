@@ -1,3 +1,4 @@
+use aws_config::BehaviorVersion;
 use aws_sdk_ecs::types::{
     AssignPublicIp, AwsVpcConfiguration, ContainerOverride, KeyValuePair, NetworkConfiguration,
     TaskOverride,
@@ -39,7 +40,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
     let neon_host = &event.payload.setup.neon.host;
 
     // Prepare the AWS client.
-    let aws_config = aws_config::load_from_env().await;
+    let aws_config = aws_config::load_defaults(BehaviorVersion::latest()).await;
     let ecs_client = aws_sdk_ecs::Client::new(&aws_config);
 
     // Retrieve secrets and parameters.

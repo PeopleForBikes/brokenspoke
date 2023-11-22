@@ -1,3 +1,4 @@
+use aws_config::BehaviorVersion;
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use serde::{Deserialize, Serialize};
 
@@ -26,7 +27,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
     let task_arn = &event.payload.fargate.task_arn;
 
     // Prepare the AWS client.
-    let aws_config = aws_config::load_from_env().await;
+    let aws_config = aws_config::load_defaults(BehaviorVersion::latest()).await;
     let ecs_client = aws_sdk_ecs::Client::new(&aws_config);
 
     // Describe the task.
