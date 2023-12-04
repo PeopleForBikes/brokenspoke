@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-axum = { version = "0.6" }
+axum = { version = "0.7" }
 bnacore = { path = "../../../bnacore" }
 chrono = "0.4.19"
 color-eyre = "0.6.1"
