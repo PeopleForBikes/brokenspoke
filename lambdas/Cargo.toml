@@ -32,7 +32,7 @@ tracing-subscriber = { version = "0.3", default-features = false, features = [
   "fmt",
 ] }
 url = { version = "2.4.1", features = ["serde"] }
-usvg = "0.36.0"
+usvg = "0.37.0"
 
 [[bin]]
 name = "bna-fargate-run"
