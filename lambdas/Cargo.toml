@@ -12,7 +12,7 @@ aws_lambda_events = "0.12.1"
 bnacore = { path = "../bnacore" }
 fontdb = "0.16.0"
 image = "0.24.7"
-lambda_http = "0.8.1"
+lambda_http = "0.9.0"
 lambda_runtime = "0.8.1"
 minijinja = "1.0.9"
 reqwest = { version = "0.11.22", features = [
