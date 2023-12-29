@@ -7,7 +7,7 @@ interpreter for Linux on the Mac machine, try the following steps.
 
 ```bash
 cd /tmp
-mdir libpython
+mkdir libpython
 cd libpython
 curl -lO http://http.us.debian.org/debian/pool/main/p/python3.11/libpython3.11_3.11.6-3_amd64.deb
 ar x libpython3.11_3.11.6-3_amd64.deb
