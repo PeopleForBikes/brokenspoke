@@ -3,7 +3,7 @@ use aws_sdk_ecs::types::{
     AssignPublicIp, AwsVpcConfiguration, ContainerOverride, KeyValuePair, NetworkConfiguration,
     TaskOverride,
 };
-use bnacore::aws::{get_aws_parameter, get_aws_secrets};
+use bnacore::aws::{get_aws_parameter, get_aws_secrets_value};
 use bnalambdas::AnalysisParameters;
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use serde::{Deserialize, Serialize};
@@ -44,7 +44,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
     let ecs_client = aws_sdk_ecs::Client::new(&aws_config);
 
     // Retrieve secrets and parameters.
-    let main_db_url = get_aws_secrets("DATABASE_URL").await?;
+    let main_db_url = get_aws_secrets_value("DATABASE_URL", "DATABASE_URL").await?;
     let ecs_cluster_arn = get_aws_parameter("BNA_CLUSTER_ARN").await?;
     let vpc_subnets = get_aws_parameter("PRIVATE_SUBNETS").await?;
     let vpc_security_groups = get_aws_parameter("BNA_TASK_SECURITY_GROUP").await?;
