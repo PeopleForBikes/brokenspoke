@@ -4,6 +4,7 @@ use time::OffsetDateTime;
 
 /// Represent the contents of the encrypted fields SecretString or SecretBinary
 /// from the specified version of a secret, whichever contains content.
+/// https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
 #[derive(Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct SecretValue {
@@ -32,18 +33,21 @@ pub struct SecretValue {
     /// A list of all of the staging labels currently attached to this version
     /// of the secret.
     pub version_stages: Vec<String>,
-    /// Metadata.
-    pub result_metadata: HashMap<String, String>,
 }
 
 impl SecretValue {
-    pub fn parse_string(&self) -> serde_json::Result<HashMap<String, String>> {
+    // Read the secret string as a collection of key/value pairs.
+    pub fn parse_secret_string(&self) -> serde_json::Result<HashMap<String, String>> {
         serde_json::from_str::<HashMap<String, String>>(&self.secret_string)
     }
 
-    pub fn extract_secret(&self, secret_name: &str) -> serde_json::Result<String> {
-        let secrets = self.parse_string()?;
-        Ok(secrets.get(secret_name).unwrap().clone())
+    // Extract the value of a specific secret from the secret string.
+    pub fn extract_secret_value(&self, key: &str) -> serde_json::Result<Option<String>> {
+        let secrets = self.parse_secret_string()?;
+        match secrets.get(key) {
+            Some(s) => Ok(Some(s.clone())),
+            None => Ok(None),
+        }
     }
 }
 
@@ -117,7 +121,13 @@ pub async fn get_aws_secrets(secret_id: &str) -> Result<String, String> {
         .json::<SecretValue>()
         .await
         .map_err(|e| e.to_string())?;
-    secret.extract_secret(secret_id).map_err(|e| e.to_string())
+    let value = secret
+        .extract_secret_value(secret_id)
+        .map_err(|e| e.to_string())?;
+    match value {
+        Some(v) => Ok(v),
+        None => Err("no value found for secret {secret_id}".to_string()),
+    }
 }
 
 /// Ref: https://docs.aws.amazon.com/systems-manager/latest/userguide/ps-integration-lambda-extensions.html
@@ -161,5 +171,27 @@ mod tests {
           }
         "#;
         let _deserialized = serde_json::from_str::<SSMParameter>(&raw_json).unwrap();
+    }
+
+    #[test]
+    fn test_deserialize_secret() {
+        let raw_json = r#"
+          {
+            "ARN": "arn:aws:secretsmanager:us-west-2:123456789012:secret:staging/DATABASE_URL-W9OPPc",
+            "Name": "staging/DATABASE_URL",
+            "VersionId": "2da56f31-38b6-4ea3-92b0-b15d1189f4d2",
+            "SecretString": "{\"DATABASE_URL\":\"postgresql://user:password@host:5432/database?sslmode=require\"}",
+            "VersionStages": [
+                "AWSCURRENT"
+            ],
+            "CreatedDate": "2023-12-28T16:37:14.751000-06:00"
+        }
+      "#;
+        let secret = serde_json::from_str::<SecretValue>(&raw_json).unwrap();
+        let value = secret.extract_secret_value("DATABASE_URL").unwrap();
+        assert_eq!(
+            value,
+            Some("postgresql://user:password@host:5432/database?sslmode=require".to_string())
+        )
     }
 }
