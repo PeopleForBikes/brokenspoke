@@ -1,5 +1,5 @@
 use bnacore::{
-    aws::{get_aws_parameter, get_aws_secrets},
+    aws::{get_aws_parameter, get_aws_secrets_value},
     neon::{
         model::{
             NeonBranch, NeonCreateBranchRequest, NeonCreateBranchResponse, NeonEndpoint,
@@ -38,7 +38,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
     let analysis_parameters = &event.payload.analysis_parameters;
 
     // Create the Neon HTTP client.
-    let neon_api_key = get_aws_secrets("NEON_API_KEY").await?;
+    let neon_api_key = get_aws_secrets_value("NEON_API_KEY", "NEON_API_KEY").await?;
     let mut headers = header::HeaderMap::new();
     let mut auth_value = HeaderValue::from_str(format!("Bearer {}", neon_api_key).as_ref())?;
     auth_value.set_sensitive(true);
