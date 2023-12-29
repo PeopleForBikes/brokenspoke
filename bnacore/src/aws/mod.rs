@@ -107,10 +107,10 @@ pub struct SSMParameter {
 /// Retrieves a secret from the AWS Secrets Manager using the Lambda caching layer.
 ///
 /// Ref: <https://docs.aws.amazon.com/secretsmanager/latest/userguide/retrieving-secrets_lambda.html>
-pub async fn get_aws_secrets(secret_id: &str) -> Result<String, String> {
+pub async fn get_aws_secrets(secret_id: &str) -> Result<SecretValue, String> {
     let aws_session_token =
         env::var("AWS_SESSION_TOKEN").map_err(|e| format!("Cannot find AWS session token: {e}"))?;
-    let secret = reqwest::Client::new()
+    reqwest::Client::new()
         .get(format!(
             "http://localhost:2773/secretsmanager/get?secretId={secret_id}"
         ))
@@ -120,13 +120,18 @@ pub async fn get_aws_secrets(secret_id: &str) -> Result<String, String> {
         .map_err(|e| e.to_string())?
         .json::<SecretValue>()
         .await
-        .map_err(|e| e.to_string())?;
+        .map_err(|e| e.to_string())
+}
+
+// Retrieve a specific value out off a secret from AWS Secrets Manager.
+pub async fn get_aws_secrets_value(secret_id: &str, key: &str) -> Result<String, String> {
+    let secret = get_aws_secrets(secret_id).await?;
     let value = secret
-        .extract_secret_value(secret_id)
+        .extract_secret_value(key)
         .map_err(|e| e.to_string())?;
     match value {
         Some(v) => Ok(v),
-        None => Err("no value found for secret {secret_id}".to_string()),
+        None => Err("no value matching the key `{key}` in secret `{secret_id}`".to_string()),
     }
 }
 
