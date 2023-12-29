@@ -1,3 +1,4 @@
+aarch
 altamonte
 appender
 Appender
@@ -17,6 +18,7 @@ Inkscape
 justfile
 kubectl
 Kubernetes
+libpython
 Mbps
 micromobility
 minikube
@@ -29,9 +31,12 @@ psql
 Quickstart
 rasc
 rotected
+rustlib
+rustup
 Seaorm
 shortcode
 Shortcodes
 Shortscorecard
 SVGgloo
+SYSV
 Vercel
