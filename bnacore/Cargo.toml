@@ -36,6 +36,7 @@ zip = "0.6.4"
 
 [dev-dependencies]
 color-eyre = "0.6"
+rstest = "0.18.2"
 tracing = { version = "0.1", features = ["log"] }
 tracing-subscriber = { version = "0.3", default-features = false, features = [
   "fmt",

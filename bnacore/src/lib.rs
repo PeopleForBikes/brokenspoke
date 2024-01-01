@@ -6,6 +6,7 @@ pub mod combine;
 pub mod neon;
 pub mod scorecard;
 pub mod template;
+pub mod versioning;
 
 use pyo3::{exceptions::PyOSError, prelude::*};
 use std::{fmt, io};
