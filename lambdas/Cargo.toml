@@ -14,24 +14,19 @@ fontdb = "0.16.0"
 image = "0.24.7"
 lambda_http = "0.9.0"
 lambda_runtime = "0.9.1"
-minijinja = "1.0.9"
-reqwest = { version = "0.11.22", features = [
-  "json",
-  "native-tls-vendored",
-  "rustls",
-] }
-serde = { version = "1.0.188", features = ["derive"] }
-serde_json = "1.0.107"
-serde_with = "3.4.0"
+minijinja = { workspace = true }
+reqwest = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde_with = { workspace = true }
 simple-error = "0.3.0"
 svg2pdf = { "version" = "0.9.0" }
 time = { version = "0.3.29", features = ["serde-well-known"] }
-tokio = { version = "1", features = ["macros"] }
-tracing = { version = "0.1", features = ["log"] }
-tracing-subscriber = { version = "0.3", default-features = false, features = [
-  "fmt",
-] }
-url = { version = "2.4.1", features = ["serde"] }
+tokio = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+url = { workspace = true }
+uuid = { workspace = true }
 usvg = "0.36.0"
 
 [[bin]]

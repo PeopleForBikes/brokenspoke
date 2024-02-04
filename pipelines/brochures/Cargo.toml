@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 bnacore = { path = "../../bnacore" }
-color-eyre = "0.6.2"
-tracing = "0.1.36"
-tracing-subscriber = "0.3.15"
-walkdir = "2.3.2"
+color-eyre = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+walkdir = { workspace = true }
