@@ -26,8 +26,8 @@ path = "src/svggloo.rs"
 [dependencies]
 bnacore = { path = "../bnacore" }
 clap = { version = "4.0.10", features = ["cargo", "derive"] }
-color-eyre = "0.6.2"
-tokio = { version = "1.21.2", features = ["macros", "rt-multi-thread"] }
+color-eyre = { workspace = true }
+tokio = { workspace = true }
 trauma = "2.1.0"
-url = "2.0"
-uuid = { version = "1.2.1", features = ["v4"] }
+url = { workspace = true }
+uuid = { workspace = true }
