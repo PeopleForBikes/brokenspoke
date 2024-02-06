@@ -4,6 +4,7 @@ use bnalambdas::{AnalysisParameters, BrokenspokePipeline, BrokenspokeState};
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
+use tracing::info;
 
 /// Response object returned by this function.
 #[derive(Serialize)]
@@ -28,6 +29,7 @@ async fn function_handler(
     let client_secret = get_aws_secrets_value(SERVICE_ACCOUNT_CREDENTIALS, "client_secret").await?;
 
     // Authenticate.
+    info!("Authenticate");
     let client = Client::new();
     let auth_response = client
         .post("https://peopleforbikes.auth.us-west-2.amazoncognito.com/oauth2/token")
@@ -41,6 +43,7 @@ async fn function_handler(
         .json::<AuthResponse>()?;
 
     // Parse the SQS message.
+    info!("Parse the SQS message");
     let analysis_parameters = &event.payload.messages[0].body;
     let receipt_handle = &event.payload.messages[0].receipt_handle;
 
@@ -77,5 +80,8 @@ async fn main() -> Result<(), Error> {
         .without_time()
         .init();
 
-    run(service_fn(function_handler)).await
+    run(service_fn(function_handler)).await.map_err(|e| {
+        info!("{e}");
+        e
+    })
 }
