@@ -57,7 +57,7 @@ async fn function_handler(
         s3_bucket: None,
     };
     let _post = client
-        .post("https://api.peopleforbikes.xyz/bna/analysis")
+        .post("https://api.peopleforbikes.xyz/bnas/analysis")
         .bearer_auth(auth_response.access_token)
         .json(&pipeline)
         .send()?
