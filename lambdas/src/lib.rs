@@ -1,4 +1,7 @@
+use bnacore::aws::get_aws_secrets_value;
+use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
@@ -58,9 +61,172 @@ pub enum BrokenspokeState {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct BrokenspokePipeline {
     pub state: Option<BrokenspokeState>,
-    pub state_machine_id: Option<String>,
+    pub state_machine_id: Uuid,
+    pub scheduled_trigger_id: Option<Uuid>,
     pub sqs_message: Option<String>,
     pub neon_branch_id: Option<String>,
     pub fargate_task_id: Option<Uuid>,
     pub s3_bucket: Option<String>,
+}
+
+/// Define Cognito autnetication response.
+#[derive(Debug, Deserialize)]
+pub struct AuthResponse {
+    pub access_token: String,
+    pub expires_in: u32,
+    pub token_type: String,
+}
+
+/// Define Cognito app client credentials.
+pub struct AppClientCredentials {
+    pub client_id: String,
+    pub client_secret: String,
+}
+
+/// Retrieve service account credentials.
+pub async fn get_service_account_credentials() -> Result<AppClientCredentials, String> {
+    const SERVICE_ACCOUNT_CREDENTIALS: &str = "BROKENSPOKE_ANALYZER_SERVICE_ACCOUNT_CREDENTIALS";
+    let client_id = get_aws_secrets_value(SERVICE_ACCOUNT_CREDENTIALS, "client_id").await?;
+    let client_secret = get_aws_secrets_value(SERVICE_ACCOUNT_CREDENTIALS, "client_secret").await?;
+    Ok(AppClientCredentials {
+        client_id,
+        client_secret,
+    })
+}
+
+pub fn authenticate(credentials: &AppClientCredentials) -> Result<AuthResponse, reqwest::Error> {
+    Client::new()
+        .post("https://peopleforbikes.auth.us-west-2.amazoncognito.com/oauth2/token")
+        .form(&[
+            ("grant_type", "client_credentials"),
+            ("scope", "service_account/write"),
+        ])
+        .basic_auth(
+            credentials.client_id.clone(),
+            Some(credentials.client_secret.clone()),
+        )
+        .send()?
+        .error_for_status()?
+        .json::<AuthResponse>()
+}
+
+pub async fn authenticate_service_account() -> Result<AuthResponse, reqwest::Error> {
+    let credentials = get_service_account_credentials().await.unwrap();
+    authenticate(&credentials)
+}
+
+/// Define a state machine context object.
+///
+/// https://docs.aws.amazon.com/step-functions/latest/dg/input-output-contextobject.html
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct Context {
+    pub execution: Execution,
+    pub state: State,
+    pub state_machine: StateMachine,
+}
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct Execution {
+    pub id: String,
+    pub name: String,
+    pub role_arn: String,
+    #[serde(with = "time::serde::iso8601")]
+    pub start_time: OffsetDateTime,
+}
+
+impl Execution {
+    /// Parse the execution name into the state machine ID and the scheduled trigger id if available.
+    ///
+    /// ```
+    /// use bnalambdas::Execution;
+    /// use uuid::Uuid;
+    ///
+    /// let execution = Execution {
+    ///   id: "id".to_string(),
+    ///   name: "e6aade5a-b343-120b-dbaa-bd916cd99221_04ca18b9-6e0c-1aa5-2c3f-d4b445f840bc".to_string(),
+    ///   role_arn: "role".to_string(),
+    ///   start_time: time::OffsetDateTime::now_utc(),
+    /// };
+    /// let (state_machine_id, schedule_trigger_id) = execution.ids().unwrap();
+    /// assert_eq!(
+    ///     state_machine_id,
+    ///     Uuid::parse_str("e6aade5a-b343-120b-dbaa-bd916cd99221").unwrap()
+    /// );
+    /// assert_eq!(
+    ///     schedule_trigger_id,
+    ///     Some(Uuid::parse_str("04ca18b9-6e0c-1aa5-2c3f-d4b445f840bc").unwrap())
+    /// );
+    /// ```
+    pub fn ids(&self) -> Result<(Uuid, Option<Uuid>), uuid::Error> {
+        let mut parts = self.name.split('_');
+        let state_machine_id = parts.next().unwrap().parse::<Uuid>()?;
+        let scheduled_trigger_id = parts.next().map(|s| s.parse::<Uuid>()).transpose()?;
+
+        Ok((state_machine_id, scheduled_trigger_id))
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct State {
+    #[serde(with = "time::serde::iso8601")]
+    pub entered_time: OffsetDateTime,
+    pub name: String,
+}
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "PascalCase")]
+pub struct StateMachine {
+    pub id: String,
+    pub name: String,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Uses the example provided in the official Step Function documentation:
+    // https://docs.aws.amazon.com/step-functions/latest/dg/input-output-contextobject.html#contextobject-format
+    #[test]
+    fn test_serde_context() {
+        let raw_json = r#"{
+          "Execution": {
+              "Id": "arn:aws:states:us-east-1:123456789012:execution:stateMachineName:executionName",
+              "Input": {
+                 "key": "value"
+              },
+              "Name": "executionName",
+              "RoleArn": "arn:aws:iam::123456789012:role...",
+              "StartTime": "2019-03-26T20:14:13.192Z"
+          },
+          "State": {
+              "EnteredTime": "2019-03-26T20:14:13.192Z",
+              "Name": "Test",
+              "RetryCount": 3
+          },
+          "StateMachine": {
+              "Id": "arn:aws:states:us-east-1:123456789012:stateMachine:stateMachineName",
+              "Name": "stateMachineName"
+          },
+          "Task": {
+              "Token": "h7XRiCdLtd/83p1E0dMccoxlzFhglsdkzpK9mBVKZsp7d9yrT1W"
+          }
+      }"#;
+        let deserialized = serde_json::from_str::<Context>(&raw_json).unwrap();
+        assert_eq!(deserialized.execution.name, "executionName")
+    }
+
+    #[test]
+    fn test_ids_partial() {
+        let name = "e6aade5a-b343-120b-dbaa-bd916cd99221".to_string();
+        let deserialized = Execution {
+            id: "id".to_string(),
+            name: name.clone(),
+            role_arn: "role".to_string(),
+            start_time: time::OffsetDateTime::now_utc(),
+        };
+        let (state_machine_id, schedule_trigger_id) = deserialized.ids().unwrap();
+        assert_eq!(state_machine_id, Uuid::parse_str(&name).unwrap());
+        assert_eq!(schedule_trigger_id, None);
+    }
 }
