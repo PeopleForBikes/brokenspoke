@@ -58,7 +58,7 @@ pub enum BrokenspokeState {
     SqsMessage,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct BrokenspokePipeline {
     pub state: Option<BrokenspokeState>,
     pub state_machine_id: Uuid,
@@ -179,6 +179,19 @@ pub struct State {
 pub struct StateMachine {
     pub id: String,
     pub name: String,
+}
+
+pub fn update_pipeline(
+    url: &str,
+    auth: &AuthResponse,
+    pipeline: &BrokenspokePipeline,
+) -> Result<reqwest::blocking::Response, reqwest::Error> {
+    Client::new()
+        .patch(url)
+        .bearer_auth(auth.access_token.clone())
+        .json(&pipeline)
+        .send()?
+        .error_for_status()
 }
 
 #[cfg(test)]
