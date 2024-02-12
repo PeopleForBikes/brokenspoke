@@ -1,6 +1,7 @@
 use aws_config::BehaviorVersion;
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use serde::{Deserialize, Serialize};
+use tracing::info;
 
 #[derive(Deserialize, Serialize)]
 struct TaskInput {
@@ -62,7 +63,10 @@ async fn main() -> Result<(), Error> {
         .without_time()
         .init();
 
-    run(service_fn(function_handler)).await
+    run(service_fn(function_handler)).await.map_err(|e| {
+        info!("{e}");
+        e
+    })
 }
 
 #[cfg(test)]
