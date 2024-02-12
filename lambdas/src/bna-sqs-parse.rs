@@ -10,6 +10,7 @@ use tracing::info;
 
 #[derive(Serialize, Deserialize)]
 struct TaskInput {
+    #[serde(rename = "PascalCase")]
     messages: Vec<SqsApiMessageObj<AnalysisParameters>>,
     context: Context,
 }
