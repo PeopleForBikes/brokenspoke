@@ -23,8 +23,11 @@ struct TaskOutput {
 }
 
 async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, Error> {
+    // Retrieve API URL.
+    let url = "https://api.peopleforbikes.xyz/bnas/analysis";
+
     // Authenticate the service account.
-    let auth_response = authenticate_service_account()
+    let auth = authenticate_service_account()
         .await
         .map_err(|e| format!("cannot authenticate service account: {e}"))?;
 
@@ -33,25 +36,24 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
     let analysis_parameters = &event.payload.messages[0].body;
     let receipt_handle = &event.payload.messages[0].receipt_handle;
     let state_machine_context = &event.payload.context;
+    let (state_machine_id, scheduled_trigger_id) = state_machine_context.execution.ids()?;
 
     // Create a new pipeline entry.
     info!(
         state_machine_id = state_machine_context.execution.name,
         "create a new Brokensspoke pipeline entry",
     );
-    let (state_machine_id, scheduled_trigger_id) = state_machine_context.execution.ids()?;
+
     let pipeline = BrokenspokePipeline {
         state_machine_id,
         scheduled_trigger_id,
         state: Some(BrokenspokeState::SqsMessage),
         sqs_message: Some(serde_json::to_string(analysis_parameters)?),
-        neon_branch_id: None,
-        fargate_task_id: None,
-        s3_bucket: None,
+        ..Default::default()
     };
     let _post = Client::new()
-        .post("https://api.peopleforbikes.xyz/bnas/analysis")
-        .bearer_auth(auth_response.access_token)
+        .post(url)
+        .bearer_auth(auth.access_token)
         .json(&pipeline)
         .send()?
         .error_for_status()?;
@@ -78,4 +80,35 @@ async fn main() -> Result<(), Error> {
         info!("{e}");
         e
     })
+}
+
+#[test]
+fn test_input_deserialization() {
+    let raw_json = r#"{
+    "Messages": [
+      {
+        "Body": "{\n  \"city\": \"santa rosa\",\n  \"country\": \"usa\",\n  \"fips_code\": \"3570670\",\n  \"region\": \"new mexico\"\n}",
+        "Md5OfBody": "a7d2c2a0976976a725f06db3a9b90520",
+        "MessageId": "b53c03f0-6993-4b4e-8815-a84e323a0e4c",
+        "ReceiptHandle": "AQEBig5tn0SKv0mFFajmwh/50mLs1g2hFXGEcblkGGpa3pqmiposxJEsdgInINH3tHwWDQ6C1Xoly7abjNr3G6m88QYZYPYcFf3HnBM2s+zYXsAITrBAA92Z8CGXPvglx04NxgiYLFIegyqKRUmWNE2uwI/ubbpcAMdrCcjXRQ+LjGLHRYR567uW75TZHsAds8GPKJ937pJ9RiSU9hHSrLAjABZD/AWXgGeJ19619w9TOSRFFzKiZRxcWqhDEtasl4YN6mX3+/lY4Gx5/ATPzXmjlIKa33viTURtlMuAEKjJ4gmSFgdIaovSkrl7V+ZbJw85anWCzcQ8rQSqJB2p4aZgX57MBTrIKrgUKDaP7CvASuM27jj8Pou8Ka9bspOhfOHlwPSmxn3AfeYl3ruT1prGoA=="
+      }
+    ],
+    "context": {
+      "Execution": {
+        "StartTime": "2024-02-12T16:45:38.655Z",
+        "Id": "arn:aws:states:us-west-2:123456789012:execution:brokenspoke-analyzer:a0e708f8-3d9f-4749-b4de-20b2c2aab3d2",
+        "RoleArn": "arn:aws:iam::123456789012:role/role",
+        "Name": "a0e708f8-3d9f-4749-b4de-20b2c2aab3d2"
+      },
+      "State": {
+        "EnteredTime": "2024-02-12T16:45:38.881Z",
+        "Name": "BNAContext"
+      },
+      "StateMachine": {
+        "Id": "arn:aws:states:us-west-2:123456789012:stateMachine:brokenspoke-analyzer",
+        "Name": "brokenspoke-analyzer"
+      }
+    }
+  }"#;
+    let _deserialized = serde_json::from_str::<TaskInput>(&raw_json).unwrap();
 }

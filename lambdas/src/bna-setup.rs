@@ -8,7 +8,10 @@ use bnacore::{
         NEON_PROJECTS_URL,
     },
 };
-use bnalambdas::AnalysisParameters;
+use bnalambdas::{
+    authenticate_service_account, update_pipeline, AnalysisParameters, BrokenspokePipeline,
+    BrokenspokeState, Context,
+};
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use reqwest::header::{self, HeaderValue};
 use serde::{Deserialize, Serialize};
@@ -20,11 +23,13 @@ const NEON_MAX_BRANCHES: usize = 20;
 #[derive(Deserialize)]
 struct TaskInput {
     analysis_parameters: AnalysisParameters,
+    context: Context,
 }
 
 #[derive(Serialize)]
 struct TaskOutput {
     neon: Neon,
+    context: Context,
 }
 
 #[derive(Serialize)]
@@ -34,8 +39,26 @@ struct Neon {
 }
 
 async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, Error> {
+    // Retrieve API URL.
+    let url = "https://api.peopleforbikes.xyz/bnas/analysis";
+
+    // Authenticate the service account.
+    let auth = authenticate_service_account()
+        .await
+        .map_err(|e| format!("cannot authenticate service account: {e}"))?;
+
     // Read the task inputs.
     let analysis_parameters = &event.payload.analysis_parameters;
+    let state_machine_context = &event.payload.context;
+    let (state_machine_id, _) = state_machine_context.execution.ids()?;
+
+    // Update the pipeline status.
+    let pipeline = BrokenspokePipeline {
+        state_machine_id,
+        state: Some(BrokenspokeState::Setup),
+        ..Default::default()
+    };
+    update_pipeline(url, &auth, &pipeline)?;
 
     // Create the Neon HTTP client.
     let neon_api_key = get_aws_secrets_value("NEON_API_KEY", "NEON_API_KEY").await?;
@@ -123,12 +146,21 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
         .clone()
         .unwrap();
 
+    // Update the pipeline status.
+    let pipeline = BrokenspokePipeline {
+        state_machine_id,
+        neon_branch_id: Some(neon_branch_id.clone()),
+        ..Default::default()
+    };
+    update_pipeline(url, &auth, &pipeline)?;
+
     // Return the ID of the created database branch.
     Ok(TaskOutput {
         neon: Neon {
             branch_id: neon_branch_id,
             host: neon_host,
         },
+        context: state_machine_context.clone(),
     })
 }
 
