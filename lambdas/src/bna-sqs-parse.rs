@@ -10,7 +10,7 @@ use tracing::info;
 
 #[derive(Serialize, Deserialize)]
 struct TaskInput {
-    analysis_parameters: AnalysisParameters,
+    event_obj: SqsApiEventObj<AnalysisParameters>,
     context: Context,
 }
 /// Response object returned by this function.
@@ -21,9 +21,7 @@ struct TaskOutput {
     context: Context,
 }
 
-async fn function_handler(
-    event: LambdaEvent<SqsApiEventObj<TaskInput>>,
-) -> Result<TaskOutput, Error> {
+async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, Error> {
     // Authenticate the service account.
     let auth_response = authenticate_service_account()
         .await
@@ -31,10 +29,9 @@ async fn function_handler(
 
     // Parse the SQS message.
     info!("Parse the SQS message");
-    let task_input = &event.payload.messages[0].body;
-    let receipt_handle = &event.payload.messages[0].receipt_handle;
-    let analysis_parameters = &task_input.analysis_parameters;
-    let state_machine_context = &task_input.context;
+    let analysis_parameters = &event.payload.event_obj.messages[0].body;
+    let receipt_handle = &event.payload.event_obj.messages[0].receipt_handle;
+    let state_machine_context = &event.payload.context;
 
     // Create a new pipeline entry.
     info!(
