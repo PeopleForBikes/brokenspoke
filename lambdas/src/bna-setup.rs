@@ -43,16 +43,19 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
     let url = "https://api.peopleforbikes.xyz/bnas/analysis";
 
     // Authenticate the service account.
+    info!("Authenticating service account...");
     let auth = authenticate_service_account()
         .await
         .map_err(|e| format!("cannot authenticate service account: {e}"))?;
 
     // Read the task inputs.
+    info!("Reading input...");
     let analysis_parameters = &event.payload.analysis_parameters;
     let state_machine_context = &event.payload.context;
     let (state_machine_id, _) = state_machine_context.execution.ids()?;
 
     // Update the pipeline status.
+    info!("updating pipeline...");
     let pipeline = BrokenspokePipeline {
         state_machine_id,
         state: Some(BrokenspokeState::Setup),
@@ -61,6 +64,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
     update_pipeline(url, &auth, &pipeline)?;
 
     // Create the Neon HTTP client.
+    info!("Creating Neon client...");
     let neon_api_key = get_aws_secrets_value("NEON_API_KEY", "NEON_API_KEY").await?;
     let mut headers = header::HeaderMap::new();
     let mut auth_value = HeaderValue::from_str(format!("Bearer {}", neon_api_key).as_ref())?;
@@ -174,5 +178,8 @@ async fn main() -> Result<(), Error> {
         .without_time()
         .init();
 
-    run(service_fn(function_handler)).await
+    run(service_fn(function_handler)).await.map_err(|e| {
+        info!("{e}");
+        e
+    })
 }
