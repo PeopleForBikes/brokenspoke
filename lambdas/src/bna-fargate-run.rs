@@ -4,7 +4,10 @@ use aws_sdk_ecs::types::{
     TaskOverride,
 };
 use bnacore::aws::{get_aws_parameter, get_aws_secrets_value};
-use bnalambdas::AnalysisParameters;
+use bnalambdas::{
+    authenticate_service_account, update_pipeline, AnalysisParameters, BrokenspokePipeline,
+    BrokenspokeState, Context,
+};
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use serde::{Deserialize, Serialize};
 use url::Url;
@@ -13,6 +16,7 @@ use url::Url;
 struct TaskInput {
     analysis_parameters: AnalysisParameters,
     setup: Setup,
+    context: Context,
 }
 
 #[derive(Deserialize)]
@@ -30,14 +34,33 @@ struct TaskOutput {
     ecs_cluster_arn: String,
     task_arn: String,
     last_status: String,
+    context: Context,
 }
 
 const FARGATE_MAX_TASK: i32 = 1;
 
 async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, Error> {
+    // Retrieve API URL.
+    let url = "https://api.peopleforbikes.xyz/bnas/analysis";
+
+    // Authenticate the service account.
+    let auth = authenticate_service_account()
+        .await
+        .map_err(|e| format!("cannot authenticate service account: {e}"))?;
+
     // Read the task inputs.
     let analysis_parameters = &event.payload.analysis_parameters;
     let neon_host = &event.payload.setup.neon.host;
+    let state_machine_context = &event.payload.context;
+    let (state_machine_id, _) = state_machine_context.execution.ids()?;
+
+    // Update the pipeline status.
+    let pipeline = BrokenspokePipeline {
+        state_machine_id,
+        state: Some(BrokenspokeState::Pipeline),
+        ..Default::default()
+    };
+    update_pipeline(url, &auth, &pipeline)?;
 
     // Prepare the AWS client.
     let aws_config = aws_config::load_defaults(BehaviorVersion::latest()).await;
@@ -111,7 +134,16 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
         ecs_cluster_arn: task.cluster_arn().unwrap().into(),
         task_arn: task.task_arn().unwrap().into(),
         last_status: task.last_status().unwrap().into(),
+        context: state_machine_context.clone(),
     };
+
+    // Update the pipeline status.
+    let pipeline = BrokenspokePipeline {
+        state_machine_id,
+        // fargate_task_id: Some(task.),
+        ..Default::default()
+    };
+    update_pipeline(url, &auth, &pipeline)?;
 
     Ok(output)
 }

@@ -2,6 +2,9 @@ use bnacore::{
     aws::{get_aws_parameter, get_aws_secrets_value},
     neon::NEON_PROJECTS_URL,
 };
+use bnalambdas::{
+    authenticate_service_account, update_pipeline, BrokenspokePipeline, BrokenspokeState, Context,
+};
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use reqwest::header::{self, HeaderValue};
 use serde::{Deserialize, Serialize};
@@ -10,6 +13,7 @@ use tracing::info;
 #[derive(Debug, Serialize, Deserialize)]
 struct TaskInput {
     setup: Setup,
+    context: Context,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -23,8 +27,26 @@ struct Neon {
 }
 
 async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
+    // Retrieve API URL.
+    let url = "https://api.peopleforbikes.xyz/bnas/analysis";
+
+    // Authenticate the service account.
+    let auth = authenticate_service_account()
+        .await
+        .map_err(|e| format!("cannot authenticate service account: {e}"))?;
+
     // Read the task inputs.
     let neon_branch_id = &event.payload.setup.neon.branch_id;
+    let state_machine_context = &event.payload.context;
+    let (state_machine_id, _) = state_machine_context.execution.ids()?;
+
+    // Update the pipeline status.
+    let pipeline = BrokenspokePipeline {
+        state_machine_id,
+        state: Some(BrokenspokeState::Export),
+        ..Default::default()
+    };
+    update_pipeline(url, &auth, &pipeline)?;
 
     // Create the Neon HTTP client.
     let neon_api_key = get_aws_secrets_value("NEON_API_KEY", "NEON_API_KEY").await?;
@@ -68,6 +90,7 @@ async fn main() -> Result<(), Error> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use bnalambdas::{Execution, State, StateMachine};
     use lambda_runtime::{Context, LambdaEvent};
 
     #[tokio::test]
@@ -81,6 +104,22 @@ mod tests {
             setup: Setup {
                 neon: Neon {
                     branch_id: "br-bold-mode-48632613".to_string(),
+                },
+            },
+            context: bnalambdas::Context {
+                execution: Execution {
+                    id: "id".to_string(),
+                    name: "name".to_string(),
+                    role_arn: "arn".to_string(),
+                    start_time: time::OffsetDateTime::now_utc(),
+                },
+                state: State {
+                    entered_time: time::OffsetDateTime::now_utc(),
+                    name: "name".to_string(),
+                },
+                state_machine: StateMachine {
+                    id: "id".to_string(),
+                    name: "name".to_string(),
                 },
             },
         };
@@ -106,6 +145,22 @@ mod tests {
               "neon": {
                 "branch_id": "br-bold-mode-48632613",
                 "host": "ep-sweet-recipe-68291618.us-west-2.aws.neon.tech"
+              }
+            },
+            "context": {
+              "Execution": {
+                "StartTime": "2024-02-12T16:45:38.655Z",
+                "Id": "arn:aws:states:us-west-2:123456789012:execution:brokenspoke-analyzer:a0e708f8-3d9f-4749-b4de-20b2c2aab3d2",
+                "RoleArn": "arn:aws:iam::123456789012:role/role",
+                "Name": "a0e708f8-3d9f-4749-b4de-20b2c2aab3d2"
+              },
+              "State": {
+                "EnteredTime": "2024-02-12T16:45:38.881Z",
+                "Name": "BNAContext"
+              },
+              "StateMachine": {
+                "Id": "arn:aws:states:us-west-2:123456789012:stateMachine:brokenspoke-analyzer",
+                "Name": "brokenspoke-analyzer"
               }
             }
           }"#;
