@@ -1,4 +1,4 @@
-use aws_lambda_events::event::sqs::SqsApiEventObj;
+use aws_lambda_events::sqs::SqsApiMessageObj;
 use bnalambdas::{
     authenticate_service_account, AnalysisParameters, BrokenspokePipeline, BrokenspokeState,
     Context,
@@ -10,7 +10,7 @@ use tracing::info;
 
 #[derive(Serialize, Deserialize)]
 struct TaskInput {
-    event_obj: SqsApiEventObj<AnalysisParameters>,
+    messages: Vec<SqsApiMessageObj<AnalysisParameters>>,
     context: Context,
 }
 /// Response object returned by this function.
@@ -29,8 +29,8 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
 
     // Parse the SQS message.
     info!("Parse the SQS message");
-    let analysis_parameters = &event.payload.event_obj.messages[0].body;
-    let receipt_handle = &event.payload.event_obj.messages[0].receipt_handle;
+    let analysis_parameters = &event.payload.messages[0].body;
+    let receipt_handle = &event.payload.messages[0].receipt_handle;
     let state_machine_context = &event.payload.context;
 
     // Create a new pipeline entry.
