@@ -56,12 +56,13 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
 
     // Update the pipeline status.
     info!("updating pipeline...");
+    let patch_url = format!("{url}/{state_machine_id}");
     let pipeline = BrokenspokePipeline {
         state_machine_id,
         state: Some(BrokenspokeState::Setup),
         ..Default::default()
     };
-    update_pipeline(url, &auth, &pipeline)?;
+    update_pipeline(&patch_url, &auth, &pipeline)?;
 
     // Create the Neon HTTP client.
     info!("Creating Neon client...");
@@ -156,7 +157,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
         neon_branch_id: Some(neon_branch_id.clone()),
         ..Default::default()
     };
-    update_pipeline(url, &auth, &pipeline)?;
+    update_pipeline(&patch_url, &auth, &pipeline)?;
 
     // Return the ID of the created database branch.
     Ok(TaskOutput {

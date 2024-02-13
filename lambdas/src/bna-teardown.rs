@@ -41,12 +41,13 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     let (state_machine_id, _) = state_machine_context.execution.ids()?;
 
     // Update the pipeline status.
+    let patch_url = format!("{url}/{state_machine_id}");
     let pipeline = BrokenspokePipeline {
         state_machine_id,
         state: Some(BrokenspokeState::Export),
         ..Default::default()
     };
-    update_pipeline(url, &auth, &pipeline)?;
+    update_pipeline(&patch_url, &auth, &pipeline)?;
 
     // Create the Neon HTTP client.
     let neon_api_key = get_aws_secrets_value("NEON_API_KEY", "NEON_API_KEY").await?;

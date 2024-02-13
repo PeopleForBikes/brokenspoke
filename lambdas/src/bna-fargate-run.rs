@@ -56,12 +56,13 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
     let (state_machine_id, _) = state_machine_context.execution.ids()?;
 
     // Update the pipeline status.
+    let patch_url = format!("{url}/{state_machine_id}");
     let pipeline = BrokenspokePipeline {
         state_machine_id,
         state: Some(BrokenspokeState::Pipeline),
         ..Default::default()
     };
-    update_pipeline(url, &auth, &pipeline)?;
+    update_pipeline(&patch_url, &auth, &pipeline)?;
 
     // Prepare the AWS client.
     let aws_config = aws_config::load_defaults(BehaviorVersion::latest()).await;
@@ -144,7 +145,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
         // fargate_task_id: Some(task.),
         ..Default::default()
     };
-    update_pipeline(url, &auth, &pipeline)?;
+    update_pipeline(&patch_url, &auth, &pipeline)?;
 
     Ok(output)
 }
