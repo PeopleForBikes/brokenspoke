@@ -27,48 +27,56 @@ pub const MAX_PROMPT_LENGTH: usize = 8191;
 /// There is no length limit for the command prompt on Unix platforms.
 pub const MAX_PROMPT_LENGTH: usize = usize::MAX;
 
-/// Errors that can happen when using pfbcore.
+/// Errors that can happen when using bnacore.
 #[derive(Error, Debug)]
 pub enum Error {
     /// Error from an underlying system.
     #[error("Internal error: {0}")]
     Internal(String),
+
     /// Error from the URL crate.
     #[error("URL error")]
-    Url {
-        #[from]
-        source: url::ParseError,
-    },
+    Url(#[from] url::ParseError),
+
     /// Error from the CSV crate.
     #[error("CSV error")]
-    Csv {
-        #[from]
-        source: csv::Error,
-    },
+    Csv(#[from] csv::Error),
+
     /// Line too long.
     #[error("Invalid argument: {0}")]
     InvalidArgument(String),
+
     /// I/O Error.
     #[error("I/O error")]
-    IOError {
-        #[from]
-        source: io::Error,
-    },
-    /// MiniJinja Error.
+    IOError(#[from] io::Error),
+
+    /// Error from the MiniJinja crate .
     #[error("MiniJinja error")]
-    MiniJinja {
-        #[from]
-        source: minijinja::Error,
-    },
+    MiniJinja(#[from] minijinja::Error),
+
     /// Windows prompt too long.
     #[error("The length of the command prompt exceeds the maximum permitted by the platform (8191 characters).")]
     PromptTooLong,
-    /// Zip Error.
+
+    /// Error from the Zip crate.
     #[error("Zip error")]
-    ZipError {
-        #[from]
-        source: zip::result::ZipError,
-    },
+    ZipError(#[from] zip::result::ZipError),
+
+    /// Error from the Serde crate.
+    #[error("Serde JSON error")]
+    SerdeJSON(#[from] serde_json::Error),
+
+    /// Error From the Reqwest crate.
+    #[error("Reqwest error")]
+    Reqwest(#[from] reqwest::Error),
+
+    /// AWS error from the bnacore::aws module.
+    #[error("AWS error")]
+    BNAAWS(#[from] aws::AWSError),
+
+    /// Environment variable error.
+    #[error("Environment variable error")]
+    VarError(#[from] std::env::VarError),
 }
 
 impl std::convert::From<Error> for PyErr {

@@ -84,7 +84,7 @@ pub struct AppClientCredentials {
 }
 
 /// Retrieve service account credentials.
-pub async fn get_service_account_credentials() -> Result<AppClientCredentials, String> {
+pub async fn get_service_account_credentials() -> Result<AppClientCredentials, bnacore::Error> {
     const SERVICE_ACCOUNT_CREDENTIALS: &str = "BROKENSPOKE_ANALYZER_SERVICE_ACCOUNT_CREDENTIALS";
     let client_id = get_aws_secrets_value(SERVICE_ACCOUNT_CREDENTIALS, "client_id").await?;
     let client_secret = get_aws_secrets_value(SERVICE_ACCOUNT_CREDENTIALS, "client_secret").await?;
@@ -94,9 +94,16 @@ pub async fn get_service_account_credentials() -> Result<AppClientCredentials, S
     })
 }
 
-pub fn authenticate(credentials: &AppClientCredentials) -> Result<AuthResponse, reqwest::Error> {
+pub async fn authenticate(
+    credentials: &AppClientCredentials,
+) -> Result<AuthResponse, reqwest::Error> {
+    const COGNITO_HOSTNAME: &str = "BNA_COGNITO_HOSTNAME";
+    let cognito_hostname = get_aws_secrets_value(COGNITO_HOSTNAME, "client_id")
+        .await
+        .unwrap();
+    let token_endpoint = format!("{cognito_hostname}/oauth2/token");
     Client::new()
-        .post("https://peopleforbikes.auth.us-west-2.amazoncognito.com/oauth2/token")
+        .post(token_endpoint)
         .form(&[
             ("grant_type", "client_credentials"),
             ("scope", "service_account/write"),
@@ -112,7 +119,7 @@ pub fn authenticate(credentials: &AppClientCredentials) -> Result<AuthResponse, 
 
 pub async fn authenticate_service_account() -> Result<AuthResponse, reqwest::Error> {
     let credentials = get_service_account_credentials().await.unwrap();
-    authenticate(&credentials)
+    authenticate(&credentials).await
 }
 
 /// Define a state machine context object.

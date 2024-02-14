@@ -1,5 +1,5 @@
 use bnacore::{
-    aws::{get_aws_parameter, get_aws_secrets_value},
+    aws::{get_aws_parameter_value, get_aws_secrets_value},
     neon::NEON_PROJECTS_URL,
 };
 use bnalambdas::{
@@ -27,8 +27,11 @@ struct Neon {
 }
 
 async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
-    // Retrieve API URL.
-    let url = "https://api.peopleforbikes.xyz/bnas/analysis";
+    // Retrieve API hostname.
+    let api_hostname = get_aws_parameter_value("BNA_API_HOSTNAME").await?;
+
+    // Prepare the API URL.
+    let url = format!("{api_hostname}/bnas/analysis");
 
     // Authenticate the service account.
     let auth = authenticate_service_account()
@@ -58,7 +61,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     let neon = reqwest::Client::builder()
         .default_headers(headers)
         .build()?;
-    let neon_project_id = get_aws_parameter("NEON_BROKENSPOKE_ANALYZER_PROJECT").await?;
+    let neon_project_id = get_aws_parameter_value("NEON_BROKENSPOKE_ANALYZER_PROJECT").await?;
     let neon_branches_url = format!(
         "{}/{}/branches/{}",
         NEON_PROJECTS_URL, neon_project_id, &neon_branch_id

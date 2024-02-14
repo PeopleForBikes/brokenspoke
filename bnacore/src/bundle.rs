@@ -1,12 +1,10 @@
 use crate::Error;
 use libflate::gzip::{EncodeOptions, Encoder};
-use std::io::{self, ErrorKind};
 use std::{
     collections::HashMap,
     ffi::OsStr,
-    fs,
-    fs::File,
-    io::{Read, Write},
+    fs::{self, File},
+    io::{self, ErrorKind, Read, Write},
     path::{Path, PathBuf},
 };
 use walkdir::{DirEntry, WalkDir};
@@ -268,21 +266,17 @@ impl BNAFilename {
             Some(extension) => match extension.to_str() {
                 Some(extension) => extension.to_string(),
                 None => {
-                    return Err(Error::IOError {
-                        source: io::Error::new(
-                            ErrorKind::InvalidInput,
-                            format!("this extension is not valid UTF-8: {i}"),
-                        ),
-                    })
+                    return Err(Error::IOError(io::Error::new(
+                        ErrorKind::InvalidInput,
+                        format!("this extension is not valid UTF-8: {i}"),
+                    )))
                 }
             },
             None => {
-                return Err(Error::IOError {
-                    source: io::Error::new(
-                        ErrorKind::InvalidInput,
-                        format!("this file has no extension: {i}"),
-                    ),
-                })
+                return Err(Error::IOError(io::Error::new(
+                    ErrorKind::InvalidInput,
+                    format!("this file has no extension: {i}"),
+                )))
             }
         };
 
@@ -291,21 +285,17 @@ impl BNAFilename {
             Some(stem) => match stem.to_str() {
                 Some(stem) => stem.to_string(),
                 None => {
-                    return Err(Error::IOError {
-                        source: io::Error::new(
-                            ErrorKind::InvalidInput,
-                            format!("this filename is not valid UTF-8: {i}"),
-                        ),
-                    })
+                    return Err(Error::IOError(io::Error::new(
+                        ErrorKind::InvalidInput,
+                        format!("this filename is not valid UTF-8: {i}"),
+                    )))
                 }
             },
             None => {
-                return Err(Error::IOError {
-                    source: io::Error::new(
-                        ErrorKind::InvalidInput,
-                        format!("this file has no stem: {i}"),
-                    ),
-                })
+                return Err(Error::IOError(io::Error::new(
+                    ErrorKind::InvalidInput,
+                    format!("this file has no stem: {i}"),
+                )))
             }
         };
 
@@ -314,40 +304,32 @@ impl BNAFilename {
         let country = match split_stem.first() {
             Some(country) => country.to_string(),
             None => {
-                return Err(Error::IOError {
-                    source: io::Error::new(
-                        ErrorKind::InvalidInput,
-                        format!(
+                return Err(Error::IOError(io::Error::new(
+                    ErrorKind::InvalidInput,
+                    format!(
                         "the first part of the file name is expected to be the country name: {i}"
                     ),
-                    ),
-                })
+                )))
             }
         };
         let state = match split_stem.get(1) {
             Some(state) => state.to_string(),
             None => {
-                return Err(Error::IOError {
-                    source: io::Error::new(
-                        ErrorKind::InvalidInput,
-                        format!(
-                      "the second part of the file name is expected to be the state name: {i}"
-                  ),
+                return Err(Error::IOError(io::Error::new(
+                    ErrorKind::InvalidInput,
+                    format!(
+                        "the second part of the file name is expected to be the state name: {i}"
                     ),
-                })
+                )))
             }
         };
         let city = match split_stem.get(2) {
             Some(city) => city.to_string(),
             None => {
-                return Err(Error::IOError {
-                    source: io::Error::new(
-                        ErrorKind::InvalidInput,
-                        format!(
-                            "the third part of the file name is expected to be the city name: {i}"
-                        ),
-                    ),
-                })
+                return Err(Error::IOError(io::Error::new(
+                    ErrorKind::InvalidInput,
+                    format!("the third part of the file name is expected to be the city name: {i}"),
+                )))
             }
         };
         let description = split_stem.get(4).map(|&part| String::from(part));
