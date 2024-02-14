@@ -483,7 +483,7 @@ mod tests {
           ]
         }
       "#;
-        let deserialized = serde_json::from_str::<CreateBranchResponse>(&raw_json).unwrap();
+        let deserialized = serde_json::from_str::<CreateBranchResponse>(raw_json).unwrap();
         let _serialized = serde_json::to_string(&deserialized).unwrap();
     }
 
@@ -534,6 +534,6 @@ mod tests {
             }
           ]
         }"#;
-        let _deserialized = serde_json::from_str::<DeleteBranchResponse>(&raw_json).unwrap();
+        let _deserialized = serde_json::from_str::<DeleteBranchResponse>(raw_json).unwrap();
     }
 }

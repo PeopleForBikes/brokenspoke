@@ -62,7 +62,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
     let patch_url = format!("{url}/{state_machine_id}");
     let pipeline = BrokenspokePipeline {
         state_machine_id,
-        state: Some(BrokenspokeState::Pipeline),
+        state: Some(BrokenspokeState::Analysis),
         ..Default::default()
     };
     update_pipeline(&patch_url, &auth, &pipeline)?;
@@ -145,7 +145,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
     // Update the pipeline status.
     let pipeline = BrokenspokePipeline {
         state_machine_id,
-        // fargate_task_id: Some(task.),
+        fargate_task_arn: Some(task.task_arn().unwrap().into()),
         ..Default::default()
     };
     update_pipeline(&patch_url, &auth, &pipeline)?;
@@ -222,6 +222,6 @@ mod tests {
             }
           }
         }"#;
-        let _deserialized = serde_json::from_str::<TaskInput>(&json_input).unwrap();
+        let _deserialized = serde_json::from_str::<TaskInput>(json_input).unwrap();
     }
 }

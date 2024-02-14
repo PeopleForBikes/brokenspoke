@@ -51,22 +51,41 @@ impl AnalysisParameters {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum BrokenspokeState {
-    Analysis,
-    Export,
-    Pipeline,
-    Setup,
     SqsMessage,
+    Setup,
+    Analysis,
+    Cleanup,
 }
 
-#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct BrokenspokePipeline {
-    pub state: Option<BrokenspokeState>,
     pub state_machine_id: Uuid,
     pub scheduled_trigger_id: Option<Uuid>,
+    pub state: Option<BrokenspokeState>,
     pub sqs_message: Option<String>,
     pub neon_branch_id: Option<String>,
-    pub fargate_task_id: Option<Uuid>,
+    pub fargate_task_arn: Option<String>,
     pub s3_bucket: Option<String>,
+    pub start_time: OffsetDateTime,
+    pub end_time: Option<OffsetDateTime>,
+    pub torn_down: Option<bool>,
+}
+
+impl Default for BrokenspokePipeline {
+    fn default() -> Self {
+        Self {
+            state_machine_id: Default::default(),
+            scheduled_trigger_id: Default::default(),
+            state: Default::default(),
+            sqs_message: Default::default(),
+            neon_branch_id: Default::default(),
+            fargate_task_arn: Default::default(),
+            s3_bucket: Default::default(),
+            start_time: OffsetDateTime::now_utc(),
+            end_time: Default::default(),
+            torn_down: Default::default(),
+        }
+    }
 }
 
 /// Define Cognito autnetication response.
@@ -232,7 +251,7 @@ mod tests {
               "Token": "h7XRiCdLtd/83p1E0dMccoxlzFhglsdkzpK9mBVKZsp7d9yrT1W"
           }
       }"#;
-        let deserialized = serde_json::from_str::<Context>(&raw_json).unwrap();
+        let deserialized = serde_json::from_str::<Context>(raw_json).unwrap();
         assert_eq!(deserialized.execution.name, "executionName")
     }
 

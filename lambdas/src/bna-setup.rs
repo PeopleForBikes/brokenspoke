@@ -182,6 +182,6 @@ mod tests {
             }
           }
         }"#;
-        let _deserialized = serde_json::from_str::<TaskInput>(&json_input).unwrap();
+        let _deserialized = serde_json::from_str::<TaskInput>(json_input).unwrap();
     }
 }
