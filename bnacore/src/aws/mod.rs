@@ -1,6 +1,27 @@
+use reqwest::StatusCode;
 use serde::Deserialize;
 use std::{collections::HashMap, env};
+use thiserror::Error;
 use time::OffsetDateTime;
+
+/// AWS module errors
+#[derive(Error, Debug)]
+pub enum AWSError {
+    /// Secret not found.
+    #[error("secret `{0}` not found")]
+    SecretNotFound(String),
+
+    /// Secret was found but the secret key does not exist.
+    #[error("no value matching the key `{secret_key}` in secret `{secret_name}`")]
+    SecretKeyNotFound {
+        secret_name: String,
+        secret_key: String,
+    },
+
+    /// SSM parameter not found.
+    #[error("parameter `{0}` not found")]
+    ParameterNotFound(String),
+}
 
 /// Represent the contents of the encrypted fields SecretString or SecretBinary
 /// from the specified version of a secret, whichever contains content.
@@ -36,12 +57,12 @@ pub struct SecretValue {
 }
 
 impl SecretValue {
-    // Read the secret string as a collection of key/value pairs.
+    /// Read the secret string as a collection of key/value pairs.
     pub fn parse_secret_string(&self) -> serde_json::Result<HashMap<String, String>> {
         serde_json::from_str::<HashMap<String, String>>(&self.secret_string)
     }
 
-    // Extract the value of a specific secret from the secret string.
+    /// Extract the value of a specific secret from the secret string.
     pub fn extract_secret_value(&self, key: &str) -> serde_json::Result<Option<String>> {
         let secrets = self.parse_secret_string()?;
         match secrets.get(key) {
@@ -104,53 +125,72 @@ pub struct SSMParameter {
     pub result_metadata: ResultMetadata,
 }
 
-/// Retrieves a secret from the AWS Secrets Manager using the Lambda caching layer.
+/// Retrieve a secret from the AWS Secrets Manager using the Lambda caching layer.
 ///
 /// Ref: <https://docs.aws.amazon.com/secretsmanager/latest/userguide/retrieving-secrets_lambda.html>
-pub async fn get_aws_secrets(secret_id: &str) -> Result<SecretValue, String> {
-    let aws_session_token =
-        env::var("AWS_SESSION_TOKEN").map_err(|e| format!("Cannot find AWS session token: {e}"))?;
-    reqwest::Client::new()
+pub async fn get_aws_secrets(secret_id: &str) -> Result<SecretValue, crate::Error> {
+    let aws_session_token = env::var("AWS_SESSION_TOKEN")?;
+    let res = reqwest::Client::new()
         .get(format!(
             "http://localhost:2773/secretsmanager/get?secretId={secret_id}"
         ))
         .header("X-Aws-Parameters-Secrets-Token", aws_session_token)
         .send()
-        .await
-        .map_err(|e| e.to_string())?
-        .json::<SecretValue>()
-        .await
-        .map_err(|e| e.to_string())
-}
+        .await?
+        .error_for_status();
+    match res {
+        Ok(res) => Ok(res.json::<SecretValue>().await?),
 
-// Retrieve a specific value out off a secret from AWS Secrets Manager.
-pub async fn get_aws_secrets_value(secret_id: &str, key: &str) -> Result<String, String> {
-    let secret = get_aws_secrets(secret_id).await?;
-    let value = secret
-        .extract_secret_value(key)
-        .map_err(|e| e.to_string())?;
-    match value {
-        Some(v) => Ok(v),
-        None => Err("no value matching the key `{key}` in secret `{secret_id}`".to_string()),
+        Err(err) => match err.status() {
+            Some(StatusCode::NOT_FOUND) => Err(crate::Error::BNAAWS(AWSError::SecretNotFound(
+                secret_id.to_string(),
+            ))),
+            _ => Err(crate::Error::Reqwest(err)),
+        },
     }
 }
 
+/// Retrieve a specific value out off a secret from AWS Secrets Manager.
+pub async fn get_aws_secrets_value(
+    secret_name: &str,
+    secret_key: &str,
+) -> Result<String, crate::Error> {
+    let secret = get_aws_secrets(secret_name).await?;
+    let value = secret.extract_secret_value(secret_key)?;
+    value.ok_or(crate::Error::BNAAWS(AWSError::SecretKeyNotFound {
+        secret_name: secret_name.into(),
+        secret_key: secret_key.into(),
+    }))
+}
+
+/// Retrieve a parameter from the parameter store.
+///
 /// Ref: https://docs.aws.amazon.com/systems-manager/latest/userguide/ps-integration-lambda-extensions.html
-pub async fn get_aws_parameter(name: &str) -> Result<String, String> {
-    let aws_session_token =
-        env::var("AWS_SESSION_TOKEN").map_err(|e| format!("Cannot find AWS session token: {e}"))?;
-    let param = reqwest::Client::new()
+pub async fn get_aws_parameter(name: &str) -> Result<SSMParameter, crate::Error> {
+    let aws_session_token = env::var("AWS_SESSION_TOKEN")?;
+    let res = reqwest::Client::new()
         .get(format!(
             "http://localhost:2773/systemsmanager/parameters/get/?name={name}"
         ))
         .header("X-Aws-Parameters-Secrets-Token", aws_session_token)
         .send()
-        .await
-        .map_err(|e| e.to_string())?
-        .json::<SSMParameter>()
-        .await
-        .map_err(|e| e.to_string())?;
-    Ok(param.parameter.value)
+        .await?
+        .error_for_status();
+    match res {
+        Ok(res) => Ok(res.json::<SSMParameter>().await?),
+        Err(err) => match err.status() {
+            Some(StatusCode::NOT_FOUND) => Err(crate::Error::BNAAWS(AWSError::ParameterNotFound(
+                name.to_string(),
+            ))),
+            _ => Err(crate::Error::Reqwest(err)),
+        },
+    }
+}
+
+/// Convenience function to extract a value from a parameter directly.
+pub async fn get_aws_parameter_value(name: &str) -> Result<String, crate::Error> {
+    let parameter = get_aws_parameter(name).await?;
+    Ok(parameter.parameter.value)
 }
 
 #[cfg(test)]

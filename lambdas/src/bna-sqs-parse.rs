@@ -1,4 +1,5 @@
 use aws_lambda_events::sqs::SqsApiMessageObj;
+use bnacore::aws::get_aws_parameter_value;
 use bnalambdas::{
     authenticate_service_account, AnalysisParameters, BrokenspokePipeline, BrokenspokeState,
     Context,
@@ -23,8 +24,11 @@ struct TaskOutput {
 }
 
 async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, Error> {
-    // Retrieve API URL.
-    let url = "https://api.peopleforbikes.xyz/bnas/analysis";
+    // Retrieve API hostname.
+    let api_hostname = get_aws_parameter_value("BNA_API_HOSTNAME").await?;
+
+    // Prepare the API URL.
+    let url = format!("{api_hostname}/bnas/analysis");
 
     // Authenticate the service account.
     let auth = authenticate_service_account()
@@ -43,7 +47,6 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
         state_machine_id = state_machine_context.execution.name,
         "create a new Brokensspoke pipeline entry",
     );
-
     let pipeline = BrokenspokePipeline {
         state_machine_id,
         scheduled_trigger_id,
@@ -52,7 +55,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
         ..Default::default()
     };
     let _post = Client::new()
-        .post(url)
+        .post(&url)
         .bearer_auth(auth.access_token)
         .json(&pipeline)
         .send()?
@@ -84,7 +87,7 @@ async fn main() -> Result<(), Error> {
 
 #[test]
 fn test_input_deserialization() {
-    let raw_json = r#"{
+    let json_input = r#"{
     "Messages": [
       {
         "Body": "{\n  \"city\": \"santa rosa\",\n  \"country\": \"usa\",\n  \"fips_code\": \"3570670\",\n  \"region\": \"new mexico\"\n}",
@@ -110,5 +113,5 @@ fn test_input_deserialization() {
       }
     }
   }"#;
-    let _deserialized = serde_json::from_str::<TaskInput>(&raw_json).unwrap();
+    let _deserialized = serde_json::from_str::<TaskInput>(&json_input).unwrap();
 }

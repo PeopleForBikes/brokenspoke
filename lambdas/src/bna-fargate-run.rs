@@ -3,7 +3,7 @@ use aws_sdk_ecs::types::{
     AssignPublicIp, AwsVpcConfiguration, ContainerOverride, KeyValuePair, NetworkConfiguration,
     TaskOverride,
 };
-use bnacore::aws::{get_aws_parameter, get_aws_secrets_value};
+use bnacore::aws::{get_aws_parameter_value, get_aws_secrets_value};
 use bnalambdas::{
     authenticate_service_account, update_pipeline, AnalysisParameters, BrokenspokePipeline,
     BrokenspokeState, Context,
@@ -41,8 +41,11 @@ struct TaskOutput {
 const FARGATE_MAX_TASK: i32 = 1;
 
 async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, Error> {
-    // Retrieve API URL.
-    let url = "https://api.peopleforbikes.xyz/bnas/analysis";
+    // Retrieve API hostname.
+    let api_hostname = get_aws_parameter_value("BNA_API_HOSTNAME").await?;
+
+    // Prepare the API URL.
+    let url = format!("{api_hostname}/bnas/analysis");
 
     // Authenticate the service account.
     let auth = authenticate_service_account()
@@ -70,11 +73,11 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
 
     // Retrieve secrets and parameters.
     let main_db_url = get_aws_secrets_value("DATABASE_URL", "DATABASE_URL").await?;
-    let ecs_cluster_arn = get_aws_parameter("BNA_CLUSTER_ARN").await?;
-    let vpc_subnets = get_aws_parameter("PRIVATE_SUBNETS").await?;
-    let vpc_security_groups = get_aws_parameter("BNA_TASK_SECURITY_GROUP").await?;
-    let task_definition = get_aws_parameter("BNA_TASK_DEFINITION").await?;
-    let s3_bucket = get_aws_parameter("BNA_BUCKET").await?;
+    let ecs_cluster_arn = get_aws_parameter_value("BNA_CLUSTER_ARN").await?;
+    let vpc_subnets = get_aws_parameter_value("PRIVATE_SUBNETS").await?;
+    let vpc_security_groups = get_aws_parameter_value("BNA_TASK_SECURITY_GROUP").await?;
+    let task_definition = get_aws_parameter_value("BNA_TASK_DEFINITION").await?;
+    let s3_bucket = get_aws_parameter_value("BNA_BUCKET").await?;
 
     // Replace the main database host with the compute endpoint.
     let mut database_url = Url::parse(&main_db_url)?;
@@ -164,4 +167,61 @@ async fn main() -> Result<(), Error> {
         info!("{e}");
         e
     })
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_input_deserialization() {
+        let json_input = r#"
+        {
+          "analysis_parameters": {
+            "country": "usa",
+            "city": "santa rosa",
+            "region": "new mexico",
+            "fips_code": "3570670"
+          },
+          "receipt_handle": "AQEBMtAMiWSYxry6iA8NH0wHUYvOXNLS00piVRqNYWlI5Cs8RRhd21R+5L46DsJgQtbNyrnUATM6Dw70nQoKQ5nFaU3GjK+Aone90aWVAB7DPcYpnUt9uxKdRLdgeNUAAHvBT+K83cJgHwL2ek/fGHPEBCZGN8CV2ZXEDoY2GFfRB51el+4f61YqsIxOEOpgV0djb2D0B/WzS8i8BznanguRn3bT8iz0RXk60hZjp01PN9ljSqjpFwlXM0TLx3tI1RgVYconH2CGnII9qtWz0A4MciKW0vOnKyA70AfUgDPgFFmw6OTwuPeLedCt6lhpYc7fZUGuRAc/Ozz8uAkEI6eTm2yxh1p0OJzXDoqEEaoFgsHHaHOgulmL5QwhZw3z/lBEDii8g4MTZ6UqekkK9dcxew==",
+          "context": {
+            "Execution": {
+              "Id": "arn:aws:states:us-west-2:123456789012:execution:brokenspoke-analyzer:73f24dfc-8978-4d93-a4f7-29d1b0263e4a",
+              "Name": "73f24dfc-8978-4d93-a4f7-29d1b0263e4a",
+              "RoleArn": "arn:aws:iam::123456789012:role/role",
+              "StartTime": "+002024-02-13T00:22:50.787000000Z"
+            },
+            "State": {
+              "EnteredTime": "+002024-02-13T00:22:51.019000000Z",
+              "Name": "BNAContext"
+            },
+            "StateMachine": {
+              "Id": "arn:aws:states:us-west-2:123456789012:stateMachine:brokenspoke-analyzer",
+              "Name": "brokenspoke-analyzer"
+            }
+          },
+          "setup": {
+            "neon": {
+              "branch_id": "br-small-recipe-a6taof36",
+              "host": "host.us-west-2.aws.neon.tech"
+            },
+            "context": {
+              "Execution": {
+                "Id": "arn:aws:states:us-west-2:123456789012:execution:brokenspoke-analyzer:73f24dfc-8978-4d93-a4f7-29d1b0263e4a",
+                "Name": "73f24dfc-8978-4d93-a4f7-29d1b0263e4a",
+                "RoleArn": "arn:aws:iam::123456789012:role/role",
+                "StartTime": "+002024-02-13T00:22:50.787000000Z"
+              },
+              "State": {
+                "EnteredTime": "+002024-02-13T00:22:51.019000000Z",
+                "Name": "BNAContext"
+              },
+              "StateMachine": {
+                "Id": "arn:aws:states:us-west-2:123456789012:stateMachine:brokenspoke-analyzer",
+                "Name": "brokenspoke-analyzer"
+              }
+            }
+          }
+        }"#;
+        let _deserialized = serde_json::from_str::<TaskInput>(&json_input).unwrap();
+    }
 }
