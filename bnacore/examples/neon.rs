@@ -1,7 +1,7 @@
 use bnacore::neon::{
     model::{
-        NeonBranch, NeonCreateBranchRequest, NeonCreateBranchResponse, NeonEndpoint,
-        NeonEndpointType, NeonListBranchResponses,
+        Branch, CreateBranchRequest, CreateBranchResponse, Endpoint, EndpointType,
+        ListBranchResponses,
     },
     NEON_PROJECTS_URL,
 };
@@ -35,17 +35,17 @@ async fn main() -> Result<()> {
         .send()
         .await?
         .error_for_status()?
-        .json::<NeonListBranchResponses>()
+        .json::<ListBranchResponses>()
         .await?;
     dbg!(&branches);
 
     let branch_name = "usa-santa-rosa-new-mexico".to_string();
-    let create_branch_request = NeonCreateBranchRequest {
-        endpoints: vec![NeonEndpoint {
-            r#type: NeonEndpointType::ReadWrite,
+    let create_branch_request = CreateBranchRequest {
+        endpoints: vec![Endpoint {
+            r#type: EndpointType::ReadWrite,
             ..Default::default()
         }],
-        branch: NeonBranch {
+        branch: Branch {
             name: Some(branch_name),
             ..Default::default()
         },
@@ -56,7 +56,7 @@ async fn main() -> Result<()> {
         .send()
         .await?
         .error_for_status()?
-        .json::<NeonCreateBranchResponse>()
+        .json::<CreateBranchResponse>()
         .await?;
     dbg!(&create_branch_response);
 

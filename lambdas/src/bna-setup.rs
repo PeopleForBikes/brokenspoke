@@ -1,19 +1,12 @@
 use bnacore::{
     aws::{get_aws_parameter_value, get_aws_secrets_value},
-    neon::{
-        model::{
-            NeonBranch, NeonCreateBranchRequest, NeonCreateBranchResponse, NeonEndpoint,
-            NeonEndpointType, NeonListBranchResponses,
-        },
-        NEON_PROJECTS_URL,
-    },
+    neon,
 };
 use bnalambdas::{
     authenticate_service_account, update_pipeline, AnalysisParameters, BrokenspokePipeline,
     BrokenspokeState, Context,
 };
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
-use reqwest::header::{self, HeaderValue};
 use serde::{Deserialize, Serialize};
 use simple_error::SimpleError;
 use tracing::info;
@@ -69,26 +62,13 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
 
     // Create the Neon HTTP client.
     info!("Creating Neon client...");
-    let neon_api_key = get_aws_secrets_value("NEON_API_KEY", "NEON_API_KEY").await?;
-    let mut headers = header::HeaderMap::new();
-    let mut auth_value = HeaderValue::from_str(format!("Bearer {}", neon_api_key).as_ref())?;
-    auth_value.set_sensitive(true);
-    headers.insert(header::AUTHORIZATION, auth_value);
-    let neon = reqwest::Client::builder()
-        .default_headers(headers)
-        .build()?;
-    let neon_project_id = get_aws_parameter_value("NEON_BROKENSPOKE_ANALYZER_PROJECT").await?;
-    let neon_branches_url = format!("{}/{}/branches", NEON_PROJECTS_URL, neon_project_id);
+    let api_key = get_aws_secrets_value("NEON_API_KEY", "NEON_API_KEY").await?;
+    let project_id = get_aws_parameter_value("NEON_BROKENSPOKE_ANALYZER_PROJECT").await?;
+    let neon = neon::Client::new(&api_key, &project_id)?;
 
     // Query neon API and check whether we can create a branch or not.
     info!("Checking database branch capacity...");
-    let branches = neon
-        .get(&neon_branches_url)
-        .send()
-        .await?
-        .error_for_status()?
-        .json::<NeonListBranchResponses>()
-        .await?;
+    let branches = neon.get_branches().await?;
 
     // Not enough capacity to proceed. Back into the queue.
     if branches.branches.len() >= (NEON_MAX_BRANCHES + 1) {
@@ -125,24 +105,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
 
     // Create the neon branch.
     info!("Creating branch {}...", branch_name);
-    let create_branch_request = NeonCreateBranchRequest {
-        endpoints: vec![NeonEndpoint {
-            r#type: NeonEndpointType::ReadWrite,
-            ..Default::default()
-        }],
-        branch: NeonBranch {
-            name: Some(branch_name),
-            ..Default::default()
-        },
-    };
-    let create_branch_response = neon
-        .post(&neon_branches_url)
-        .json(&create_branch_request)
-        .send()
-        .await?
-        .error_for_status()?
-        .json::<NeonCreateBranchResponse>()
-        .await?;
+    let create_branch_response = neon.create_branch(&branch_name).await?;
     info!("{:#?}", create_branch_response);
 
     let neon_branch_id = create_branch_response.branch.id.unwrap();

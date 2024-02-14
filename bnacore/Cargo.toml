@@ -23,6 +23,7 @@ regex = "1.6.0"
 reqwest = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+serde_with = { workspace = true }
 thiserror = "1.0"
 time = { workspace = true }
 tokio = { workspace = true }
