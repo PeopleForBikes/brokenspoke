@@ -120,7 +120,7 @@ mod tests {
             "last_status": "PROVISIONING"
           }
         }"#;
-        let deserialized = serde_json::from_str::<TaskInput>(&json_input).unwrap();
+        let deserialized = serde_json::from_str::<TaskInput>(json_input).unwrap();
         assert_eq!(deserialized.fargate.last_status, "PROVISIONING");
         let _serialized = serde_json::to_string(&deserialized).unwrap();
     }

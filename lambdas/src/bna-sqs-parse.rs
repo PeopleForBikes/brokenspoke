@@ -52,6 +52,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
         scheduled_trigger_id,
         state: Some(BrokenspokeState::SqsMessage),
         sqs_message: Some(serde_json::to_string(analysis_parameters)?),
+
         ..Default::default()
     };
     let _post = Client::new()
@@ -113,5 +114,5 @@ fn test_input_deserialization() {
       }
     }
   }"#;
-    let _deserialized = serde_json::from_str::<TaskInput>(&json_input).unwrap();
+    let _deserialized = serde_json::from_str::<TaskInput>(json_input).unwrap();
 }

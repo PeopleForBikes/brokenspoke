@@ -3,14 +3,17 @@ use bnacore::{
     neon,
 };
 use bnalambdas::{
-    authenticate_service_account, update_pipeline, BrokenspokePipeline, BrokenspokeState, Context,
+    authenticate_service_account, update_pipeline, AnalysisParameters, BrokenspokePipeline,
+    BrokenspokeState, Context,
 };
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use serde::{Deserialize, Serialize};
+use time::OffsetDateTime;
 use tracing::info;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct TaskInput {
+    analysis_parameters: AnalysisParameters,
     setup: Setup,
     context: Context,
 }
@@ -38,6 +41,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
         .map_err(|e| format!("cannot authenticate service account: {e}"))?;
 
     // Read the task inputs.
+    let analysis_parameters = &event.payload.analysis_parameters;
     let neon_branch_id = &event.payload.setup.neon.branch_id;
     let state_machine_context = &event.payload.context;
     let (state_machine_id, _) = state_machine_context.execution.ids()?;
@@ -46,7 +50,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     let patch_url = format!("{url}/{state_machine_id}");
     let pipeline = BrokenspokePipeline {
         state_machine_id,
-        state: Some(BrokenspokeState::Export),
+        state: Some(BrokenspokeState::Cleanup),
         ..Default::default()
     };
     update_pipeline(&patch_url, &auth, &pipeline)?;
@@ -59,6 +63,24 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     // Delete neon branch.
     let delete_branch_response = neon.delete_branch(neon_branch_id).await?;
     info!("{:#?}", delete_branch_response);
+
+    let pipeline = BrokenspokePipeline {
+        state_machine_id,
+        state: Some(BrokenspokeState::Cleanup),
+        s3_bucket: Some(format!(
+            "{}/{}/{}",
+            analysis_parameters.country,
+            analysis_parameters
+                .region
+                .clone()
+                .unwrap_or(analysis_parameters.country.clone()),
+            analysis_parameters.city,
+        )),
+        torn_down: Some(true),
+        end_time: Some(OffsetDateTime::now_utc()),
+        ..Default::default()
+    };
+    update_pipeline(&patch_url, &auth, &pipeline)?;
 
     Ok(())
 }
@@ -93,6 +115,10 @@ mod tests {
         context.request_id = id.to_string();
 
         let payload = TaskInput {
+            analysis_parameters: AnalysisParameters::simple(
+                "Malta".to_string(),
+                "Valetta".to_string(),
+            ),
             setup: Setup {
                 neon: Neon {
                     branch_id: "br-bold-mode-48632613".to_string(),
@@ -156,7 +182,7 @@ mod tests {
               }
             }
           }"#;
-        let deserialized = serde_json::from_str::<TaskInput>(&json_input).unwrap();
+        let deserialized = serde_json::from_str::<TaskInput>(json_input).unwrap();
         assert_eq!(deserialized.setup.neon.branch_id, "br-bold-mode-48632613");
         let _serialized = serde_json::to_string(&deserialized).unwrap();
     }

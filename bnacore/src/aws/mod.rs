@@ -215,7 +215,7 @@ mod tests {
             "ResultMetadata": {}
           }
         "#;
-        let _deserialized = serde_json::from_str::<SSMParameter>(&raw_json).unwrap();
+        let _deserialized = serde_json::from_str::<SSMParameter>(raw_json).unwrap();
     }
 
     #[test]
@@ -232,7 +232,7 @@ mod tests {
             "CreatedDate": "2023-12-28T16:37:14.751000-06:00"
         }
       "#;
-        let secret = serde_json::from_str::<SecretValue>(&raw_json).unwrap();
+        let secret = serde_json::from_str::<SecretValue>(raw_json).unwrap();
         let value = secret.extract_secret_value("DATABASE_URL").unwrap();
         assert_eq!(
             value,
