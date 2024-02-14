@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 use time::OffsetDateTime;
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -8,21 +9,21 @@ pub struct NeonError {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct NeonListBranchResponse {
+pub struct ListBranchResponse {
     #[serde(flatten)]
-    pub branch: NeonBranch,
+    pub branch: Branch,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct NeonListBranchResponses {
-    pub branches: Vec<NeonListBranchResponse>,
+pub struct ListBranchResponses {
+    pub branches: Vec<ListBranchResponse>,
 }
 
 /// The compute endpoint type. Either read_write or read_only.
 /// The read_only compute endpoint type is not yet supported (Oct 2023).
 #[derive(Default, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
-pub enum NeonEndpointType {
+pub enum EndpointType {
     ReadOnly,
     #[default]
     ReadWrite,
@@ -31,7 +32,7 @@ pub enum NeonEndpointType {
 /// The Neon compute provisioner.
 /// Specify the k8s-neonvm provisioner to create a compute endpoint that supports Autoscaling.
 #[derive(Debug, Deserialize, Serialize)]
-pub enum NeonComputeProvisioner {
+pub enum ComputeProvisioner {
     #[serde(rename = "k8s-pod")]
     K8sPod,
     #[serde(rename = "k8s-neonvm")]
@@ -40,19 +41,19 @@ pub enum NeonComputeProvisioner {
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
-pub enum NeonEndpointState {
+pub enum EndpointState {
     Active,
     Idle,
     Init,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct NeonSettings {
+pub struct Settings {
     // pg_settings: NeonPGSettings,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct NeonPGSettings {}
+pub struct PGSettings {}
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
@@ -60,76 +61,58 @@ pub enum PoolerMode {
     Transaction,
 }
 
+#[skip_serializing_none]
 #[derive(Default, Debug, Deserialize, Serialize)]
-pub struct NeonEndpoint {
+pub struct Endpoint {
     /// The maximum number of Compute Units.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub autoscaling_limit_max_cu: Option<f32>,
     /// The minimum number of Compute Units.
     /// The minimum value is 0.25.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub autoscaling_limit_min_cu: Option<f32>,
     /// The ID of the branch that the compute endpoint is associated with.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub branch_id: Option<String>,
     /// A timestamp indicating when the compute endpoint was created.
-    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(with = "time::serde::iso8601::option")]
     #[serde(default)]
     pub created_at: Option<OffsetDateTime>,
     /// The state of the compute endpoint.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub current_state: Option<NeonEndpointState>,
+    pub current_state: Option<EndpointState>,
     /// Whether to restrict connections to the compute endpoint
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub disabled: Option<bool>,
     /// The hostname of the compute endpoint.
     /// This is the hostname specified when connecting to a Neon database.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub host: Option<String>,
     /// The compute endpoint ID.
     /// Compute endpoint IDs have an ep- prefix. For example: ep-little-smoke-851426
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
     /// A timestamp indicating when the compute endpoint was last active.
-    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(with = "time::serde::iso8601::option")]
     #[serde(default)]
     pub last_active: Option<OffsetDateTime>,
     /// Whether to permit passwordless access to the compute endpoint.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub passwordless_access: Option<bool>,
     /// The state of the compute endpoint.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub pending_state: Option<NeonEndpointState>,
+    pub pending_state: Option<EndpointState>,
     /// Whether connection pooling is enabled for the compute endpoint.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub pooler_enabled: Option<bool>,
     /// The connection pooler mode. Neon supports PgBouncer in transaction mode only.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub pooler_mode: Option<PoolerMode>,
     /// The ID of the project to which the compute endpoint belongs.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub project_id: Option<String>,
     /// The Neon compute provisioner.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub provisioner: Option<NeonComputeProvisioner>,
+    pub provisioner: Option<ComputeProvisioner>,
     /// The region identifier.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub region_id: Option<String>,
     /// A collection of settings for a compute endpoint
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub settings: Option<NeonSettings>,
+    pub settings: Option<Settings>,
     /// Duration of inactivity in seconds after which the compute endpoint is
     /// automatically suspended. The value 0 means use the global default.
     /// The value -1 means never suspend. The default value is 300 seconds (5 minutes).
     /// The maximum value is 604800 seconds (1 week).
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub suspend_timeout_seconds: Option<u64>,
     /// The compute endpoint type.
-    pub r#type: NeonEndpointType,
+    pub r#type: EndpointType,
     /// A timestamp indicating when the compute endpoint was last updated.
-    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(with = "time::serde::iso8601::option")]
     #[serde(default)]
     pub updated_at: Option<OffsetDateTime>,
@@ -137,81 +120,64 @@ pub struct NeonEndpoint {
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
-pub enum NeonBranchState {
+pub enum BranchState {
     Init,
     Ready,
 }
 
+#[skip_serializing_none]
 #[derive(Default, Debug, Deserialize, Serialize)]
-pub struct NeonBranch {
+pub struct Branch {
     ///
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub active_time_seconds: Option<u64>,
     ///
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub compute_time_seconds: Option<u64>,
     /// CPU seconds used by all the endpoints of the branch, including deleted ones.
     /// This value is reset at the beginning of each billing period.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub cpu_used_sec: Option<u64>,
     /// A timestamp indicating when the branch was created.
-    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(with = "time::serde::iso8601::option")]
     #[serde(default)]
     pub created_at: Option<OffsetDateTime>,
     /// The branch creation source.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub creation_source: Option<String>,
     /// The branch state.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub current_state: Option<NeonBranchState>,
+    pub current_state: Option<BranchState>,
     ///
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub data_transfer_bytes: Option<u64>,
     /// The branch ID.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
     /// The logical size of the branch, in bytes
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub logical_size: Option<u64>,
     /// The branch name.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
     /// The branch_id of the parent branch.
     /// If omitted or empty, the branch will be created from the project's primary branch.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub parent_id: Option<String>,
     /// The ID of the project to which the branch belongs.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub project_id: Option<String>,
     /// A Log Sequence Number (LSN) on the parent branch.
     /// The branch will be created with data from this LSN.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub parent_lsn: Option<String>,
     /// The branch state.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub pending_state: Option<NeonBranchState>,
+    pub pending_state: Option<BranchState>,
     /// Whether the branch is the project's primary branch
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub primary: Option<bool>,
     /// A timestamp identifying a point in time on the parent branch.
     /// The branch will be created with data starting from this point in time.
-    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(with = "time::serde::iso8601::option")]
     #[serde(default)]
     pub timestamp: Option<OffsetDateTime>,
     /// A timestamp indicating when the branch was last updated.
-    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(with = "time::serde::iso8601::option")]
     #[serde(default)]
     pub updated_at: Option<OffsetDateTime>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub written_data_bytes: Option<u64>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
-pub enum NeonAction {
+pub enum Action {
     ApplyConfig,
     ApplyStorageConfig,
     CheckAvailability,
@@ -229,117 +195,102 @@ pub enum NeonAction {
     TenantReattach,
 }
 
+#[skip_serializing_none]
 #[derive(Default, Debug, Deserialize, Serialize)]
-pub struct NeonOperation {
+pub struct Operation {
     /// The action performed by the operation.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub action: Option<NeonAction>,
+    pub action: Option<Action>,
     /// The branch ID.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub branch_id: Option<String>,
     /// A timestamp indicating when the operation was created.
-    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(with = "time::serde::iso8601::option")]
     #[serde(default)]
     pub created_at: Option<OffsetDateTime>,
     /// The endpoint ID.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub endpoint_id: Option<String>,
     /// The error that occured.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<String>,
     /// The operation ID.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<String>,
     /// The number of times the operation failed.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub failures_count: Option<u32>,
     /// The Neon project ID.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub project_id: Option<String>,
     /// A timestamp indicating when the operation was last retried.
-    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(with = "time::serde::iso8601::option")]
     #[serde(default)]
     pub retry_at: Option<OffsetDateTime>,
     /// The status of the operation.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub status: Option<String>,
     /// The total duration of the operation in milliseconds.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub total_duration_ms: Option<u32>,
     /// A timestamp indicating when the operation was last updated.
-    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(with = "time::serde::iso8601::option")]
     #[serde(default)]
     pub updated_at: Option<OffsetDateTime>,
 }
 
+#[skip_serializing_none]
 #[derive(Default, Debug, Deserialize, Serialize)]
-pub struct NeonRole {
+pub struct Role {
     /// The ID of the branch to which the role belongs.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub branch_id: Option<String>,
     /// A timestamp indicating when the role was created.
-    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(with = "time::serde::iso8601::option")]
     #[serde(default)]
     pub created_at: Option<OffsetDateTime>,
     /// The role name.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
     /// The role password.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub password: Option<String>,
     /// Whether or not the role is system-protected.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub role: Option<bool>,
     /// A timestamp indicating when the role was last updated.
-    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(with = "time::serde::iso8601::option")]
     #[serde(default)]
     pub updated_at: Option<OffsetDateTime>,
 }
 
+#[skip_serializing_none]
 #[derive(Default, Debug, Deserialize, Serialize)]
-pub struct NeonDatabase {
+pub struct Database {
     /// The ID of the branch to which the database belongs.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub branch_id: Option<String>,
     /// A timestamp indicating when the database was created.
-    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(with = "time::serde::iso8601::option")]
     #[serde(default)]
     pub created_at: Option<OffsetDateTime>,
     /// The database ID.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<u32>,
     /// The database name.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
     /// The name of role that owns the database.
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub owner_name: Option<String>,
     /// A timestamp indicating when the database was last updated.
-    #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(with = "time::serde::iso8601::option")]
     #[serde(default)]
     pub updated_at: Option<OffsetDateTime>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct NeonCreateBranchRequest {
-    pub endpoints: Vec<NeonEndpoint>,
-    pub branch: NeonBranch,
+pub struct CreateBranchRequest {
+    pub endpoints: Vec<Endpoint>,
+    pub branch: Branch,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct NeonCreateBranchResponse {
-    pub branch: NeonBranch,
-    pub endpoints: Vec<NeonEndpoint>,
-    pub operations: Vec<NeonOperation>,
-    pub roles: Vec<NeonRole>,
-    pub databases: Vec<NeonDatabase>,
+pub struct CreateBranchResponse {
+    pub branch: Branch,
+    pub endpoints: Vec<Endpoint>,
+    pub operations: Vec<Operation>,
+    pub roles: Vec<Role>,
+    pub databases: Vec<Database>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct DeleteBranchResponse {
+    pub branch: Branch,
+    pub operations: Vec<Operation>,
 }
 
 #[cfg(test)]
@@ -405,25 +356,25 @@ mod tests {
             }
           ]
         }"#;
-        let v = serde_json::from_str::<NeonListBranchResponses>(raw_json).unwrap();
+        let v = serde_json::from_str::<ListBranchResponses>(raw_json).unwrap();
         assert_eq!(v.branches.len(), 3)
     }
 
     #[test]
     fn test_ser_de_create_branch_request() {
         let branch_name = "usa-santa-rosa-new-mexico".to_string();
-        let create_branch_request = NeonCreateBranchRequest {
-            endpoints: vec![NeonEndpoint {
-                r#type: NeonEndpointType::ReadWrite,
+        let create_branch_request = CreateBranchRequest {
+            endpoints: vec![Endpoint {
+                r#type: EndpointType::ReadWrite,
                 ..Default::default()
             }],
-            branch: NeonBranch {
+            branch: Branch {
                 name: Some(branch_name),
                 ..Default::default()
             },
         };
         let serialized = dbg!(serde_json::to_string(&create_branch_request)).unwrap();
-        let _deserialized = serde_json::from_str::<NeonCreateBranchRequest>(&serialized).unwrap();
+        let _deserialized = serde_json::from_str::<CreateBranchRequest>(&serialized).unwrap();
     }
 
     #[test]
@@ -532,7 +483,57 @@ mod tests {
           ]
         }
       "#;
-        let deserialized = serde_json::from_str::<NeonCreateBranchResponse>(&raw_json).unwrap();
+        let deserialized = serde_json::from_str::<CreateBranchResponse>(&raw_json).unwrap();
         let _serialized = serde_json::to_string(&deserialized).unwrap();
+    }
+
+    #[test]
+    fn test_deserialize_delete_branch() {
+        //https://api-docs.neon.tech/reference/deleteprojectbranch
+        let raw_json = r#"
+        {
+          "branch": {
+            "id": "br-aged-salad-637688",
+            "project_id": "shiny-wind-028834",
+            "name": "main",
+            "current_state": "ready",
+            "logical_size": 28,
+            "created_at": "2022-11-23T17:42:25Z",
+            "updated_at": "2022-11-23T17:42:26Z",
+            "data_transfer_bytes": 1000000,
+            "written_data_bytes": 100800,
+            "compute_time_seconds": 100,
+            "active_time_seconds": 100,
+            "cpu_used_sec": 100,
+            "primary": true,
+            "creation_source": "console"
+          },
+          "operations": [
+            {
+              "id": "b6afbc21-2990-4a76-980b-b57d8c2948f2",
+              "project_id": "shiny-wind-028834",
+              "branch_id": "br-sweet-breeze-497520",
+              "endpoint_id": "ep-soft-violet-752733",
+              "action": "suspend_compute",
+              "status": "running",
+              "failures_count": 0,
+              "created_at": "2022-12-01T19:53:05Z",
+              "updated_at": "2022-12-01T19:53:05Z",
+              "total_duration_ms": 100
+            },
+            {
+              "id": "b6afbc21-2990-4a76-980b-b57d8c2948f2",
+              "project_id": "shiny-wind-028834",
+              "branch_id": "br-sweet-breeze-497520",
+              "action": "delete_timeline",
+              "status": "scheduling",
+              "failures_count": 0,
+              "created_at": "2022-12-01T19:53:05Z",
+              "updated_at": "2022-12-01T19:53:05Z",
+              "total_duration_ms": 100
+            }
+          ]
+        }"#;
+        let _deserialized = serde_json::from_str::<DeleteBranchResponse>(&raw_json).unwrap();
     }
 }

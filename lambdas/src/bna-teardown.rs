@@ -1,12 +1,11 @@
 use bnacore::{
     aws::{get_aws_parameter_value, get_aws_secrets_value},
-    neon::NEON_PROJECTS_URL,
+    neon,
 };
 use bnalambdas::{
     authenticate_service_account, update_pipeline, BrokenspokePipeline, BrokenspokeState, Context,
 };
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
-use reqwest::header::{self, HeaderValue};
 use serde::{Deserialize, Serialize};
 use tracing::info;
 
@@ -53,26 +52,12 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     update_pipeline(&patch_url, &auth, &pipeline)?;
 
     // Create the Neon HTTP client.
-    let neon_api_key = get_aws_secrets_value("NEON_API_KEY", "NEON_API_KEY").await?;
-    let mut headers = header::HeaderMap::new();
-    let mut auth_value = HeaderValue::from_str(format!("Bearer {}", neon_api_key).as_ref())?;
-    auth_value.set_sensitive(true);
-    headers.insert(header::AUTHORIZATION, auth_value);
-    let neon = reqwest::Client::builder()
-        .default_headers(headers)
-        .build()?;
-    let neon_project_id = get_aws_parameter_value("NEON_BROKENSPOKE_ANALYZER_PROJECT").await?;
-    let neon_branches_url = format!(
-        "{}/{}/branches/{}",
-        NEON_PROJECTS_URL, neon_project_id, &neon_branch_id
-    );
+    let api_key = get_aws_secrets_value("NEON_API_KEY", "NEON_API_KEY").await?;
+    let project_id = get_aws_parameter_value("NEON_BROKENSPOKE_ANALYZER_PROJECT").await?;
+    let neon = neon::Client::new(&api_key, &project_id)?;
 
     // Delete neon branch.
-    let delete_branch_response = neon
-        .delete(&neon_branches_url)
-        .send()
-        .await?
-        .error_for_status()?;
+    let delete_branch_response = neon.delete_branch(neon_branch_id).await?;
     info!("{:#?}", delete_branch_response);
 
     Ok(())
