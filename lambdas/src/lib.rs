@@ -1,4 +1,4 @@
-use bnacore::aws::get_aws_secrets_value;
+use bnacore::aws::{get_aws_parameter_value, get_aws_secrets_value};
 use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
@@ -115,13 +115,11 @@ pub async fn get_service_account_credentials() -> Result<AppClientCredentials, b
 
 pub async fn authenticate(
     credentials: &AppClientCredentials,
-) -> Result<AuthResponse, reqwest::Error> {
+) -> Result<AuthResponse, bnacore::Error> {
     const COGNITO_HOSTNAME: &str = "BNA_COGNITO_HOSTNAME";
-    let cognito_hostname = get_aws_secrets_value(COGNITO_HOSTNAME, "client_id")
-        .await
-        .unwrap();
+    let cognito_hostname = get_aws_parameter_value(COGNITO_HOSTNAME).await?;
     let token_endpoint = format!("{cognito_hostname}/oauth2/token");
-    Client::new()
+    Ok(Client::new()
         .post(token_endpoint)
         .form(&[
             ("grant_type", "client_credentials"),
@@ -133,11 +131,11 @@ pub async fn authenticate(
         )
         .send()?
         .error_for_status()?
-        .json::<AuthResponse>()
+        .json::<AuthResponse>()?)
 }
 
-pub async fn authenticate_service_account() -> Result<AuthResponse, reqwest::Error> {
-    let credentials = get_service_account_credentials().await.unwrap();
+pub async fn authenticate_service_account() -> Result<AuthResponse, bnacore::Error> {
+    let credentials = get_service_account_credentials().await?;
     authenticate(&credentials).await
 }
 
