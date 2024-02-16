@@ -74,7 +74,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
     // Retrieve secrets and parameters.
     let main_db_url = get_aws_secrets_value("DATABASE_URL", "DATABASE_URL").await?;
     let ecs_cluster_arn = get_aws_parameter_value("BNA_CLUSTER_ARN").await?;
-    let vpc_subnets = get_aws_parameter_value("PRIVATE_SUBNETS").await?;
+    let vpc_subnets = get_aws_parameter_value("PUBLIC_SUBNETS").await?;
     let vpc_security_groups = get_aws_parameter_value("BNA_TASK_SECURITY_GROUP").await?;
     let task_definition = get_aws_parameter_value("BNA_TASK_DEFINITION").await?;
     let s3_bucket = get_aws_parameter_value("BNA_BUCKET").await?;
