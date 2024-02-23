@@ -1,6 +1,6 @@
 use bnacore::scorecard::{
-    scorecard21::ScoreCard21, scorecard23::ScoreCard23, shortscorecard::ShortScoreCard, CsvExt,
-    Format, ScoreCardVersion,
+    scorecard21::ScoreCard21, scorecard23::ScoreCard23, shortscorecard::ShortScoreCard, Format,
+    ScoreCardVersion, ScorecardCsv,
 };
 use clap::{crate_name, ArgAction, Parser, ValueEnum, ValueHint};
 use color_eyre::{eyre::Report, Result};

@@ -1,4 +1,4 @@
-use super::{CsvExt, ScorecardExt};
+use super::{Scorecard, ScorecardCsv, Size};
 use crate::{Dataset, Error, PFB_S3_PUBLIC_DOCUMENTS, PFB_S3_STORAGE_BASE_URL};
 use serde::Deserialize;
 use url::Url;
@@ -102,17 +102,6 @@ pub struct BNA23 {
 }
 
 #[derive(Debug, Deserialize, Clone)]
-#[serde(rename_all = "lowercase")]
-pub enum Size {
-    /// Represent small cities.
-    Small,
-    /// Represent medium cities.
-    Medium,
-    /// Represent large cities.
-    Large,
-}
-
-#[derive(Debug, Deserialize, Clone)]
 pub struct ScoreCard23 {
     /// City details.
     #[serde(flatten)]
@@ -122,12 +111,9 @@ pub struct ScoreCard23 {
     pub bna: BNA23,
 }
 
-impl CsvExt for ScoreCard23 {}
+impl ScorecardCsv for ScoreCard23 {}
 
-impl ScorecardExt for ScoreCard23 {
-    /// Return the full name of the city.
-    ///
-    /// The full name has the following format: `{COUNTRY}-{STATE}-{CITY_NAME}`.
+impl Scorecard for ScoreCard23 {
     fn full_name(&self) -> String {
         format!(
             "{}-{}-{}",
@@ -135,7 +121,6 @@ impl ScorecardExt for ScoreCard23 {
         )
     }
 
-    /// Return the URL of the specified dataset.
     fn url(&self, dataset: &Dataset) -> Result<Url, Error> {
         let mut dataset_url: String = String::new();
         if *dataset == Dataset::DataDictionary {
@@ -150,5 +135,9 @@ impl ScorecardExt for ScoreCard23 {
         dataset_url.push('.');
         dataset_url.push_str(&dataset.extension());
         Ok(Url::parse(&dataset_url)?)
+    }
+
+    fn version(&self) -> String {
+        String::from("23.1")
     }
 }

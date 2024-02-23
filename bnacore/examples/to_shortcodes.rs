@@ -5,14 +5,14 @@
 //! cargo run -q --example to_shortcodes
 //! ```
 //!
-use bnacore::scorecard::{scorecard21::ScoreCard21, shortscorecard::ShortScoreCard, CsvExt};
+use bnacore::scorecard::{scorecard21::ScoreCard21, shortscorecard::ShortScoreCard, ScorecardCsv};
 use color_eyre::{eyre::Report, Result};
 use std::fs;
 
 // The paths must be relative to the Cargo.toml file.
-const CITY_RATINGS_CSV: &'static str = "../assets/city_ratings/city-ratings-v22.10.csv";
-const OUTPUT_DIR: &'static str = "examples/output";
-const SHORTCODES_CSV: &'static str = "examples/output/shortcodes.csv";
+const CITY_RATINGS_CSV: &str = "../assets/city_ratings/city-ratings-v22.10.csv";
+const OUTPUT_DIR: &str = "examples/output";
+const SHORTCODES_CSV: &str = "examples/output/shortcodes.csv";
 
 fn main() -> Result<(), Report> {
     // Setup the application.

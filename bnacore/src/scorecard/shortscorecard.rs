@@ -1,4 +1,4 @@
-use super::{scorecard21::ScoreCard21, scorecard23::ScoreCard23, CsvExt};
+use super::{scorecard21::ScoreCard21, scorecard23::ScoreCard23, ScorecardCsv};
 use pyo3::prelude::*;
 use serde::Serialize;
 
@@ -132,7 +132,7 @@ impl From<&ScoreCard23> for ShortScoreCard {
     }
 }
 
-impl CsvExt for ShortScoreCard {}
+impl ScorecardCsv for ShortScoreCard {}
 
 /// Define Python compatible methods.
 #[pymethods]

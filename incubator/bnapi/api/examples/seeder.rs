@@ -1,7 +1,7 @@
 //! Utility to seed the database using the City Ratings CSV file provided in the
 //! assets directory.
 //!
-use bnacore::scorecard::{scorecard21::ScoreCard21, CsvExt};
+use bnacore::scorecard::{scorecard21::ScoreCard21, ScorecardCsv};
 use chrono::prelude::*;
 use color_eyre::{eyre::Report, Result};
 use dotenv::dotenv;
@@ -43,7 +43,6 @@ async fn main() -> Result<(), Report> {
             ratings: Set(scorecard.city.ratings),
             created_at: Set(now),
             updated_at: Set(now),
-            ..Default::default()
         };
 
         let bna_entry = bna::ActiveModel {
@@ -75,7 +74,6 @@ async fn main() -> Result<(), Report> {
             city_id: Set(Some(entry_id)),
             created_at: Set(now),
             updated_at: Set(now),
-            ..Default::default()
         };
 
         let infra_entry = infrastructure::ActiveModel {
@@ -85,7 +83,6 @@ async fn main() -> Result<(), Report> {
             city_id: Set(Some(entry_id)),
             created_at: Set(now),
             updated_at: Set(now),
-            ..Default::default()
         };
 
         bnas.push(bna_entry);

@@ -15,7 +15,7 @@ use pyo3::prelude::*;
 use serde::Deserialize;
 use url::Url;
 
-use super::{CsvExt, ScorecardExt};
+use super::{Scorecard, ScorecardCsv};
 
 /// Represent a PeopleForBikes city.
 #[pyclass]
@@ -86,10 +86,7 @@ impl City21 {
     }
 }
 
-impl ScorecardExt for ScoreCard21 {
-    /// Return the full name of the city.
-    ///
-    /// The full name has the following format: `{COUNTRY}-{STATE}-{CITY_NAME}`.
+impl Scorecard for ScoreCard21 {
     fn full_name(&self) -> String {
         format!(
             "{}-{}-{}",
@@ -97,7 +94,6 @@ impl ScorecardExt for ScoreCard21 {
         )
     }
 
-    /// Return the URL of the specified dataset.
     fn url(&self, dataset: &Dataset) -> Result<Url, Error> {
         let mut dataset_url: String = String::new();
         if *dataset == Dataset::DataDictionary {
@@ -113,9 +109,13 @@ impl ScorecardExt for ScoreCard21 {
         dataset_url.push_str(&dataset.extension());
         Ok(Url::parse(&dataset_url)?)
     }
+
+    fn version(&self) -> String {
+        String::from("21.1")
+    }
 }
 
-impl CsvExt for City21 {}
+impl ScorecardCsv for City21 {}
 
 /// Represent the results from the community survey.
 #[pyclass]
@@ -225,7 +225,7 @@ pub struct ScoreCard21 {
     pub infrastructure: Infrastructure21,
 }
 
-impl CsvExt for ScoreCard21 {}
+impl ScorecardCsv for ScoreCard21 {}
 
 /// Define Python compatible methods.
 #[pymethods]
