@@ -13,26 +13,26 @@ resolver = "2"
 
 [workspace.dependencies]
 color-eyre = "0.6.2"
-minijinja = "1.0.9"
-reqwest = { version = "0.11.22", features = [
+minijinja = "1.0.12"
+reqwest = { version = "0.11.24", features = [
   "blocking",
   "json",
   "native-tls-vendored",
   "rustls",
 ] }
 rstest = "0.18.2"
-serde = { version = "1.0.188", features = ["derive"] }
-serde_json = "1.0.107"
+serde = { version = "1.0.197", features = ["derive"] }
+serde_json = "1.0.114"
 serde_with = "3.6.1"
-time = { version = "0.3.29", features = ["serde-well-known"] }
+time = { version = "0.3.34", features = ["macros", "serde-well-known"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 tracing = { version = "0.1", features = ["log"] }
-tracing-subscriber = { version = "0.3.15", default-features = false, features = [
+tracing-subscriber = { version = "0.3.18", default-features = false, features = [
   "fmt",
 ] }
 url = { version = "2.4.1", features = ["serde"] }
-uuid = { version = "1.2.1", features = ["v4", "serde"] }
-walkdir = "2.3.2"
+uuid = { version = "1.7.0", features = ["v4", "serde"] }
+walkdir = "2.4.0"
 
 
 [profile.flamegraph]

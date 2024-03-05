@@ -31,7 +31,7 @@ fn main() -> Result<(), Report> {
 
     // Render the template.
     let fields = vec![String::from("co"), String::from("st"), String::from("ci")];
-    let _ = render(
+    render(
         &brochure_template,
         &output_dir,
         Some(Exporter::Inkscape),

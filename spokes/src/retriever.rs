@@ -1,7 +1,7 @@
 use bnacore::{
     scorecard::{
-        scorecard21::ScoreCard21, scorecard23::ScoreCard23, CsvExt, Format, ScoreCardVersion,
-        ScorecardExt,
+        scorecard21::ScoreCard21, scorecard23::ScoreCard23, Format, ScoreCardVersion, Scorecard,
+        ScorecardCsv,
     },
     Dataset,
 };
