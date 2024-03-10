@@ -7,7 +7,7 @@ use url::Url;
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ScoreCard24 {
     pub city: String,
-    pub state: String,
+    pub state: Option<String>,
     pub state_full: String,
     pub country: String,
     pub region: String,
@@ -52,7 +52,7 @@ impl ScorecardCsv for ScoreCard24 {}
 
 impl Scorecard for ScoreCard24 {
     fn full_name(&self) -> String {
-        format!("{}-{}-{}", self.country, self.state, self.city)
+        format!("{}-{}-{}", self.country, self.state_full, self.city)
     }
 
     fn url(&self, dataset: &Dataset) -> Result<Url, Error> {
@@ -103,7 +103,7 @@ mod tests {
     fn test_scorecard24() {
         let sc = ScoreCard24 {
             city: "Yarra LGA".to_string(),
-            state: "VIC".to_string(),
+            state: Some("VIC".to_string()),
             state_full: "Victoria".to_string(),
             country: "Australia".to_string(),
             region: "Australia".to_string(),
@@ -143,7 +143,7 @@ mod tests {
             bna_recreation_trails: None,
         };
 
-        assert_eq!(sc.state, "VIC");
+        assert_eq!(sc.state, Some("VIC".to_string()));
     }
 
     #[test]
@@ -151,7 +151,7 @@ mod tests {
         let raw_json = r#"
           {
             "city": "Christchurch",
-            "state": "Canterbury",
+            "state": "CAN",
             "state_full": "Canterbury",
             "country": "New Zealand",
             "region": "New Zealand",
@@ -187,6 +187,6 @@ mod tests {
             "filename": "_Christchurch_v23.1.csv"
           }"#;
         let deserialized = serde_json::from_str::<ScoreCard24>(raw_json).unwrap();
-        assert_eq!(deserialized.state, "Canterbury");
+        assert_eq!(deserialized.state, Some("CAN".to_string()));
     }
 }
