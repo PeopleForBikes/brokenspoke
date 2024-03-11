@@ -27,7 +27,7 @@ tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 url = { workspace = true }
 uuid = { workspace = true }
-usvg = "0.36.0"
+usvg = "0.40.0"
 
 [[bin]]
 name = "bna-fargate-run"
