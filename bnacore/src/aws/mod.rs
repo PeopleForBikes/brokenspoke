@@ -1,3 +1,5 @@
+pub mod s3;
+
 use reqwest::StatusCode;
 use serde::Deserialize;
 use std::{collections::HashMap, env};
