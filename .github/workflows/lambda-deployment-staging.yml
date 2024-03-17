@@ -40,6 +40,7 @@ jobs:
         run: |
           LAMBDAS="bna-fargate-run
           bna-fargate-status
+          bna-prepare-destination
           bna-setup
           bna-sqs-parse
           bna-teardown
