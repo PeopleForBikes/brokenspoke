@@ -23,6 +23,10 @@ pub enum AWSError {
     /// SSM parameter not found.
     #[error("parameter `{0}` not found")]
     ParameterNotFound(String),
+
+    /// S3 Error.
+    #[error("S3 operation failed: `{0}`")]
+    S3Error(String),
 }
 
 /// Represent the contents of the encrypted fields SecretString or SecretBinary

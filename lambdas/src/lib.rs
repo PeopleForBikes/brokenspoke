@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 use uuid::Uuid;
 
+pub const BROKENSPOKE_ANALYZER_BUCKET: &str = "brokenspoke-analyzer";
+
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct AnalysisParameters {
     pub country: String,

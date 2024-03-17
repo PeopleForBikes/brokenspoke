@@ -11,11 +11,11 @@ async fn main() -> Result<()> {
 
     let dir = create_calver_s3_directories(
         "brokenspoke-analyzer",
-        "remyland",
-        "remyville",
-        Some("remyregion"),
+        "testland",
+        "testville",
+        Some("testregion"),
     )
-    .await;
+    .await?;
     dbg!(dir);
 
     Ok(())

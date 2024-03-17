@@ -3,6 +3,8 @@ use aws_sdk_s3::primitives::{ByteStream, SdkBody};
 use std::path::{Path, PathBuf};
 use time::{macros::format_description, OffsetDateTime};
 
+use crate::Error;
+
 /// Return the calver notation YY.0M for the UTC now date.
 fn calver_utc_now() -> String {
     let now_utc = OffsetDateTime::now_utc();
@@ -56,19 +58,23 @@ where
 /// This function does not validate the paths. Therefore different paths ending with a
 /// valid Ubuntu-like calver format would still produce a result, even though it would
 /// not make sense.
+///
+/// Paths are ignored if:
+///   - they are not valid unicode
+///   - they do not end with a number
 pub fn calver_next(dirs: &[PathBuf]) -> u32 {
     let with_micro = dirs
         .iter()
         .filter_map(|d| d.file_name())
         .filter_map(|d| d.to_str())
         .filter(|d| d.chars().filter(|c| *c == '.').count() == 2)
-        .map(|d| {
+        .filter_map(|d| {
             d.split('.')
                 .collect::<Vec<&str>>()
                 .last()
                 .unwrap()
                 .parse::<u32>()
-                .expect("directory must follow the calver naming convention")
+                .ok()
         })
         .collect::<Vec<u32>>();
 
@@ -86,7 +92,7 @@ pub async fn create_calver_s3_directories(
     country: &str,
     city: &str,
     region: Option<&str>,
-) -> PathBuf {
+) -> Result<PathBuf, crate::Error> {
     // Get the base path.
     let s3_dir = calver_base::<PathBuf>(country, city, region, None, None);
     let mut s3_dir_str = s3_dir.to_str().unwrap().to_string();
@@ -138,18 +144,10 @@ pub async fn create_calver_s3_directories(
         .body(ByteStream::new(SdkBody::from("")))
         .send()
         .await;
-
     match res {
-        Ok(r) => {
-            dbg!(r);
-        }
-        Err(e) => {
-            dbg!(e);
-        }
+        Ok(_) => Ok(PathBuf::from(s3_dir_str)),
+        Err(e) => Err(Error::BNAAWS(super::AWSError::S3Error(e.to_string()))),
     }
-
-    // Return the PathBuf used to create the bucket.
-    PathBuf::from(s3_dir_str)
 }
 
 #[cfg(test)]
