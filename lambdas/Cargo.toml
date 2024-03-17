@@ -38,6 +38,10 @@ name = "bna-fargate-status"
 path = "src/bna-fargate-status.rs"
 
 [[bin]]
+name = "bna-prepare-destination"
+path = "src/bna-prepare-destination.rs"
+
+[[bin]]
 name = "bna-setup"
 path = "src/bna-setup.rs"
 
