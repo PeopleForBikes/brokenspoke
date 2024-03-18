@@ -1,5 +1,5 @@
 use bnacore::aws::s3::create_calver_s3_directories;
-use bnalambdas::{AnalysisParameters, Context, BROKENSPOKE_ANALYZER_BUCKET};
+use bnalambdas::{AnalysisParameters, BROKENSPOKE_ANALYZER_BUCKET};
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use serde::{Deserialize, Serialize};
 use tracing::info;
@@ -7,21 +7,22 @@ use tracing::info;
 #[derive(Deserialize)]
 struct TaskInput {
     analysis_parameters: AnalysisParameters,
-    context: Context,
 }
 
 #[derive(Serialize)]
 struct TaskOutput {
-    analysis_parameters: AnalysisParameters,
-    s3_destination: String,
-    context: Context,
+    aws_s3: AWSS3,
+}
+
+#[derive(Serialize)]
+struct AWSS3 {
+    destination: String,
 }
 
 async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, Error> {
     // Read the task inputs.
     info!("Reading input...");
     let analysis_parameters = &event.payload.analysis_parameters;
-    let state_machine_context = &event.payload.context;
 
     // Read the task inputs.
     info!("Creating S3 directory...");
@@ -35,9 +36,9 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
 
     // Update the output with the S3 folder that was created.
     Ok(TaskOutput {
-        analysis_parameters: analysis_parameters.clone(),
-        s3_destination: dir.to_str().unwrap().to_string(),
-        context: state_machine_context.clone(),
+        aws_s3: AWSS3 {
+            destination: dir.to_str().unwrap().to_string(),
+        },
     })
 }
 
