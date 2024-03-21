@@ -9,8 +9,7 @@ use bnacore::scorecard::{scorecard24::ScoreCard24, ScorecardCsv};
 use color_eyre::{eyre::Report, Result};
 
 // The paths must be relative to the Cargo.toml file.
-const CITY_RATINGS_CSV: &str =
-    "../assets/city_ratings/city-ratings-all-historical-results-v24.1.csv";
+const CITY_RATINGS_CSV: &str = "../assets/city_ratings/latest.csv";
 
 fn main() -> Result<(), Report> {
     // Setup the application.
