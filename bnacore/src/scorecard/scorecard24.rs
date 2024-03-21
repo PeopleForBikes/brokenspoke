@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 use url::Url;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct ScoreCard24 {
     pub city: String,
     pub state: Option<String>,
@@ -42,7 +42,7 @@ pub struct ScoreCard24 {
     pub bna_rounded_score: u8,
     pub bna_total_low_stress_miles: Option<f64>,
     pub bna_total_high_stress_miles: Option<f64>,
-    pub pop_size: Size,
+    pub pop_size: Option<Size>,
     #[serde(with = "time::serde::iso8601")]
     pub creation_date: OffsetDateTime,
     pub filename: String,
@@ -135,7 +135,7 @@ mod tests {
             bna_rounded_score: 60,
             bna_total_low_stress_miles: Some(292.9),
             bna_total_high_stress_miles: Some(95.0),
-            pop_size: Size::Medium,
+            pop_size: Some(Size::Medium),
             creation_date: datetime!(2023-04-14 14:26:00 UTC),
             filename: "VIC_Yarra LGA_v23.1.csv".to_string(),
             bna_recreation_community_centers: None,
