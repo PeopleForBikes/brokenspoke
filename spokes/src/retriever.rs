@@ -1,7 +1,7 @@
 use bnacore::{
     scorecard::{
-        scorecard21::ScoreCard21, scorecard23::ScoreCard23, Format, ScoreCardVersion, Scorecard,
-        ScorecardCsv,
+        scorecard21::ScoreCard21, scorecard23::ScoreCard23, scorecard24::ScoreCard24, Format,
+        ScoreCardVersion, Scorecard, ScorecardCsv,
     },
     Dataset,
 };
@@ -59,6 +59,7 @@ impl From<CliDataset> for Dataset {
 pub enum CliFormat {
     V21,
     V23,
+    V24,
 }
 
 impl From<Format> for CliFormat {
@@ -66,6 +67,7 @@ impl From<Format> for CliFormat {
         match value {
             Format::V21 => CliFormat::V21,
             Format::V23 => CliFormat::V23,
+            Format::V24 => CliFormat::V24,
         }
     }
 }
@@ -75,6 +77,7 @@ impl From<CliFormat> for Format {
         match value {
             CliFormat::V21 => Format::V21,
             CliFormat::V23 => Format::V23,
+            CliFormat::V24 => Format::V24,
         }
     }
 }
@@ -127,6 +130,10 @@ async fn main() -> Result<(), Report> {
         CliFormat::V23 => ScoreCard23::from_csv(opts.from_csv)?
             .iter()
             .map(|e| ScoreCardVersion::V23(e.clone()))
+            .collect(),
+        CliFormat::V24 => ScoreCard24::from_csv(opts.from_csv)?
+            .iter()
+            .map(|e| ScoreCardVersion::V24(e.clone()))
             .collect(),
     };
 

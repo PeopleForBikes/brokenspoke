@@ -22,8 +22,8 @@ fn main() -> Result<(), Report> {
         .init();
 
     // Parameters
-    let format = "v23";
-    let city_rating_version = "v23.2";
+    let format = "v24";
+    let _city_rating_version = "v23.2";
 
     // Get the paths.
     let top_dir = PathBuf::from("../../").canonicalize()?;
@@ -33,11 +33,7 @@ fn main() -> Result<(), Report> {
         .join("visuals/template-scorecard-pg1-v23.2.svg")
         .canonicalize()?;
     let brochure_information_page = asset_dir.join("visuals/template-scorecard-pg2-v23.1.pdf");
-    let city_ratings = asset_dir
-        .join(format!(
-            "city-ratings/city-ratings-{city_rating_version}.csv"
-        ))
-        .canonicalize()?;
+    let city_ratings = asset_dir.join("city-ratings/latest.csv").canonicalize()?;
     let brochure_template_copy = output_dir.join("scorecard.svg");
     let shortcodes = output_dir.join("scorecard.csv");
 
@@ -79,7 +75,7 @@ fn main() -> Result<(), Report> {
         .arg("--field")
         .arg("ci")
         .arg("--exporter")
-        .arg("svg2pdf")
+        .arg("inkscape")
         .arg(&brochure_template_copy)
         .arg(&output_dir)
         .output()?;

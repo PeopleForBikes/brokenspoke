@@ -9,7 +9,10 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::path::Path;
 use url::Url;
 
-use self::{scorecard21::ScoreCard21, scorecard23::ScoreCard23, shortscorecard::ShortScoreCard};
+use self::{
+    scorecard21::ScoreCard21, scorecard23::ScoreCard23, scorecard24::ScoreCard24,
+    shortscorecard::ShortScoreCard,
+};
 
 pub trait ScorecardCsv {
     /// Read a CSV file and populate a Vector of Self.
@@ -58,12 +61,14 @@ pub trait Scorecard {
 pub enum Format {
     V21,
     V23,
+    V24,
 }
 
 #[derive(Debug, Clone)]
 pub enum ScoreCardVersion {
     V21(ScoreCard21),
     V23(ScoreCard23),
+    V24(ScoreCard24),
 }
 
 impl Scorecard for ScoreCardVersion {
@@ -71,6 +76,7 @@ impl Scorecard for ScoreCardVersion {
         match self {
             ScoreCardVersion::V21(s) => s.full_name(),
             ScoreCardVersion::V23(s) => s.full_name(),
+            ScoreCardVersion::V24(s) => s.full_name(),
         }
     }
 
@@ -78,6 +84,7 @@ impl Scorecard for ScoreCardVersion {
         match self {
             ScoreCardVersion::V21(s) => s.url(dataset),
             ScoreCardVersion::V23(s) => s.url(dataset),
+            ScoreCardVersion::V24(s) => s.url(dataset),
         }
     }
 
@@ -85,6 +92,7 @@ impl Scorecard for ScoreCardVersion {
         match self {
             ScoreCardVersion::V21(s) => s.version(),
             ScoreCardVersion::V23(s) => s.version(),
+            ScoreCardVersion::V24(s) => s.version(),
         }
     }
 }
@@ -94,6 +102,7 @@ impl From<&ScoreCardVersion> for ShortScoreCard {
         match value {
             ScoreCardVersion::V21(s) => ShortScoreCard::from(s),
             ScoreCardVersion::V23(s) => ShortScoreCard::from(s),
+            ScoreCardVersion::V24(s) => ShortScoreCard::from(s),
         }
     }
 }
