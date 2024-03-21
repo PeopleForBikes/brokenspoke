@@ -1,6 +1,6 @@
 use bnacore::scorecard::{
-    scorecard21::ScoreCard21, scorecard23::ScoreCard23, shortscorecard::ShortScoreCard, Format,
-    ScoreCardVersion, ScorecardCsv,
+    scorecard21::ScoreCard21, scorecard23::ScoreCard23, scorecard24::ScoreCard24,
+    shortscorecard::ShortScoreCard, Format, ScoreCardVersion, ScorecardCsv,
 };
 use clap::{crate_name, ArgAction, Parser, ValueEnum, ValueHint};
 use color_eyre::{eyre::Report, Result};
@@ -10,6 +10,7 @@ use std::{fs, path::PathBuf};
 pub enum CliFormat {
     V21,
     V23,
+    V24,
 }
 
 impl From<Format> for CliFormat {
@@ -17,6 +18,7 @@ impl From<Format> for CliFormat {
         match value {
             Format::V21 => CliFormat::V21,
             Format::V23 => CliFormat::V23,
+            Format::V24 => CliFormat::V24,
         }
     }
 }
@@ -26,6 +28,7 @@ impl From<CliFormat> for Format {
         match value {
             CliFormat::V21 => Format::V21,
             CliFormat::V23 => Format::V23,
+            CliFormat::V24 => Format::V24,
         }
     }
 }
@@ -63,6 +66,10 @@ fn main() -> Result<(), Report> {
         CliFormat::V23 => ScoreCard23::from_csv(opts.city_ratings)?
             .iter()
             .map(|e| ScoreCardVersion::V23(e.clone()))
+            .collect(),
+        CliFormat::V24 => ScoreCard24::from_csv(opts.city_ratings)?
+            .iter()
+            .map(|e| ScoreCardVersion::V24(e.clone()))
             .collect(),
     };
     let short_scorecards = scorecards

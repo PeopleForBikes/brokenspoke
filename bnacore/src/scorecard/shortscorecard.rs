@@ -1,4 +1,6 @@
-use super::{scorecard21::ScoreCard21, scorecard23::ScoreCard23, ScorecardCsv};
+use super::{
+    scorecard21::ScoreCard21, scorecard23::ScoreCard23, scorecard24::ScoreCard24, ScorecardCsv,
+};
 use pyo3::prelude::*;
 use serde::Serialize;
 
@@ -128,6 +130,39 @@ impl From<&ScoreCard23> for ShortScoreCard {
             bnasc: sc.bna.bna_overall_score.round() as u8,
             lsm: sc.bna.bna_total_low_stress_miles.round() as u32,
             hsm: sc.bna.bna_total_high_stress_miles.round() as u32,
+        }
+    }
+}
+
+impl From<&ScoreCard24> for ShortScoreCard {
+    fn from(sc: &ScoreCard24) -> Self {
+        ShortScoreCard {
+            ci: sc.city.clone(),
+            co: sc.country.clone(),
+            // st: sc.state.expect("there must be a state").clone(),
+            st: <std::option::Option<std::string::String> as Clone>::clone(&sc.state)
+                .unwrap_or_default()
+                .clone(),
+            uuid: sc.bna_uuid.clone(),
+            po: sc.census_population,
+            ra: sc.bna_overall_score.unwrap_or_default(),
+            rasc: sc.bna_rounded_score,
+            nw: 0,
+            aw: 0,
+            sf: 0,
+            rs: 0,
+            total: 0,
+            cssc: 0,
+            responses: 0,
+            nh: sc.bna_people.unwrap_or_default().round() as u8,
+            op: sc.bna_opportunity.unwrap_or_default().round() as u8,
+            es: sc.bna_core_services.unwrap_or_default().round() as u8,
+            ret: sc.bna_retail.unwrap_or_default().round() as u8,
+            rec: sc.bna_recreation.unwrap_or_default().round() as u8,
+            tr: sc.bna_transit.unwrap_or_default().round() as u8,
+            bnasc: sc.bna_overall_score.unwrap_or_default().round() as u8,
+            lsm: sc.bna_total_low_stress_miles.unwrap_or_default().round() as u32,
+            hsm: sc.bna_total_high_stress_miles.unwrap_or_default().round() as u32,
         }
     }
 }
