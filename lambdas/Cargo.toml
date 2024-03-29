@@ -4,30 +4,35 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-aws-config = "1.0.0"
-aws-sdk-ecs = "1.1.0"
-aws-sdk-s3 = "1.1.0"
-aws-sdk-sqs = "1.1.0"
-aws_lambda_events = "0.15.0"
+aws-config = { workspace = true }
+aws-sdk-ecs = { workspace = true }
+aws-sdk-s3 = { workspace = true }
+aws-sdk-sqs = { workspace = true }
+aws_lambda_events = { workspace = true }
 bnacore = { path = "../bnacore" }
-fontdb = "0.16.0"
-image = "0.25.0"
-lambda_http = "0.10.0"
-lambda_runtime = "0.10.0"
+fontdb = { workspace = true }
+image = { workspace = true }
+lambda_http = { workspace = true }
+lambda_runtime = { workspace = true }
 minijinja = { workspace = true }
-reqwest = { workspace = true }
+reqwest = { workspace = true, features = [
+  "blocking",
+  "json",
+  "native-tls-vendored",
+  "rustls",
+] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde_with = { workspace = true }
-simple-error = "0.3.0"
-svg2pdf = { "version" = "0.9.0" }
-time = { workspace = true }
-tokio = { workspace = true }
-tracing = { workspace = true }
-tracing-subscriber = { workspace = true }
-url = { workspace = true }
-uuid = { workspace = true }
-usvg = "0.36.0"
+simple-error = { workspace = true }
+svg2pdf = { workspace = true }
+time = { workspace = true, features = ["macros", "serde-well-known"] }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+tracing = { workspace = true, features = ["log"] }
+tracing-subscriber = { workspace = true, features = ["fmt"] }
+url = { workspace = true, features = ["serde"] }
+uuid = { workspace = true, features = ["v4", "serde"] }
+usvg = { workspace = true }
 
 [[bin]]
 name = "bna-fargate-run"

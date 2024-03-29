@@ -14,30 +14,35 @@ name = "bnacore"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-aws-config = "1.0.0"
-aws-sdk-s3 = "1.1.0"
-csv = "1.1"
-libflate = "2.0.0"
-lopdf = "0.32.0"
+aws-config = { workspace = true }
+aws-sdk-s3 = { workspace = true }
+csv = { workspace = true }
+libflate = { workspace = true }
+lopdf = { workspace = true }
 minijinja = { workspace = true }
-pyo3 = { version = "0.20.0" }
-regex = "1.6.0"
-reqwest = { workspace = true }
+pyo3 = { workspace = true }
+regex = { workspace = true }
+reqwest = { workspace = true, features = [
+  "blocking",
+  "json",
+  "native-tls-vendored",
+  "rustls",
+] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde_with = { workspace = true }
-thiserror = "1.0"
-time = { workspace = true }
-tokio = { workspace = true }
-url = { workspace = true }
+thiserror = { workspace = true }
+time = { workspace = true, features = ["macros", "serde-well-known"] }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+url = { workspace = true, features = ["serde"] }
 walkdir = { workspace = true }
-zip = "0.6.4"
+zip = { workspace = true }
 
 [dev-dependencies]
 color-eyre = { workspace = true }
 rstest = { workspace = true }
-tracing = { workspace = true }
-tracing-subscriber = { workspace = true }
+tracing = { workspace = true, features = ["log"] }
+tracing-subscriber = { workspace = true, features = ["fmt"] }
 
 [features]
 extension-module = ["pyo3/extension-module"]

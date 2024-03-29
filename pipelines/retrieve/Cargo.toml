@@ -7,5 +7,5 @@ edition = "2021"
 
 [dependencies]
 color-eyre = { workspace = true }
-tracing = { workspace = true }
-tracing-subscriber = { workspace = true }
+tracing = { workspace = true, features = ["log"] }
+tracing-subscriber = { workspace = true, features = ["fmt"] }

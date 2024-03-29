@@ -4,7 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-serde = { version = "1", features = ["derive"] }
-
-[dependencies.sea-orm]
-version = "^0.12.1"
+serde = { workspace = true, features = ["derive"] }
+sea-orm = { workspace = true, features = [
+  "debug-print",
+  "runtime-tokio-native-tls",
+  "sqlx-postgres",
+] }
