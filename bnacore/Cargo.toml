@@ -26,7 +26,7 @@ reqwest = { workspace = true, features = [
   "blocking",
   "json",
   "native-tls-vendored",
-  "rustls",
+  "rustls-tls",
 ] }
 serde = { workspace = true }
 serde_json = { workspace = true }
