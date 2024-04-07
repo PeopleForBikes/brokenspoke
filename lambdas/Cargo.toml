@@ -10,6 +10,7 @@ aws-sdk-s3 = { workspace = true }
 aws-sdk-sqs = { workspace = true }
 aws_lambda_events = { workspace = true }
 bnacore = { path = "../bnacore" }
+csv = { workspace = true }
 fontdb = { workspace = true }
 image = { workspace = true }
 lambda_http = { workspace = true }
@@ -45,6 +46,10 @@ path = "src/bna-fargate-status.rs"
 [[bin]]
 name = "bna-prepare-destination"
 path = "src/bna-prepare-destination.rs"
+
+[[bin]]
+name = "bna-save-results"
+path = "src/bna-save-results.rs"
 
 [[bin]]
 name = "bna-setup"

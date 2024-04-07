@@ -1,5 +1,5 @@
-use bnacore::aws::s3::create_calver_s3_directories;
-use bnalambdas::{AnalysisParameters, BROKENSPOKE_ANALYZER_BUCKET};
+use bnacore::aws::{get_aws_parameter_value, s3::create_calver_s3_directories};
+use bnalambdas::AnalysisParameters;
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use serde::{Deserialize, Serialize};
 use tracing::info;
@@ -24,10 +24,13 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
     info!("Reading input...");
     let analysis_parameters = &event.payload.analysis_parameters;
 
+    // Retrieve bna_bucket name.
+    let bna_bucket = get_aws_parameter_value("BNA_BUCKET").await?;
+
     // Read the task inputs.
     info!("Creating S3 directory...");
     let dir = create_calver_s3_directories(
-        BROKENSPOKE_ANALYZER_BUCKET,
+        &bna_bucket,
         analysis_parameters.country.as_str(),
         analysis_parameters.city.as_str(),
         analysis_parameters.region.as_deref(),
