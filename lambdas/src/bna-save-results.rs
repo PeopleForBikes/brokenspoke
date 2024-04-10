@@ -34,11 +34,6 @@ impl AWSS3 {
     }
 }
 
-#[derive(Deserialize, Serialize)]
-struct TaskOutput {
-    // aws_s3: AWSS3,
-}
-
 #[derive(Deserialize, Clone)]
 struct OverallScore {
     score_id: String,
@@ -119,7 +114,7 @@ pub struct BNAPost {
     pub summary: BNASummary,
 }
 
-async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, Error> {
+async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     // Read the task inputs.
     info!("Reading input...");
     let aws_s3 = &event.payload.aws_s3;
@@ -221,7 +216,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
     // };
     // update_pipeline(&patch_url, &auth, &pipeline)?;
 
-    Ok(TaskOutput {})
+    Ok(())
 }
 
 #[tokio::main]
