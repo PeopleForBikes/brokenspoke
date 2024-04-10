@@ -3,7 +3,7 @@ use aws_sdk_ecs::types::{
     AssignPublicIp, AwsVpcConfiguration, ContainerOverride, KeyValuePair, NetworkConfiguration,
     TaskOverride,
 };
-use bnacore::aws::{get_aws_parameter_value, get_aws_secrets_value};
+use bnacore::aws::get_aws_parameter_value;
 use bnalambdas::{
     authenticate_service_account, update_pipeline, AnalysisParameters, BrokenspokePipeline,
     BrokenspokeState, Context,
@@ -11,23 +11,11 @@ use bnalambdas::{
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use serde::{Deserialize, Serialize};
 use tracing::info;
-use url::Url;
 
 #[derive(Deserialize)]
 struct TaskInput {
     analysis_parameters: AnalysisParameters,
-    setup: Setup,
     context: Context,
-}
-
-#[derive(Deserialize)]
-pub struct Setup {
-    neon: Neon,
-}
-
-#[derive(Deserialize)]
-struct Neon {
-    host: String,
 }
 
 #[derive(Serialize)]
@@ -54,7 +42,6 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
 
     // Read the task inputs.
     let analysis_parameters = &event.payload.analysis_parameters;
-    let neon_host = &event.payload.setup.neon.host;
     let state_machine_context = &event.payload.context;
     let (state_machine_id, _) = state_machine_context.execution.ids()?;
 
@@ -72,7 +59,6 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
     let ecs_client = aws_sdk_ecs::Client::new(&aws_config);
 
     // Retrieve secrets and parameters.
-    let main_db_url = get_aws_secrets_value("DATABASE_URL", "DATABASE_URL").await?;
     let ecs_cluster_arn = get_aws_parameter_value("BNA_CLUSTER_ARN").await?;
     let vpc_subnets = get_aws_parameter_value("PUBLIC_SUBNETS").await?;
     let vpc_security_groups = get_aws_parameter_value("BNA_TASK_SECURITY_GROUP").await?;
@@ -80,8 +66,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
     let s3_bucket = get_aws_parameter_value("BNA_BUCKET").await?;
 
     // Replace the main database host with the compute endpoint.
-    let mut database_url = Url::parse(&main_db_url)?;
-    database_url.set_host(Some(neon_host))?;
+    let database_url = "postgresql://postgres:postgres@localhost:5432/postgres";
 
     // Prepare the command.
     let mut container_command: Vec<String> = vec![
@@ -203,22 +188,6 @@ mod tests {
             "neon": {
               "branch_id": "br-small-recipe-a6taof36",
               "host": "host.us-west-2.aws.neon.tech"
-            },
-            "context": {
-              "Execution": {
-                "Id": "arn:aws:states:us-west-2:123456789012:execution:brokenspoke-analyzer:73f24dfc-8978-4d93-a4f7-29d1b0263e4a",
-                "Name": "73f24dfc-8978-4d93-a4f7-29d1b0263e4a",
-                "RoleArn": "arn:aws:iam::123456789012:role/role",
-                "StartTime": "+002024-02-13T00:22:50.787000000Z"
-              },
-              "State": {
-                "EnteredTime": "+002024-02-13T00:22:51.019000000Z",
-                "Name": "BNAContext"
-              },
-              "StateMachine": {
-                "Id": "arn:aws:states:us-west-2:123456789012:stateMachine:brokenspoke-analyzer",
-                "Name": "brokenspoke-analyzer"
-              }
             }
           }
         }"#;
