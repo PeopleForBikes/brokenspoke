@@ -22,7 +22,6 @@ struct TaskInput {
 #[derive(Serialize)]
 struct TaskOutput {
     neon: Neon,
-    context: Context,
 }
 
 #[derive(Serialize)]
@@ -131,7 +130,6 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
             branch_id: neon_branch_id,
             host: neon_host,
         },
-        context: state_machine_context.clone(),
     })
 }
 

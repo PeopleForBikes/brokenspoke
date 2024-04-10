@@ -11,11 +11,6 @@ struct TaskInput {
 
 #[derive(Serialize)]
 struct TaskOutput {
-    aws_s3: AWSS3,
-}
-
-#[derive(Serialize)]
-struct AWSS3 {
     destination: String,
 }
 
@@ -39,9 +34,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
 
     // Update the output with the S3 folder that was created.
     Ok(TaskOutput {
-        aws_s3: AWSS3 {
-            destination: dir.to_str().unwrap().to_string(),
-        },
+        destination: dir.to_str().unwrap().to_string(),
     })
 }
 
