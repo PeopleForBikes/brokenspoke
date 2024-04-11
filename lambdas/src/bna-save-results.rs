@@ -121,6 +121,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     let state_machine_context = &event.payload.context;
     let (_state_machine_id, _) = state_machine_context.execution.ids()?;
 
+    info!("Retrieve secrets and parameters...");
     // Retrieve API hostname.
     let api_hostname = get_aws_parameter_value("BNA_API_HOSTNAME").await?;
 
@@ -133,10 +134,12 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
         .map_err(|e| format!("cannot authenticate service account: {e}"))?;
 
     // Configure the S3 client.
+    info!("Configure the S3 client...");
     let config = aws_config::load_defaults(BehaviorVersion::latest()).await;
     let client = aws_sdk_s3::Client::new(&config);
 
     // Download the CSV file with the results.
+    info!("Download the CSV file with the results...");
     let mut object = client
         .get_object()
         .bucket(bna_bucket)
@@ -149,6 +152,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     }
 
     // Parse the results.
+    info!("Parse the results...");
     let mut overall_scores = OverallScores::new();
     let mut rdr = Reader::from_reader(buffer.as_slice());
     for result in rdr.deserialize() {
@@ -198,6 +202,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     let bnas_url = format!("{api_hostname}/bnas");
 
     // Post a new entry via the API.
+    info!("Post a new entry via the API...");
     Client::new()
         .post(bnas_url)
         .bearer_auth(auth.access_token.clone())
@@ -233,4 +238,47 @@ async fn main() -> Result<(), Error> {
         info!("{e}");
         e
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_input_deserialization() {
+        let json_input = r#"{
+          "analysis_parameters": {
+            "country": "usa",
+            "city": "santa rosa",
+            "region": "new mexico",
+            "fips_code": "3570670"
+          },
+          "receipt_handle": "AQEBFo+wTTIZdCvaF2KtZN4ZolAGKeKVGSAhQ7BTA9MUirBT/8mprrHIOg8LuWi3LK9Lu1oFDd5GqVmzExGeHlVbmRA3HWd+vy11b1N4qVeHywvUJJT5/G/GVG2jimkHDa31893N0k2HIm2USSsN6Bqw0JI57ac0ymUWJxzkN9/yJQQXg2dmnNn3YuouzQTGpOJnMjv9UnZaHGVjZXV30IWjs9VzUZd9Wnl721B99pF9t1FUeYnAxShtNUZKzbfbNmSmwtKoE+SwohFL0k84cYkJUjgdXw9yEoT2+zEqeGWtU/oSGmbLorPWIiVYubPcwni1Q9KZROUDvBX7sPDwUeYxxhw9SBxz3y4Tg5hH7X99D4tDXbnRJR1v/0aBAs9h/ohfcEjoYmHdYqRL9r2t33SwYg==",
+          "context": {
+            "Execution": {
+              "Id": "arn:aws:states:us-west-2:863246263227:execution:brokenspoke-analyzer:fd34f1d1-8009-44f1-9111-d3a2daf8a8fe",
+              "Name": "fd34f1d1-8009-44f1-9111-d3a2daf8a8fe",
+              "RoleArn": "arn:aws:iam::863246263227:role/BNAPipelineLambdaExecution",
+              "StartTime": "+002024-04-11T03:05:31.843000000Z"
+            },
+            "State": {
+              "EnteredTime": "+002024-04-11T03:05:32.059000000Z",
+              "Name": "BNAContext"
+            },
+            "StateMachine": {
+              "Id": "arn:aws:states:us-west-2:863246263227:stateMachine:brokenspoke-analyzer",
+              "Name": "brokenspoke-analyzer"
+            }
+          },
+          "aws_s3": {
+            "destination": "usa/new mexico/santa rosa/24.04.4"
+          },
+          "fargate": {
+            "ecs_cluster_arn": "arn:aws:ecs:us-west-2:863246263227:cluster/bna",
+            "task_arn": "arn:aws:ecs:us-west-2:863246263227:task/bna/681690ef8bbb446a93e1324f113e75f0",
+            "last_status": "STOPPED"
+          }
+        }"#;
+        let _deserialized = serde_json::from_str::<TaskInput>(json_input).unwrap();
+    }
 }
