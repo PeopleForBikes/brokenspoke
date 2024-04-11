@@ -23,7 +23,7 @@ struct TaskOutput {
     ecs_cluster_arn: String,
     task_arn: String,
     last_status: String,
-    context: Context,
+    command: Vec<String>,
 }
 
 const FARGATE_MAX_TASK: i32 = 1;
@@ -88,7 +88,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
     let container_name = "brokenspoke-analyzer".to_string();
     let container_overrides = ContainerOverride::builder()
         .name(container_name)
-        .set_command(Some(container_command))
+        .set_command(Some(container_command.clone()))
         .environment(
             KeyValuePair::builder()
                 .name("DATABASE_URL".to_string())
@@ -124,7 +124,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
         ecs_cluster_arn: task.cluster_arn().unwrap().into(),
         task_arn: task.task_arn().unwrap().into(),
         last_status: task.last_status().unwrap().into(),
-        context: state_machine_context.clone(),
+        command: container_command,
     };
 
     // Update the pipeline status.
@@ -182,12 +182,6 @@ mod tests {
             "StateMachine": {
               "Id": "arn:aws:states:us-west-2:123456789012:stateMachine:brokenspoke-analyzer",
               "Name": "brokenspoke-analyzer"
-            }
-          },
-          "setup": {
-            "neon": {
-              "branch_id": "br-small-recipe-a6taof36",
-              "host": "host.us-west-2.aws.neon.tech"
             }
           }
         }"#;
