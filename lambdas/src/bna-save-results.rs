@@ -1,12 +1,11 @@
-use std::{collections::HashMap, io::Write};
-
 use aws_config::BehaviorVersion;
 use bnacore::aws::get_aws_parameter_value;
 use bnalambdas::{authenticate_service_account, Context};
-use csv::Reader;
+use csv::ReaderBuilder;
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
+use std::{collections::HashMap, io::Write};
 use tracing::info;
 use uuid::Uuid;
 
@@ -36,8 +35,8 @@ impl AWSS3 {
 
 #[derive(Deserialize, Clone)]
 struct OverallScore {
-    score_id: String,
-    score_normalized: f64,
+    pub score_id: String,
+    pub score_normalized: Option<f64>,
 }
 
 #[derive(Deserialize)]
@@ -56,7 +55,8 @@ impl OverallScores {
 
     /// Retrieve the normalized score of an OverallScore item by id.
     fn get_normalized_score(&self, score_id: &str) -> Option<f64> {
-        self.get_overall_score(score_id).map(|s| s.score_normalized)
+        self.get_overall_score(score_id)
+            .and_then(|s| s.score_normalized)
     }
 }
 
@@ -140,10 +140,14 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
 
     // Download the CSV file with the results.
     info!("Download the CSV file with the results...");
+    let scores_csv = format!(
+        "{}/neighborhood_overall_scores.csv",
+        aws_s3.destination.clone()
+    );
     let mut object = client
         .get_object()
         .bucket(bna_bucket)
-        .key(aws_s3.destination.clone())
+        .key(scores_csv)
         .send()
         .await?;
     let mut buffer: Vec<u8> = Vec::new();
@@ -153,12 +157,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
 
     // Parse the results.
     info!("Parse the results...");
-    let mut overall_scores = OverallScores::new();
-    let mut rdr = Reader::from_reader(buffer.as_slice());
-    for result in rdr.deserialize() {
-        let score: OverallScore = result?;
-        overall_scores.0.insert(score.score_id.clone(), score);
-    }
+    let overall_scores = parse_overall_scores(buffer.as_slice())?;
 
     // Convert the overall scores to a BNAPost struct.
     let version = aws_s3.get_version();
@@ -224,6 +223,16 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     Ok(())
 }
 
+fn parse_overall_scores(data: &[u8]) -> Result<OverallScores, Error> {
+    let mut overall_scores = OverallScores::new();
+    let mut rdr = ReaderBuilder::new().flexible(true).from_reader(data);
+    for result in rdr.deserialize() {
+        let score: OverallScore = result?;
+        overall_scores.0.insert(score.score_id.clone(), score);
+    }
+    Ok(overall_scores)
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     tracing_subscriber::fmt()
@@ -271,7 +280,7 @@ mod tests {
             }
           },
           "aws_s3": {
-            "destination": "usa/new mexico/santa rosa/24.04.4"
+            "destination": "usa/new mexico/santa rosa/23.12.4"
           },
           "fargate": {
             "ecs_cluster_arn": "arn:aws:ecs:us-west-2:863246263227:cluster/bna",
@@ -280,5 +289,34 @@ mod tests {
           }
         }"#;
         let _deserialized = serde_json::from_str::<TaskInput>(json_input).unwrap();
+    }
+
+    #[test]
+    fn test_parse_overallscores() {
+        let data = r#"id,score_id,score_original,score_normalized,human_explanation
+1,people,0.1917,19.1700,"On average, census blocks in the neighborhood received this population score."
+2,opportunity_employment,0.0826,8.2600,"On average, census blocks in the neighborhood received this employment score."
+3,opportunity_k12_education,0.0831,8.3100,"On average, census blocks in the neighborhood received this K12 schools score."
+4,opportunity_technical_vocational_college,0.0000,0.0000,"On average, census blocks in the neighborhood received this tech/vocational colleges score."
+5,opportunity_higher_education,0.0000,0.0000,"On average, census blocks in the neighborhood received this universities score."
+6,opportunity,0.0829,8.2900,
+7,core_services_doctors,0.0000,0.0000,"On average, census blocks in the neighborhood received this doctors score."
+8,core_services_dentists,0.0000,0.0000,"On average, census blocks in the neighborhood received this dentists score."
+9,core_services_hospitals,0.0518,5.1800,"On average, census blocks in the neighborhood received this hospital score."
+10,core_services_pharmacies,0.0000,0.0000,"On average, census blocks in the neighborhood received this pharmacies score."
+11,core_services_grocery,0.0169,1.6900,"On average, census blocks in the neighborhood received this grocery score."
+12,core_services_social_services,0.0000,0.0000,"On average, census blocks in the neighborhood received this social services score."
+13,core_services,0.0324,3.2400,
+14,retail,0.0000,0.0000,"On average, census blocks in the neighborhood received this retail score."
+15,recreation_parks,0.0713,7.1300,"On average, census blocks in the neighborhood received this parks score."
+16,recreation_trails,0.0000,0.0000,"On average, census blocks in the neighborhood received this trails score."
+17,recreation_community_centers,0.0000,0.0000,"On average, census blocks in the neighborhood received this community centers score."
+18,recreation,0.0713,7.1300,
+19,transit,0.0000,0.0000,"On average, census blocks in the neighborhood received this transit score."
+20,overall_score,0.0893,8.9300,
+21,population_total,2960.0000,,Total population of boundary
+22,total_miles_low_stress,9.3090,9.3000,Total low-stress miles
+23,total_miles_high_stress,64.5092,64.5000,Total high-stress miles"#;
+        let _scores = parse_overall_scores(data.as_bytes()).unwrap();
     }
 }
