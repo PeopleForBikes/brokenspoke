@@ -128,9 +128,7 @@ pub enum BranchState {
 #[skip_serializing_none]
 #[derive(Default, Debug, Deserialize, Serialize)]
 pub struct Branch {
-    ///
     pub active_time_seconds: Option<u64>,
-    ///
     pub compute_time_seconds: Option<u64>,
     /// CPU seconds used by all the endpoints of the branch, including deleted ones.
     /// This value is reset at the beginning of each billing period.
@@ -143,7 +141,6 @@ pub struct Branch {
     pub creation_source: Option<String>,
     /// The branch state.
     pub current_state: Option<BranchState>,
-    ///
     pub data_transfer_bytes: Option<u64>,
     /// The branch ID.
     pub id: Option<String>,
