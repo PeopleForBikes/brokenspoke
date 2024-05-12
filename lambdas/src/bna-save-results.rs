@@ -1,11 +1,13 @@
 use aws_config::BehaviorVersion;
 use bnacore::aws::get_aws_parameter_value;
-use bnalambdas::{authenticate_service_account, Context};
+use bnalambdas::{authenticate_service_account, AnalysisParameters, Context};
 use csv::ReaderBuilder;
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
+use simple_error::SimpleError;
 use std::{collections::HashMap, io::Write};
+use time::OffsetDateTime;
 use tracing::info;
 use uuid::Uuid;
 
@@ -13,6 +15,7 @@ const OVERALL_SCORES_COUNT: usize = 23;
 
 #[derive(Deserialize)]
 struct TaskInput {
+    analysis_parameters: AnalysisParameters,
     aws_s3: AWSS3,
     context: Context,
 }
@@ -64,6 +67,8 @@ impl OverallScores {
 pub struct BNASummary {
     pub bna_uuid: Uuid,
     pub version: String,
+    pub city_id: Uuid,
+    pub score: f64,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -114,9 +119,25 @@ pub struct BNAPost {
     pub summary: BNASummary,
 }
 
+#[derive(Serialize, Deserialize, Default)]
+pub struct City {
+    pub city_id: Uuid,
+    pub country: String,
+    pub state: String,
+    pub name: String,
+    pub latitude: Option<f64>,
+    pub longitude: Option<f64>,
+    pub region: Option<String>,
+    pub state_abbrev: Option<String>,
+    pub speed_limit: Option<i32>,
+    pub created_at: Option<OffsetDateTime>,
+    pub updated_at: Option<OffsetDateTime>,
+}
+
 async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     // Read the task inputs.
     info!("Reading input...");
+    let analysis_parameters = &event.payload.analysis_parameters;
     let aws_s3 = &event.payload.aws_s3;
     let state_machine_context = &event.payload.context;
     let (_state_machine_id, _) = state_machine_context.execution.ids()?;
@@ -159,43 +180,49 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     info!("Parse the results...");
     let overall_scores = parse_overall_scores(buffer.as_slice())?;
 
+    // Query city.
+    let country = &analysis_parameters.country;
+    let region = match &analysis_parameters.region {
+        Some(region) => region.to_owned(),
+        None => country.to_owned(),
+    };
+    let name = &analysis_parameters.city;
+    let cities_url = format!("{api_hostname}/cities/{country}/{region}/{name}");
+    let client = Client::new();
+    let r = client.get(&cities_url).send()?;
+    let city: Option<City> = match r.status().as_u16() {
+        x if x < 400 => Some(r.json::<City>()?),
+        404 => None,
+        _ => {
+            return Err(Box::new(SimpleError::new(format!(
+                "cannot retrieve city at {cities_url}: {} {}",
+                r.status(),
+                r.status().as_str()
+            ))))
+        }
+    };
+
+    // Create city if it does not exist and save the city_id.
+    // Otherwise save the city_id and update the population.
+    let city_id: Uuid;
+    if let Some(city) = city {
+        city_id = city.city_id;
+    } else {
+        city_id = Uuid::new_v4();
+        // Create the city.
+        let c = City {
+            city_id,
+            country: country.clone(),
+            state: region.clone(),
+            name: name.clone(),
+            ..Default::default()
+        };
+        client.post(cities_url).json(&c).send()?;
+    }
+
     // Convert the overall scores to a BNAPost struct.
     let version = aws_s3.get_version();
-    let bna_post = BNAPost {
-        core_services: BNACoreServices {
-            dentists: overall_scores.get_normalized_score("core_services_dentists"),
-            doctors: overall_scores.get_normalized_score("core_services_doctors"),
-            grocery: overall_scores.get_normalized_score("core_services_grocery"),
-            hospitals: overall_scores.get_normalized_score("core_services_hospitals"),
-            pharmacies: overall_scores.get_normalized_score("core_services_pharmacies"),
-            social_services: overall_scores.get_normalized_score("core_services_social_services"),
-        },
-        features: BNAFeatures {
-            people: overall_scores.get_normalized_score("people"),
-            retail: overall_scores.get_normalized_score("retail"),
-            transit: overall_scores.get_normalized_score("transit"),
-        },
-        infrastructure: BNAInfrastructure {
-            low_stress_miles: overall_scores.get_normalized_score("total_miles_low_stress"),
-            high_stress_miles: overall_scores.get_normalized_score("total_miles_high_stress"),
-        },
-        opportunity: BNAOpportunity {
-            employment: overall_scores.get_normalized_score("opportunity_employment"),
-            higher_education: overall_scores.get_normalized_score("opportunity_higher_education"),
-            k12_education: overall_scores.get_normalized_score("opportunity_k12_education"),
-            technical_vocational_college: overall_scores
-                .get_normalized_score("opportunity_technical_vocational_college"),
-        },
-        recreation: BNARecreation {
-            community_centers: overall_scores.get_normalized_score("recreation_community_centers"),
-            parks: overall_scores.get_normalized_score("recreation_parks"),
-            recreation_trails: overall_scores.get_normalized_score("recreation_trails"),
-        },
-        summary: BNASummary {
-            bna_uuid: Uuid::new_v4(),
-            version,
-        },
-    };
+    let bna_post = scores_to_bnapost(overall_scores, version, city_id);
 
     // Prepare API URLs.
     let bnas_url = format!("{api_hostname}/bnas");
@@ -233,6 +260,46 @@ fn parse_overall_scores(data: &[u8]) -> Result<OverallScores, Error> {
     Ok(overall_scores)
 }
 
+fn scores_to_bnapost(overall_scores: OverallScores, version: String, city_id: Uuid) -> BNAPost {
+    BNAPost {
+        core_services: BNACoreServices {
+            dentists: overall_scores.get_normalized_score("core_services_dentists"),
+            doctors: overall_scores.get_normalized_score("core_services_doctors"),
+            grocery: overall_scores.get_normalized_score("core_services_grocery"),
+            hospitals: overall_scores.get_normalized_score("core_services_hospitals"),
+            pharmacies: overall_scores.get_normalized_score("core_services_pharmacies"),
+            social_services: overall_scores.get_normalized_score("core_services_social_services"),
+        },
+        features: BNAFeatures {
+            people: overall_scores.get_normalized_score("people"),
+            retail: overall_scores.get_normalized_score("retail"),
+            transit: overall_scores.get_normalized_score("transit"),
+        },
+        infrastructure: BNAInfrastructure {
+            low_stress_miles: overall_scores.get_normalized_score("total_miles_low_stress"),
+            high_stress_miles: overall_scores.get_normalized_score("total_miles_high_stress"),
+        },
+        opportunity: BNAOpportunity {
+            employment: overall_scores.get_normalized_score("opportunity_employment"),
+            higher_education: overall_scores.get_normalized_score("opportunity_higher_education"),
+            k12_education: overall_scores.get_normalized_score("opportunity_k12_education"),
+            technical_vocational_college: overall_scores
+                .get_normalized_score("opportunity_technical_vocational_college"),
+        },
+        recreation: BNARecreation {
+            community_centers: overall_scores.get_normalized_score("recreation_community_centers"),
+            parks: overall_scores.get_normalized_score("recreation_parks"),
+            recreation_trails: overall_scores.get_normalized_score("recreation_trails"),
+        },
+        summary: BNASummary {
+            bna_uuid: Uuid::new_v4(),
+            version,
+            city_id,
+            score: 0.0,
+        },
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     tracing_subscriber::fmt()
@@ -251,6 +318,7 @@ async fn main() -> Result<(), Error> {
 
 #[cfg(test)]
 mod tests {
+
     use super::*;
 
     #[test]
@@ -319,4 +387,61 @@ mod tests {
 23,total_miles_high_stress,64.5092,64.5000,Total high-stress miles"#;
         let _scores = parse_overall_scores(data.as_bytes()).unwrap();
     }
+
+    //     #[test]
+    //     fn test_post() {
+    //         let data = r#"id,score_id,score_original,score_normalized,human_explanation
+    // 1,people,0.1917,19.1700,"On average, census blocks in the neighborhood received this population score."
+    // 2,opportunity_employment,0.0826,8.2600,"On average, census blocks in the neighborhood received this employment score."
+    // 3,opportunity_k12_education,0.0831,8.3100,"On average, census blocks in the neighborhood received this K12 schools score."
+    // 4,opportunity_technical_vocational_college,0.0000,0.0000,"On average, census blocks in the neighborhood received this tech/vocational colleges score."
+    // 5,opportunity_higher_education,0.0000,0.0000,"On average, census blocks in the neighborhood received this universities score."
+    // 6,opportunity,0.0829,8.2900,
+    // 7,core_services_doctors,0.0000,0.0000,"On average, census blocks in the neighborhood received this doctors score."
+    // 8,core_services_dentists,0.0000,0.0000,"On average, census blocks in the neighborhood received this dentists score."
+    // 9,core_services_hospitals,0.0518,5.1800,"On average, census blocks in the neighborhood received this hospital score."
+    // 10,core_services_pharmacies,0.0000,0.0000,"On average, census blocks in the neighborhood received this pharmacies score."
+    // 11,core_services_grocery,0.0169,1.6900,"On average, census blocks in the neighborhood received this grocery score."
+    // 12,core_services_social_services,0.0000,0.0000,"On average, census blocks in the neighborhood received this social services score."
+    // 13,core_services,0.0324,3.2400,
+    // 14,retail,0.0000,0.0000,"On average, census blocks in the neighborhood received this retail score."
+    // 15,recreation_parks,0.0713,7.1300,"On average, census blocks in the neighborhood received this parks score."
+    // 16,recreation_trails,0.0000,0.0000,"On average, census blocks in the neighborhood received this trails score."
+    // 17,recreation_community_centers,0.0000,0.0000,"On average, census blocks in the neighborhood received this community centers score."
+    // 18,recreation,0.0713,7.1300,
+    // 19,transit,0.0000,0.0000,"On average, census blocks in the neighborhood received this transit score."
+    // 20,overall_score,0.0893,8.9300,
+    // 21,population_total,2960.0000,,Total population of boundary
+    // 22,total_miles_low_stress,9.3090,9.3000,Total low-stress miles
+    // 23,total_miles_high_stress,64.5092,64.5000,Total high-stress miles"#;
+    //         let overall_scores = parse_overall_scores(data.as_bytes()).unwrap();
+
+    //         // Convert the overall scores to a BNAPost struct.
+    //         let version = String::from("24.05");
+    //         let bna_post = scores_to_bnapost(overall_scores, version, city_id);
+
+    //         info!("Retrieve secrets and parameters...");
+    //         // Retrieve API hostname.
+    //         let api_hostname = String::from("https://api.peopleforbikes.xyz");
+
+    //         let auth = AuthResponse {
+    //             access_token: String::from("")
+    //             expires_in: 3600,
+    //             token_type: String::from("Bearer"),
+    //         };
+
+    //         // Prepare API URLs.
+    //         let bnas_url = format!("{api_hostname}/bnas");
+
+    //         // Post a new entry via the API.
+    //         info!("Post a new entry via the API...");
+    //         Client::new()
+    //             .post(bnas_url)
+    //             .bearer_auth(auth.access_token.clone())
+    //             .json(&bna_post)
+    //             .send()
+    //             .unwrap()
+    //             .error_for_status()
+    //             .unwrap();
+    //     }
 }

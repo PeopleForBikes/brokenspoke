@@ -8,7 +8,7 @@ use std::{
     path::{Path, PathBuf},
 };
 use walkdir::{DirEntry, WalkDir};
-use zip::ZipWriter;
+use zip::{write::SimpleFileOptions, ZipWriter};
 
 /// Define a structure to handle brochure bundles.
 pub struct Bundle {
@@ -129,7 +129,7 @@ impl Bundle {
 
         // Define the compression options.
         let options =
-            zip::write::FileOptions::default().compression_method(zip::CompressionMethod::Stored);
+            SimpleFileOptions::default().compression_method(zip::CompressionMethod::Stored);
 
         // Zip them all.
         let all_zip_path = bundle_dir.join("all.zip");
