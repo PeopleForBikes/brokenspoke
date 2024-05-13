@@ -50,4 +50,5 @@ jobs:
           echo $LAMBDAS \
           | xargs -n1 -t \
             cargo lambda deploy \
+            --runtime provided.al2023 \
             --iam-role ${{ secrets.LAMBDA_ROLE_ARN_STAGING }}
