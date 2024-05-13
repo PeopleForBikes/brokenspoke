@@ -160,21 +160,15 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     let client = aws_sdk_s3::Client::new(&config);
 
     // Download the CSV file with the results.
-    info!("Download the CSV file with the results...");
     let scores_csv = format!(
         "{}/neighborhood_overall_scores.csv",
         aws_s3.destination.clone()
     );
-    let mut object = client
-        .get_object()
-        .bucket(bna_bucket)
-        .key(scores_csv)
-        .send()
-        .await?;
-    let mut buffer: Vec<u8> = Vec::new();
-    while let Some(bytes) = object.body.try_next().await? {
-        buffer.write_all(&bytes)?;
-    }
+    info!(
+        "Download the CSV file with the results from {}...",
+        scores_csv
+    );
+    let buffer = fetch_s3_object_as_bytes(&client, &bna_bucket, &scores_csv).await?;
 
     // Parse the results.
     info!("Parse the results...");
@@ -204,7 +198,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     };
 
     // Create city if it does not exist and save the city_id.
-    // Otherwise save the city_id and update the population.
+    // Otherwise save the city_id and update the population..
     let city_id: Uuid;
     if let Some(city) = city {
         info!("The city exists, update the population...");
@@ -301,6 +295,30 @@ fn scores_to_bnapost(overall_scores: OverallScores, version: String, city_id: Uu
             score: 0.0,
         },
     }
+}
+
+async fn fetch_s3_object_as_bytes(
+    client: &aws_sdk_s3::Client,
+    bucket: &str,
+    key: &str,
+) -> std::io::Result<Vec<u8>> {
+    let mut object = client
+        .get_object()
+        .bucket(bucket)
+        .key(key)
+        .send()
+        .await
+        .map_err(|e| {
+            std::io::Error::new(
+                std::io::ErrorKind::Other,
+                format!("AWS S3 operation error: {e}"),
+            )
+        })?;
+    let mut buffer: Vec<u8> = Vec::new();
+    while let Some(bytes) = object.body.try_next().await? {
+        buffer.write_all(&bytes)?;
+    }
+    Ok(buffer)
 }
 
 #[tokio::main]
@@ -447,4 +465,18 @@ mod tests {
     //             .error_for_status()
     //             .unwrap();
     //     }
+
+    // #[tokio::test]
+    // async fn test_fetch_s3_object() {
+    //     let config = aws_config::load_defaults(BehaviorVersion::latest()).await;
+    //     let client = aws_sdk_s3::Client::new(&config);
+    //     let buffer = fetch_s3_object_as_bytes(
+    //         client,
+    //         "brokenspoke-analyzer",
+    //         "spain/valencia/valencia/24.4/neighborhood_overall_scores.csv",
+    //     )
+    //     .await
+    //     .unwrap();
+    //     assert!(buffer.len() > 0)
+    // }
 }
