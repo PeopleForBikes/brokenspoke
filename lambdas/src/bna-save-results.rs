@@ -181,6 +181,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     let overall_scores = parse_overall_scores(buffer.as_slice())?;
 
     // Query city.
+    info!("Check for existing city...");
     let country = &analysis_parameters.country;
     let region = match &analysis_parameters.region {
         Some(region) => region.to_owned(),
@@ -206,8 +207,10 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     // Otherwise save the city_id and update the population.
     let city_id: Uuid;
     if let Some(city) = city {
+        info!("The city exists, update the population...");
         city_id = city.city_id;
     } else {
+        info!("Create a new city...");
         city_id = Uuid::new_v4();
         // Create the city.
         let c = City {
@@ -228,7 +231,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     let bnas_url = format!("{api_hostname}/bnas");
 
     // Post a new entry via the API.
-    info!("Post a new entry via the API...");
+    info!("Post a new BNA entry via the API...");
     Client::new()
         .post(bnas_url)
         .bearer_auth(auth.access_token.clone())
