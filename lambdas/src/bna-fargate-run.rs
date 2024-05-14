@@ -15,7 +15,13 @@ use tracing::info;
 #[derive(Deserialize)]
 struct TaskInput {
     analysis_parameters: AnalysisParameters,
+    aws_s3: AWSS3,
     context: Context,
+}
+
+#[derive(Deserialize, Serialize, Clone)]
+struct AWSS3 {
+    destination: String,
 }
 
 #[derive(Serialize)]
@@ -41,6 +47,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
         .map_err(|e| format!("cannot authenticate service account: {e}"))?;
 
     // Read the task inputs.
+    let aws_s3 = &event.payload.aws_s3;
     let analysis_parameters = &event.payload.analysis_parameters;
     let state_machine_context = &event.payload.context;
     let (state_machine_id, _) = state_machine_context.execution.ids()?;
@@ -73,9 +80,11 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
         "-vv".to_string(),
         "run".to_string(),
         "--with-export".to_string(),
-        "s3".to_string(),
+        "s3-custom".to_string(),
         "--s3-bucket".to_string(),
         s3_bucket,
+        "--s3-dir".to_string(),
+        aws_s3.destination.clone(),
         analysis_parameters.country.clone(),
         analysis_parameters.city.clone(),
     ];
@@ -183,6 +192,9 @@ mod tests {
               "Id": "arn:aws:states:us-west-2:123456789012:stateMachine:brokenspoke-analyzer",
               "Name": "brokenspoke-analyzer"
             }
+          },
+          "aws_s3": {
+            "destination": "usa/new mexico/santa rosa/24.05.3"
           }
         }"#;
         let _deserialized = serde_json::from_str::<TaskInput>(json_input).unwrap();
