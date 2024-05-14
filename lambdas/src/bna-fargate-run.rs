@@ -80,7 +80,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
         "-vv".to_string(),
         "run".to_string(),
         "--with-export".to_string(),
-        "s3-custom".to_string(),
+        "s3_custom".to_string(),
         "--s3-bucket".to_string(),
         s3_bucket,
         "--s3-dir".to_string(),
