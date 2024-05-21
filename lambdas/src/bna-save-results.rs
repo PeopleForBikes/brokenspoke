@@ -217,7 +217,12 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
             name: name.clone(),
             ..Default::default()
         };
-        client.post(cities_url).json(&c).send()?;
+        client
+            .post(cities_url)
+            .bearer_auth(auth.access_token.clone())
+            .json(&c)
+            .send()?
+            .error_for_status()?;
     }
 
     // Convert the overall scores to a BNAPost struct.
@@ -229,6 +234,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
 
     // Post a new entry via the API.
     info!("Post a new BNA entry via the API...");
+    info!("New entry: {:?}", &bna_post);
     Client::new()
         .post(bnas_url)
         .bearer_auth(auth.access_token.clone())
