@@ -82,6 +82,7 @@ pub struct BNARecreation {
     pub community_centers: Option<f64>,
     pub parks: Option<f64>,
     pub recreation_trails: Option<f64>,
+    pub score: f64,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -90,6 +91,7 @@ pub struct BNAOpportunity {
     pub higher_education: Option<f64>,
     pub k12_education: Option<f64>,
     pub technical_vocational_college: Option<f64>,
+    pub score: f64,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -100,6 +102,7 @@ pub struct BNACoreServices {
     pub hospitals: Option<f64>,
     pub pharmacies: Option<f64>,
     pub social_services: Option<f64>,
+    pub score: f64,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -266,6 +269,9 @@ fn scores_to_bnapost(overall_scores: OverallScores, version: String, city_id: Uu
             hospitals: overall_scores.get_normalized_score("core_services_hospitals"),
             pharmacies: overall_scores.get_normalized_score("core_services_pharmacies"),
             social_services: overall_scores.get_normalized_score("core_services_social_services"),
+            score: overall_scores
+                .get_normalized_score("core_services")
+                .unwrap_or_default(),
         },
         features: BNAFeatures {
             people: overall_scores.get_normalized_score("people"),
@@ -282,11 +288,17 @@ fn scores_to_bnapost(overall_scores: OverallScores, version: String, city_id: Uu
             k12_education: overall_scores.get_normalized_score("opportunity_k12_education"),
             technical_vocational_college: overall_scores
                 .get_normalized_score("opportunity_technical_vocational_college"),
+            score: overall_scores
+                .get_normalized_score("opportunity")
+                .unwrap_or_default(),
         },
         recreation: BNARecreation {
             community_centers: overall_scores.get_normalized_score("recreation_community_centers"),
             parks: overall_scores.get_normalized_score("recreation_parks"),
             recreation_trails: overall_scores.get_normalized_score("recreation_trails"),
+            score: overall_scores
+                .get_normalized_score("recreation_trails")
+                .unwrap_or_default(),
         },
         summary: BNASummary {
             bna_uuid: Uuid::new_v4(),
@@ -409,9 +421,9 @@ mod tests {
         let _scores = parse_overall_scores(data.as_bytes()).unwrap();
     }
 
-    //     #[test]
-    //     fn test_post() {
-    //         let data = r#"id,score_id,score_original,score_normalized,human_explanation
+    // #[test]
+    // fn test_post() {
+    //     let data = r#"id,score_id,score_original,score_normalized,human_explanation
     // 1,people,0.1917,19.1700,"On average, census blocks in the neighborhood received this population score."
     // 2,opportunity_employment,0.0826,8.2600,"On average, census blocks in the neighborhood received this employment score."
     // 3,opportunity_k12_education,0.0831,8.3100,"On average, census blocks in the neighborhood received this K12 schools score."
@@ -435,36 +447,40 @@ mod tests {
     // 21,population_total,2960.0000,,Total population of boundary
     // 22,total_miles_low_stress,9.3090,9.3000,Total low-stress miles
     // 23,total_miles_high_stress,64.5092,64.5000,Total high-stress miles"#;
-    //         let overall_scores = parse_overall_scores(data.as_bytes()).unwrap();
+    //     let overall_scores = parse_overall_scores(data.as_bytes()).unwrap();
 
-    //         // Convert the overall scores to a BNAPost struct.
-    //         let version = String::from("24.05");
-    //         let bna_post = scores_to_bnapost(overall_scores, version, city_id);
+    //     // Convert the overall scores to a BNAPost struct.
+    //     let version = String::from("24.05");
+    //     let city_id = Uuid::new_v4();
+    //     let bna_post = scores_to_bnapost(overall_scores, version, city_id);
+    //     dbg!(&bna_post);
+    //     let s = serde_json::to_string(&bna_post);
+    //     dbg!(s);
 
-    //         info!("Retrieve secrets and parameters...");
-    //         // Retrieve API hostname.
-    //         let api_hostname = String::from("https://api.peopleforbikes.xyz");
+    // info!("Retrieve secrets and parameters...");
+    // // Retrieve API hostname.
+    // let api_hostname = String::from("https://api.peopleforbikes.xyz");
 
-    //         let auth = AuthResponse {
-    //             access_token: String::from("")
-    //             expires_in: 3600,
-    //             token_type: String::from("Bearer"),
-    //         };
+    // let auth = AuthResponse {
+    //     access_token: String::from("")
+    //     expires_in: 3600,
+    //     token_type: String::from("Bearer"),
+    // };
 
-    //         // Prepare API URLs.
-    //         let bnas_url = format!("{api_hostname}/bnas");
+    // // Prepare API URLs.
+    // let bnas_url = format!("{api_hostname}/bnas");
 
-    //         // Post a new entry via the API.
-    //         info!("Post a new entry via the API...");
-    //         Client::new()
-    //             .post(bnas_url)
-    //             .bearer_auth(auth.access_token.clone())
-    //             .json(&bna_post)
-    //             .send()
-    //             .unwrap()
-    //             .error_for_status()
-    //             .unwrap();
-    //     }
+    // // Post a new entry via the API.
+    // info!("Post a new entry via the API...");
+    // Client::new()
+    //     .post(bnas_url)
+    //     .bearer_auth(auth.access_token.clone())
+    //     .json(&bna_post)
+    //     .send()
+    //     .unwrap()
+    //     .error_for_status()
+    //     .unwrap();
+    // }
 
     // #[tokio::test]
     // async fn test_fetch_s3_object() {
