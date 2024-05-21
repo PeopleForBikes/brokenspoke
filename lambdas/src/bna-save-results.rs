@@ -185,15 +185,16 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
         None => country.to_owned(),
     };
     let name = &analysis_parameters.city;
-    let cities_url = format!("{api_hostname}/cities/{country}/{region}/{name}");
+    let cities_url = format!("{api_hostname}/cities");
+    let get_cities_url = format!("{cities_url}/{country}/{region}/{name}");
     let client = Client::new();
-    let r = client.get(&cities_url).send()?;
+    let r = client.get(&get_cities_url).send()?;
     let city: Option<City> = match r.status().as_u16() {
         x if x < 400 => Some(r.json::<City>()?),
         404 => None,
         _ => {
             return Err(Box::new(SimpleError::new(format!(
-                "cannot retrieve city at {cities_url}: {} {}",
+                "cannot retrieve city at {get_cities_url}: {} {}",
                 r.status(),
                 r.status().as_str()
             ))))
