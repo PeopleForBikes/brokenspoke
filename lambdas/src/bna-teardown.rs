@@ -1,20 +1,15 @@
-use bnacore::{
-    aws::{get_aws_parameter_value, get_aws_secrets_value},
-    neon,
-};
+use bnacore::aws::get_aws_parameter_value;
 use bnalambdas::{
     authenticate_service_account, update_pipeline, AnalysisParameters, BrokenspokePipeline,
     BrokenspokeState, Context,
 };
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use serde::{Deserialize, Serialize};
-use time::OffsetDateTime;
 use tracing::info;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct TaskInput {
     analysis_parameters: AnalysisParameters,
-    setup: Setup,
     context: Context,
 }
 
@@ -41,8 +36,6 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
         .map_err(|e| format!("cannot authenticate service account: {e}"))?;
 
     // Read the task inputs.
-    let analysis_parameters = &event.payload.analysis_parameters;
-    let neon_branch_id = &event.payload.setup.neon.branch_id;
     let state_machine_context = &event.payload.context;
     let (state_machine_id, _) = state_machine_context.execution.ids()?;
 
@@ -51,33 +44,6 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     let pipeline = BrokenspokePipeline {
         state_machine_id,
         state: Some(BrokenspokeState::Cleanup),
-        ..Default::default()
-    };
-    update_pipeline(&patch_url, &auth, &pipeline)?;
-
-    // Create the Neon HTTP client.
-    let api_key = get_aws_secrets_value("NEON_API_KEY", "NEON_API_KEY").await?;
-    let project_id = get_aws_parameter_value("NEON_BROKENSPOKE_ANALYZER_PROJECT").await?;
-    let neon = neon::Client::new(&api_key, &project_id)?;
-
-    // Delete neon branch.
-    let delete_branch_response = neon.delete_branch(neon_branch_id).await?;
-    info!("{:#?}", delete_branch_response);
-
-    let pipeline = BrokenspokePipeline {
-        state_machine_id,
-        state: Some(BrokenspokeState::Cleanup),
-        s3_bucket: Some(format!(
-            "{}/{}/{}",
-            analysis_parameters.country,
-            analysis_parameters
-                .region
-                .clone()
-                .unwrap_or(analysis_parameters.country.clone()),
-            analysis_parameters.city,
-        )),
-        torn_down: Some(true),
-        end_time: Some(OffsetDateTime::now_utc()),
         ..Default::default()
     };
     update_pipeline(&patch_url, &auth, &pipeline)?;
@@ -119,11 +85,6 @@ mod tests {
                 "Malta".to_string(),
                 "Valetta".to_string(),
             ),
-            setup: Setup {
-                neon: Neon {
-                    branch_id: "br-bold-mode-48632613".to_string(),
-                },
-            },
             context: bnalambdas::Context {
                 execution: Execution {
                     id: "id".to_string(),
@@ -159,12 +120,7 @@ mod tests {
               "fips_code": "555535"
             },
             "receipt_handle": "AQEB1tiDaN1qwFbZXhWBUwQmTRsUx06pGNOhVdZe86LABsb95D8oLIbFFcOTWQzc27SbKQ4xWtomueKwT8LjTv60SnjoTIm+bhM52w0LYRhadhdyRzQUNyOBEU18QLM8W2psRUm1bhyfRkPNPCl65uhrdJs1ta62d3n2rVOcLvNHp+EEGNnCenze8Cc9qvptMFohe9p56YBxKubA3f3Btv70FLpTZOSPHIa4aDBADLm9eZ16jN1Jc9GU4JMxeNBp3QAunPVFm94vrLCrprffJj4D83IfcQYIf1T7eYlH/LVQcp+Ihaxtas7qnjxa1W756olM3ppxq6ZjRcbVeAtQtrT/+M6YsAqXrBSS+TTOLqNS8Zn0R8/YqSdE31AUFUPeI6LIaF654LabYh/54hju6xRcyQ==",
-            "setup": {
-              "neon": {
-                "branch_id": "br-bold-mode-48632613",
-                "host": "ep-sweet-recipe-68291618.us-west-2.aws.neon.tech"
-              }
-            },
+
             "context": {
               "Execution": {
                 "StartTime": "2024-02-12T16:45:38.655Z",
@@ -183,7 +139,7 @@ mod tests {
             }
           }"#;
         let deserialized = serde_json::from_str::<TaskInput>(json_input).unwrap();
-        assert_eq!(deserialized.setup.neon.branch_id, "br-bold-mode-48632613");
+        assert_eq!(deserialized.analysis_parameters.city, "provincetown");
         let _serialized = serde_json::to_string(&deserialized).unwrap();
     }
 }
