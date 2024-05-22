@@ -124,7 +124,7 @@ pub struct BNAPost {
 
 #[derive(Serialize, Deserialize, Default)]
 pub struct City {
-    pub city_id: Uuid,
+    pub city_id: Option<Uuid>,
     pub country: String,
     pub state: String,
     pub name: String,
@@ -206,24 +206,24 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     let city_id: Uuid;
     if let Some(city) = city {
         info!("The city exists, update the population...");
-        city_id = city.city_id;
+        city_id = city.city_id.unwrap();
     } else {
         info!("Create a new city...");
-        city_id = Uuid::new_v4();
         // Create the city.
         let c = City {
-            city_id,
             country: country.clone(),
             state: region.clone(),
             name: name.clone(),
             ..Default::default()
         };
-        client
+        let city = client
             .post(cities_url)
             .bearer_auth(auth.access_token.clone())
             .json(&c)
             .send()?
-            .error_for_status()?;
+            .error_for_status()?
+            .json::<City>()?;
+        city_id = city.city_id.unwrap();
     }
 
     // Convert the overall scores to a BNAPost struct.
@@ -360,6 +360,7 @@ async fn main() -> Result<(), Error> {
 mod tests {
 
     use super::*;
+    use bnalambdas::AuthResponse;
 
     #[test]
     fn test_input_deserialization() {
@@ -501,5 +502,39 @@ mod tests {
     //     .await
     //     .unwrap();
     //     assert!(buffer.len() > 0)
+    // }
+
+    // #[test]
+    // fn test_post_cities() {
+    //     let country = String::from("United States");
+    //     let region = String::from("New Mexico");
+    //     let name = String::from("Santa Rosa");
+
+    //     let api_hostname = "https://api.peopleforbikes.xyz";
+    //     let cities_url = format!("{api_hostname}/cities");
+    //     let get_cities_url = format!("{cities_url}/{country}/{region}/{name}");
+
+    //     let auth = AuthResponse {
+    //         access_token: String::from("eyJraWQiOiJJa2REUDBMVkVBckdqM25udDZoQmJ3T3VhdVdhSUI2K0tweXJLYVRaaEVZPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJlNmMwYjEyYS1iNjg1LTQ3YmMtYThmMi1kOGU0YTZjYTMyODAiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtd2VzdC0yLmFtYXpvbmF3cy5jb21cL3VzLXdlc3QtMl9OUjFXaGVPdFciLCJjbGllbnRfaWQiOiI0amtsbGk3MDEwZHFla2NtNTJ1bjVmNXFxNyIsIm9yaWdpbl9qdGkiOiI5NmMwMWI1Ny01YWQ0LTQ4ODMtOTIwYy1kZDc5ZjY2N2RlMzYiLCJldmVudF9pZCI6IjBmMmU5NDA3LTRlYmQtNGQ1Zi1hN2YwLTBhMzM1OTNkNzg5ZSIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXdzLmNvZ25pdG8uc2lnbmluLnVzZXIuYWRtaW4iLCJhdXRoX3RpbWUiOjE3MTYzMjkzMDMsImV4cCI6MTcxNjMzMjkwMywiaWF0IjoxNzE2MzI5MzAzLCJqdGkiOiJkYzA2ZThmOS1mYjM5LTRiM2YtYTE0My03ZWY0YmEwYmNmMzUiLCJ1c2VybmFtZSI6InJlbXkuZ3JlaW5ob2ZlciJ9.k39pNR6NOtE72dysEraDr52M4pnMzRd0PW2OmbL4oB4Hn3yR89tOdIB2CKo_hT9U0gR90UPxAeQsVkfZ98LTiK5Ysf1dkQl-0gJlYayZc-Rva3_5o7eH40PsdJvAMkaIYCdTI8NoTa8WsCwqVSOx1irotzBXrSlSQ_aS7k6SJO0cYFTJPk7VIRUiHwXwARhO5N38EUTRHCbHzKmkY6MMv04yCJz1FDoYFkTzeShB6pEaUDAwnjDY3KJGhxpPFLfsGToxNB0xKfw0cklTXHnP8ZgVT2LpvP3t068rrz-3JqdqeDPshcKUkVgCEJZ1m1TlPYndXhuZoTCpR07wJhqDZQ"),
+    //         expires_in: 3600,
+    //         token_type: String::from("Bearer"),
+    //     };
+    //     // Create the city.
+    //     let c = City {
+    //         country: country.clone(),
+    //         state: region.clone(),
+    //         name: name.clone(),
+    //         ..Default::default()
+    //     };
+    //     let client = Client::new();
+    //     let r = client
+    //         .post(cities_url)
+    //         .bearer_auth(auth.access_token.clone())
+    //         .json(&c)
+    //         .send()
+    //         .unwrap()
+    //         .error_for_status()
+    //         .unwrap();
+    //     dbg!(r);
     // }
 }
