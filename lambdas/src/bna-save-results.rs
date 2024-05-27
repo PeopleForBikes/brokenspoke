@@ -1,6 +1,6 @@
 use aws_config::BehaviorVersion;
 use bnacore::aws::get_aws_parameter_value;
-use bnalambdas::{authenticate_service_account, AnalysisParameters, Context};
+use bnalambdas::{authenticate_service_account, AnalysisParameters, Context, AWSS3};
 use csv::ReaderBuilder;
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use reqwest::blocking::Client;
@@ -18,22 +18,6 @@ struct TaskInput {
     analysis_parameters: AnalysisParameters,
     aws_s3: AWSS3,
     context: Context,
-}
-
-#[derive(Deserialize, Serialize, Clone)]
-struct AWSS3 {
-    destination: String,
-}
-
-impl AWSS3 {
-    fn get_version(&self) -> String {
-        self.destination
-            .clone()
-            .split_terminator('/')
-            .last()
-            .unwrap()
-            .to_owned()
-    }
 }
 
 #[derive(Deserialize, Clone)]
@@ -360,7 +344,7 @@ async fn main() -> Result<(), Error> {
 mod tests {
 
     use super::*;
-    use bnalambdas::AuthResponse;
+    // use bnalambdas::AuthResponse;
 
     #[test]
     fn test_input_deserialization() {

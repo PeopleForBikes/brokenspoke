@@ -220,6 +220,22 @@ pub fn update_pipeline(
         .error_for_status()
 }
 
+#[derive(Deserialize, Serialize, Clone)]
+pub struct AWSS3 {
+    pub destination: String,
+}
+
+impl AWSS3 {
+    /// Returns the get version of this [`AWSS3`].
+    pub fn get_version(&self) -> String {
+        self.destination
+            .split_terminator('/')
+            .last()
+            .expect("the destination field must contain a `/` symbol")
+            .to_owned()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
