@@ -6,7 +6,7 @@ use aws_sdk_ecs::types::{
 use bnacore::aws::get_aws_parameter_value;
 use bnalambdas::{
     authenticate_service_account, update_pipeline, AnalysisParameters, BrokenspokePipeline,
-    BrokenspokeState, Context,
+    BrokenspokeState, Context, AWSS3,
 };
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use serde::{Deserialize, Serialize};
@@ -19,11 +19,6 @@ struct TaskInput {
     context: Context,
 }
 
-#[derive(Deserialize, Serialize, Clone)]
-struct AWSS3 {
-    destination: String,
-}
-
 #[derive(Serialize)]
 struct TaskOutput {
     ecs_cluster_arn: String,
@@ -33,6 +28,7 @@ struct TaskOutput {
 }
 
 const FARGATE_MAX_TASK: i32 = 1;
+const DATABASE_URL: &str = "postgresql://postgres:postgres@localhost:5432/postgres";
 
 async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, Error> {
     // Retrieve API hostname.
@@ -72,9 +68,6 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
     let task_definition = get_aws_parameter_value("BNA_TASK_DEFINITION").await?;
     let s3_bucket = get_aws_parameter_value("BNA_BUCKET").await?;
 
-    // Replace the main database host with the compute endpoint.
-    let database_url = "postgresql://postgres:postgres@localhost:5432/postgres";
-
     // Prepare the command.
     let mut container_command: Vec<String> = vec![
         "-vv".to_string(),
@@ -101,7 +94,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
         .environment(
             KeyValuePair::builder()
                 .name("DATABASE_URL".to_string())
-                .value(database_url)
+                .value(DATABASE_URL)
                 .build(),
         )
         .build();
