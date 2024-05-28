@@ -23,7 +23,7 @@ struct Neon {
     branch_id: String,
 }
 
-async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
+async fn function_handler(_event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     // Retrieve API hostname.
     let api_hostname = get_aws_parameter_value("BNA_API_HOSTNAME").await?;
 
@@ -36,8 +36,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
         .map_err(|e| format!("cannot authenticate service account: {e}"))?;
 
     // Read the task inputs.
-    let state_machine_context = &event.payload.context;
-    let (state_machine_id, _) = state_machine_context.execution.ids()?;
+    let (state_machine_id, _) = (uuid::Uuid::new_v4(), uuid::Uuid::new_v4());
 
     // Update the pipeline status.
     let patch_url = format!("{url}/{state_machine_id}");
