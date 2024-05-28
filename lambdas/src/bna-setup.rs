@@ -4,7 +4,7 @@ use bnacore::{
 };
 use bnalambdas::{
     authenticate_service_account, update_pipeline, AnalysisParameters, BrokenspokePipeline,
-    BrokenspokeState, Context,
+    BrokenspokeState,
 };
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use serde::{Deserialize, Serialize};
@@ -16,7 +16,6 @@ const NEON_MAX_BRANCHES: usize = 20;
 #[derive(Deserialize)]
 struct TaskInput {
     analysis_parameters: AnalysisParameters,
-    context: Context,
 }
 
 #[derive(Serialize)]
@@ -46,8 +45,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
     // Read the task inputs.
     info!("Reading input...");
     let analysis_parameters = &event.payload.analysis_parameters;
-    let state_machine_context = &event.payload.context;
-    let (state_machine_id, _) = state_machine_context.execution.ids()?;
+    let (state_machine_id, _) = (uuid::Uuid::new_v4(), uuid::Uuid::new_v4());
 
     // Update the pipeline status.
     info!("updating pipeline...");
