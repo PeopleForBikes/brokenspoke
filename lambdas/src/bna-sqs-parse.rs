@@ -40,7 +40,8 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
     let analysis_parameters = &event.payload.messages[0].body;
     let receipt_handle = &event.payload.messages[0].receipt_handle;
     let state_machine_context = &event.payload.context;
-    let (state_machine_id, scheduled_trigger_id) = state_machine_context.execution.ids()?;
+    let (state_machine_id, scheduled_trigger_id) =
+        (uuid::Uuid::new_v4(), Some(uuid::Uuid::new_v4()));
 
     // Create a new pipeline entry.
     info!(
