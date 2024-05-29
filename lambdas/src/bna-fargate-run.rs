@@ -9,6 +9,7 @@ use bnalambdas::{
     BrokenspokeState, Context, AWSS3,
 };
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
+use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
 use tracing::info;
 
@@ -50,12 +51,24 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
 
     // Update the pipeline status.
     let patch_url = format!("{url}/{state_machine_id}");
+
+    // Create a new pipeline entry.
+    info!(
+        state_machine_id = state_machine_context.execution.name,
+        "create a new Brokensspoke pipeline entry",
+    );
     let pipeline = BrokenspokePipeline {
         state_machine_id,
         state: Some(BrokenspokeState::Analysis),
+        sqs_message: Some(serde_json::to_string(analysis_parameters)?),
         ..Default::default()
     };
-    update_pipeline(&patch_url, &auth, &pipeline)?;
+    let _post = Client::new()
+        .post(&url)
+        .bearer_auth(auth.access_token.clone())
+        .json(&pipeline)
+        .send()?
+        .error_for_status()?;
 
     // Prepare the AWS client.
     let aws_config = aws_config::load_defaults(BehaviorVersion::latest()).await;
