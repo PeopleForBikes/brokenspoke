@@ -40,8 +40,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
     let analysis_parameters = &event.payload.messages[0].body;
     let receipt_handle = &event.payload.messages[0].receipt_handle;
     let state_machine_context = &event.payload.context;
-    let (state_machine_id, scheduled_trigger_id) =
-        (uuid::Uuid::new_v4(), Some(uuid::Uuid::new_v4()));
+    let state_machine_id = state_machine_context.id;
 
     // Create a new pipeline entry.
     info!(
@@ -50,10 +49,8 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
     );
     let pipeline = BrokenspokePipeline {
         state_machine_id,
-        scheduled_trigger_id,
         state: Some(BrokenspokeState::SqsMessage),
         sqs_message: Some(serde_json::to_string(analysis_parameters)?),
-
         ..Default::default()
     };
     let _post = Client::new()
@@ -112,7 +109,8 @@ fn test_input_deserialization() {
       "StateMachine": {
         "Id": "arn:aws:states:us-west-2:123456789012:stateMachine:brokenspoke-analyzer",
         "Name": "brokenspoke-analyzer"
-      }
+      },
+      "Id": "9ff90cac-0cf5-4923-897f-4416df5e7328"
     }
   }"#;
     let _deserialized = serde_json::from_str::<TaskInput>(json_input).unwrap();

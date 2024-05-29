@@ -4,7 +4,7 @@ use bnacore::{
 };
 use bnalambdas::{
     authenticate_service_account, update_pipeline, AnalysisParameters, BrokenspokePipeline,
-    BrokenspokeState,
+    BrokenspokeState, Context,
 };
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use serde::{Deserialize, Serialize};
@@ -16,6 +16,7 @@ const NEON_MAX_BRANCHES: usize = 20;
 #[derive(Deserialize)]
 struct TaskInput {
     analysis_parameters: AnalysisParameters,
+    context: Context,
 }
 
 #[derive(Serialize)]
@@ -45,7 +46,8 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
     // Read the task inputs.
     info!("Reading input...");
     let analysis_parameters = &event.payload.analysis_parameters;
-    let (state_machine_id, _) = (uuid::Uuid::new_v4(), uuid::Uuid::new_v4());
+    let state_machine_context = &event.payload.context;
+    let state_machine_id = state_machine_context.id;
 
     // Update the pipeline status.
     info!("updating pipeline...");
@@ -175,7 +177,8 @@ mod tests {
             "StateMachine": {
               "Id": "arn:aws:states:us-west-2:123456789012:stateMachine:brokenspoke-analyzer",
               "Name": "brokenspoke-analyzer"
-            }
+            },
+            "Id": "9ff90cac-0cf5-4923-897f-4416df5e7328"
           }
         }"#;
         let _deserialized = serde_json::from_str::<TaskInput>(json_input).unwrap();
