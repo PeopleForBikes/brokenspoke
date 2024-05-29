@@ -2,8 +2,11 @@ use aws_lambda_events::sqs::SqsApiMessageObj;
 use bnalambdas::{AnalysisParameters, Context};
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use serde::{Deserialize, Serialize};
+use slug::slugify;
 use tracing::info;
 
+const SLUG_LENGTH: usize = 71;
+const SHORT_UUID_LENGTH: usize = 8;
 #[derive(Serialize, Deserialize)]
 struct TaskInput {
     #[serde(rename = "Messages")]
@@ -16,6 +19,7 @@ struct TaskOutput {
     analysis_parameters: AnalysisParameters,
     receipt_handle: String,
     context: Context,
+    slug: String,
 }
 
 async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, Error> {
@@ -25,11 +29,26 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
     let receipt_handle = &event.payload.messages[0].receipt_handle;
     let state_machine_context = &event.payload.context;
 
+    // Valiadate the parameters.
+    let params = analysis_parameters.sanitized();
+
+    // Generate a slug.
+    let mut slug = slugify(format!(
+        "{}-{}-{}",
+        params.country,
+        params.region.clone().unwrap(),
+        params.city
+    ));
+    slug.truncate(SLUG_LENGTH);
+    let mut context_id = state_machine_context.id.to_string();
+    context_id.truncate(SHORT_UUID_LENGTH);
+
     // Return the task output.
     Ok(TaskOutput {
-        analysis_parameters: analysis_parameters.clone(),
+        analysis_parameters: params,
         receipt_handle: receipt_handle.clone().unwrap(),
         context: state_machine_context.clone(),
+        slug: format!("{slug}-{context_id}"),
     })
 }
 
