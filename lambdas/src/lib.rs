@@ -150,6 +150,7 @@ pub struct Context {
     pub execution: Execution,
     pub state: State,
     pub state_machine: StateMachine,
+    pub id: Uuid,
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "PascalCase")]
@@ -263,6 +264,7 @@ mod tests {
               "Id": "arn:aws:states:us-east-1:123456789012:stateMachine:stateMachineName",
               "Name": "stateMachineName"
           },
+          "Id": "9ff90cac-0cf5-4923-897f-4416df5e7328",
           "Task": {
               "Token": "h7XRiCdLtd/83p1E0dMccoxlzFhglsdkzpK9mBVKZsp7d9yrT1W"
           }

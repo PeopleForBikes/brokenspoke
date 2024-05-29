@@ -23,7 +23,7 @@ struct Neon {
     branch_id: String,
 }
 
-async fn function_handler(_event: LambdaEvent<TaskInput>) -> Result<(), Error> {
+async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     // Retrieve API hostname.
     let api_hostname = get_aws_parameter_value("BNA_API_HOSTNAME").await?;
 
@@ -36,7 +36,8 @@ async fn function_handler(_event: LambdaEvent<TaskInput>) -> Result<(), Error> {
         .map_err(|e| format!("cannot authenticate service account: {e}"))?;
 
     // Read the task inputs.
-    let (state_machine_id, _) = (uuid::Uuid::new_v4(), uuid::Uuid::new_v4());
+    let state_machine_context = &event.payload.context;
+    let state_machine_id = state_machine_context.id;
 
     // Update the pipeline status.
     let patch_url = format!("{url}/{state_machine_id}");
@@ -71,6 +72,7 @@ mod tests {
     use super::*;
     use bnalambdas::{Execution, State, StateMachine};
     use lambda_runtime::{Context, LambdaEvent};
+    use uuid::Uuid;
 
     #[tokio::test]
     async fn test_handler() {
@@ -99,6 +101,7 @@ mod tests {
                     id: "id".to_string(),
                     name: "name".to_string(),
                 },
+                id: Uuid::new_v4(),
             },
         };
         let _event = LambdaEvent { payload, context };
@@ -134,7 +137,8 @@ mod tests {
               "StateMachine": {
                 "Id": "arn:aws:states:us-west-2:123456789012:stateMachine:brokenspoke-analyzer",
                 "Name": "brokenspoke-analyzer"
-              }
+              },
+              "Id": "8a4d7089-fe9c-42be-b9f5-0a3b0c31edef"
             }
           }"#;
         let deserialized = serde_json::from_str::<TaskInput>(json_input).unwrap();
