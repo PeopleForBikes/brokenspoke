@@ -1,11 +1,6 @@
 use aws_lambda_events::sqs::SqsApiMessageObj;
-use bnacore::aws::get_aws_parameter_value;
-use bnalambdas::{
-    authenticate_service_account, AnalysisParameters, BrokenspokePipeline, BrokenspokeState,
-    Context,
-};
+use bnalambdas::{AnalysisParameters, Context};
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
-use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
 use tracing::info;
 
@@ -24,41 +19,11 @@ struct TaskOutput {
 }
 
 async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, Error> {
-    // Retrieve API hostname.
-    let api_hostname = get_aws_parameter_value("BNA_API_HOSTNAME").await?;
-
-    // Prepare the API URL.
-    let url = format!("{api_hostname}/bnas/analysis");
-
-    // Authenticate the service account.
-    let auth = authenticate_service_account()
-        .await
-        .map_err(|e| format!("cannot authenticate service account: {e}"))?;
-
     // Parse the SQS message.
     info!("Parse the SQS message");
     let analysis_parameters = &event.payload.messages[0].body;
     let receipt_handle = &event.payload.messages[0].receipt_handle;
     let state_machine_context = &event.payload.context;
-    let state_machine_id = state_machine_context.id;
-
-    // Create a new pipeline entry.
-    info!(
-        state_machine_id = state_machine_context.execution.name,
-        "create a new Brokensspoke pipeline entry",
-    );
-    let pipeline = BrokenspokePipeline {
-        state_machine_id,
-        state: Some(BrokenspokeState::SqsMessage),
-        sqs_message: Some(serde_json::to_string(analysis_parameters)?),
-        ..Default::default()
-    };
-    let _post = Client::new()
-        .post(&url)
-        .bearer_auth(auth.access_token)
-        .json(&pipeline)
-        .send()?
-        .error_for_status()?;
 
     // Return the task output.
     Ok(TaskOutput {
