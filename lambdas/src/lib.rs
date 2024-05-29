@@ -49,6 +49,24 @@ impl AnalysisParameters {
     ) -> Self {
         Self::new(country, city, Some(region), Some(fips_code))
     }
+
+    /// Ensure all the parameters are populated appropriately.
+    pub fn sanitized(&self) -> Self {
+        let region = match &self.region {
+            Some(region) => Some(region.clone()),
+            None => Some(self.country.clone()),
+        };
+        let fips_code = match &self.fips_code {
+            Some(fips_code) => Some(fips_code.clone()),
+            None => Some("0".to_string()),
+        };
+        Self {
+            country: self.country.clone(),
+            city: self.city.clone(),
+            region,
+            fips_code,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

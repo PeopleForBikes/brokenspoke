@@ -26,6 +26,7 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 serde_with = { workspace = true }
 simple-error = { workspace = true }
+slug = { workspace = true }
 svg2pdf = { workspace = true }
 time = { workspace = true, features = ["macros", "serde-well-known"] }
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
