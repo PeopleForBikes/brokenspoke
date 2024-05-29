@@ -6,7 +6,7 @@ use aws_sdk_ecs::types::{
 use bnacore::aws::get_aws_parameter_value;
 use bnalambdas::{
     authenticate_service_account, update_pipeline, AnalysisParameters, BrokenspokePipeline,
-    BrokenspokeState, AWSS3,
+    BrokenspokeState, Context, AWSS3,
 };
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use serde::{Deserialize, Serialize};
@@ -16,6 +16,7 @@ use tracing::info;
 struct TaskInput {
     analysis_parameters: AnalysisParameters,
     aws_s3: AWSS3,
+    context: Context,
 }
 
 #[derive(Serialize)]
@@ -44,7 +45,8 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
     // Read the task inputs.
     let aws_s3 = &event.payload.aws_s3;
     let analysis_parameters = &event.payload.analysis_parameters;
-    let (state_machine_id, _) = (uuid::Uuid::new_v4(), uuid::Uuid::new_v4());
+    let state_machine_context = &event.payload.context;
+    let state_machine_id = state_machine_context.id;
 
     // Update the pipeline status.
     let patch_url = format!("{url}/{state_machine_id}");
@@ -182,7 +184,8 @@ mod tests {
             "StateMachine": {
               "Id": "arn:aws:states:us-west-2:123456789012:stateMachine:brokenspoke-analyzer",
               "Name": "brokenspoke-analyzer"
-            }
+            },
+            "Id": "9ff90cac-0cf5-4923-897f-4416df5e7328"
           },
           "aws_s3": {
             "destination": "usa/new mexico/santa rosa/24.05.3"

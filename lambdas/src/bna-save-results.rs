@@ -127,7 +127,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     let analysis_parameters = &event.payload.analysis_parameters;
     let aws_s3 = &event.payload.aws_s3;
     let state_machine_context = &event.payload.context;
-    let (_state_machine_id, _) = state_machine_context.execution.ids()?;
+    let _state_machine_id = state_machine_context.id;
 
     info!("Retrieve secrets and parameters...");
     // Retrieve API hostname.
@@ -370,7 +370,8 @@ mod tests {
             "StateMachine": {
               "Id": "arn:aws:states:us-west-2:863246263227:stateMachine:brokenspoke-analyzer",
               "Name": "brokenspoke-analyzer"
-            }
+            },
+            "Id": "9ff90cac-0cf5-4923-897f-4416df5e7328"
           },
           "aws_s3": {
             "destination": "usa/new mexico/santa rosa/23.12.4"
