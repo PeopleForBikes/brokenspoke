@@ -5,7 +5,8 @@ use bnacore::combine::combine_mem;
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use minijinja::Environment;
 use serde_json::Value;
-use usvg::{TreeParsing, TreeTextToPath};
+use std::sync::Arc;
+use svg2pdf::{ConversionOptions, PageOptions};
 
 const BUCKET_NAME: &str = "brokenspoke-analyzer";
 
@@ -28,16 +29,11 @@ async fn function_handler(event: LambdaEvent<SqsEvent>) -> Result<(), Error> {
 
     // Prepare the font database.
     let mut fontdb = usvg::fontdb::Database::new();
-    dbg!(fontdb.len());
-    // fontdb.load_system_fonts();
-    // dbg!(fontdb.len());
-    fontdb.load_fonts_dir("../assets/fonts");
-    dbg!(fontdb.len());
-    fontdb.load_font_file("../assets/fonts/DharmaGothicExtended copy/DharmaGothicE-Bold.otf")?;
-    dbg!(fontdb.len());
-    for face in fontdb.faces() {
-        println!("{:#?}", face);
-    }
+    fontdb.load_system_fonts();
+
+    // Load custom fonts.
+    fontdb.load_fonts_dir("../assets/fonts/DharmaGothicExtended");
+    fontdb.load_fonts_dir("../assets/fonts/Montserrat");
 
     // Load the template.
     let source_page_1 = include_str!("../../assets/visuals/template-scorecard-pg1-v23.2.svg");
@@ -49,13 +45,11 @@ async fn function_handler(event: LambdaEvent<SqsEvent>) -> Result<(), Error> {
     let rendered = template.render(&v)?;
 
     // Convert it to pdf.
-    // let pdf_page_1 = svg2pdf::convert_str(source_page_1, svg2pdf::Options::default())?;
     let pdf_page_1 = pdf_convert(&rendered, &fontdb)?;
     std::fs::write("page_1.pdf", &pdf_page_1)?;
 
     // Load the second page and convert it to pdf.
     let source_page_2 = include_str!("../../assets/visuals/template-scorecard-pg2-v23.1.svg");
-    // let pdf_page_2 = svg2pdf::convert_str(source_page_2, svg2pdf::Options::default())?;
     let pdf_page_2 = pdf_convert(source_page_2, &fontdb)?;
     std::fs::write("page_2.pdf", &pdf_page_2)?;
 
@@ -63,7 +57,6 @@ async fn function_handler(event: LambdaEvent<SqsEvent>) -> Result<(), Error> {
     let full_pdf = vec![pdf_page_1.as_slice(), pdf_page_2.as_slice()];
     let mut scorecard = combine_mem(full_pdf.as_slice())?;
     let mut buffer: Vec<u8> = Vec::new();
-    // let mut writer = BufWriter::new(buffer);
     scorecard.save_to(&mut buffer)?;
     scorecard.save("scorecard_test.pdf")?;
 
@@ -83,14 +76,21 @@ async fn function_handler(event: LambdaEvent<SqsEvent>) -> Result<(), Error> {
 }
 
 fn pdf_convert(svg: &str, fontdb: &usvg::fontdb::Database) -> Result<Vec<u8>, String> {
-    let options = usvg::Options::default();
+    // Set rendering options.
+    let options = usvg::Options {
+        fontdb: Arc::new(fontdb.clone()),
+        ..usvg::Options::default()
+    };
 
-    let mut tree = usvg::Tree::from_str(svg, &options).map_err(|err| err.to_string())?;
-    tree.convert_text(fontdb);
+    // Set conversion options.
+    let conversion_options = ConversionOptions::default();
+    let page_options = PageOptions::default();
 
-    let pdf = svg2pdf::convert_tree(&tree, Default::default());
+    // Load the svg nodes.
+    let tree = usvg::Tree::from_str(svg, &options).map_err(|err| err.to_string())?;
 
-    Ok(pdf)
+    // Convert to PDF.
+    Ok(svg2pdf::to_pdf(&tree, conversion_options, page_options))
 }
 
 #[tokio::main]
