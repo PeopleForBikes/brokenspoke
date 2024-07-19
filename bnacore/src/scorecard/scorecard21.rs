@@ -61,6 +61,7 @@ impl City21 {
     /// If the `state` is not specified (a lot of countries do not have states),
     /// the name of the country is used instead.
     #[new]
+    #[pyo3(signature = (name, country, uuid, population, ratings, ratings_rounded, state=None))]
     pub fn new(
         name: &str,
         country: &str,
