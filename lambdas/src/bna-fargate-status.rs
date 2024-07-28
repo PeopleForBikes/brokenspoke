@@ -1,4 +1,5 @@
 use aws_config::BehaviorVersion;
+use bnalambdas::Fargate;
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use serde::{Deserialize, Serialize};
 use tracing::info;
@@ -6,13 +7,6 @@ use tracing::info;
 #[derive(Deserialize, Serialize)]
 struct TaskInput {
     fargate: Fargate,
-}
-
-#[derive(Deserialize, Serialize)]
-struct Fargate {
-    ecs_cluster_arn: String,
-    task_arn: String,
-    last_status: String,
 }
 
 #[derive(Deserialize, Serialize)]

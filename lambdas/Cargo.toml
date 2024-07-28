@@ -8,6 +8,7 @@ aws-config = { workspace = true }
 aws-sdk-ecs = { workspace = true }
 aws-sdk-s3 = { workspace = true }
 aws-sdk-sqs = { workspace = true }
+aws-smithy-types-convert = { workspace = true, features = ["convert-time"] }
 aws_lambda_events = { workspace = true }
 bnacore = { path = "../bnacore" }
 csv = { workspace = true }
@@ -22,6 +23,8 @@ reqwest = { workspace = true, features = [
   "native-tls-vendored",
   "rustls-tls",
 ] }
+rust_decimal = { workspace = true }
+rust_decimal_macros = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde_with = { workspace = true }
