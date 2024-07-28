@@ -1,9 +1,15 @@
 use aws_config::BehaviorVersion;
+use aws_smithy_types_convert::date_time::DateTimeExt;
 use bnacore::aws::get_aws_parameter_value;
-use bnalambdas::{authenticate_service_account, AnalysisParameters, Context, AWSS3};
+use bnalambdas::{
+    authenticate_service_account, update_pipeline, AnalysisParameters, BrokenspokePipeline,
+    BrokenspokeState, Context, Fargate, AWSS3,
+};
 use csv::ReaderBuilder;
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use reqwest::blocking::Client;
+use rust_decimal::Decimal;
+use rust_decimal_macros::dec;
 use serde::{Deserialize, Serialize};
 use simple_error::SimpleError;
 use std::{collections::HashMap, io::Write};
@@ -18,6 +24,7 @@ struct TaskInput {
     analysis_parameters: AnalysisParameters,
     aws_s3: AWSS3,
     context: Context,
+    fargate: Fargate,
 }
 
 #[derive(Deserialize, Clone)]
@@ -127,7 +134,8 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     let analysis_parameters = &event.payload.analysis_parameters;
     let aws_s3 = &event.payload.aws_s3;
     let state_machine_context = &event.payload.context;
-    let _state_machine_id = state_machine_context.id;
+    let state_machine_id = state_machine_context.id;
+    let fargate = &event.payload.fargate;
 
     info!("Retrieve secrets and parameters...");
     // Retrieve API hostname.
@@ -141,10 +149,16 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
         .await
         .map_err(|e| format!("cannot authenticate service account: {e}"))?;
 
+    // Prepare the AWS configuration.
+    let config = aws_config::load_defaults(BehaviorVersion::latest()).await;
+
     // Configure the S3 client.
     info!("Configure the S3 client...");
-    let config = aws_config::load_defaults(BehaviorVersion::latest()).await;
-    let client = aws_sdk_s3::Client::new(&config);
+    let s3_client = aws_sdk_s3::Client::new(&config);
+
+    // Configure the ECS client.
+    info!("Configure the ECS client...");
+    let ecs_client = aws_sdk_ecs::Client::new(&config);
 
     // Download the CSV file with the results.
     let scores_csv = format!(
@@ -155,7 +169,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
         "Download the CSV file with the results from {}...",
         scores_csv
     );
-    let buffer = fetch_s3_object_as_bytes(&client, &bna_bucket, &scores_csv).await?;
+    let buffer = fetch_s3_object_as_bytes(&s3_client, &bna_bucket, &scores_csv).await?;
 
     // Parse the results.
     info!("Parse the results...");
@@ -221,22 +235,51 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     info!("Post a new BNA entry via the API...");
     info!("New entry: {:?}", &bna_post);
     Client::new()
-        .post(bnas_url)
+        .post(&bnas_url)
         .bearer_auth(auth.access_token.clone())
         .json(&bna_post)
         .send()?
         .error_for_status()?;
 
+    // Compute the time it took to run the fargate task.
+    let describe_tasks = ecs_client
+        .describe_tasks()
+        .tasks(fargate.task_arn.clone())
+        .send()
+        .await?;
+    let task_info = describe_tasks.tasks().first().unwrap();
+    let started_at = task_info
+        .started_at()
+        .expect("the task must have started at this point");
+    let stopped_at = task_info
+        .started_at()
+        .expect("the task must have stopped at this point");
+    let started_secs = started_at.secs();
+    let stopped_secs = stopped_at.secs();
+    let elapsed = (stopped_secs - started_secs) / 1000;
+
+    // Compute the price.
+    const FARGATE_COST_PER_SEC: Decimal = dec!(0.00228333333333);
+    let elapsed_decimal: Decimal = elapsed.into();
+    let cost = elapsed_decimal.checked_mul(FARGATE_COST_PER_SEC);
+
     // TODO(rgreinho): Update the pipeline status when the new state will be available.
     // Update the pipeline status.
-    // info!("updating pipeline...");
-    // let patch_url = format!("{bnas_url}/analysis/{state_machine_id}");
-    // let pipeline = BrokenspokePipeline {
-    //     state_machine_id,
-    //     state: Some(BrokenspokeState::Setup),
-    //     ..Default::default()
-    // };
-    // update_pipeline(&patch_url, &auth, &pipeline)?;
+    info!("updating pipeline...");
+    let patch_url = format!("{bnas_url}/analysis/{state_machine_id}");
+    let start_time = started_at
+        .to_time()
+        .expect("a valid start time is expected");
+    let end_time = stopped_at.to_time().ok();
+    let pipeline = BrokenspokePipeline {
+        cost,
+        end_time,
+        start_time,
+        state_machine_id,
+        state: Some(BrokenspokeState::Setup),
+        ..Default::default()
+    };
+    update_pipeline(&patch_url, &auth, &pipeline)?;
 
     Ok(())
 }
