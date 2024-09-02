@@ -194,9 +194,18 @@ pub async fn get_aws_parameter(name: &str) -> Result<SSMParameter, crate::Error>
 }
 
 /// Convenience function to extract a value from a parameter directly.
+///
+/// If the name exists as an environment variable, it will be returned, otherwise
+/// AWS SSM service will be queried.
 pub async fn get_aws_parameter_value(name: &str) -> Result<String, crate::Error> {
-    let parameter = get_aws_parameter(name).await?;
-    Ok(parameter.parameter.value)
+    let value = match env::var(name) {
+        Ok(v) => v,
+        Err(_) => {
+            let parameter = get_aws_parameter(name).await?;
+            parameter.parameter.value
+        }
+    };
+    Ok(value)
 }
 
 #[cfg(test)]
