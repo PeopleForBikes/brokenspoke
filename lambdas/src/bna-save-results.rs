@@ -2,8 +2,8 @@ use aws_config::BehaviorVersion;
 use aws_smithy_types_convert::date_time::DateTimeExt;
 use bnacore::aws::get_aws_parameter_value;
 use bnalambdas::{
-    authenticate_service_account, update_pipeline, AnalysisParameters, BrokenspokePipeline,
-    BrokenspokeState, Context, Fargate, AWSS3,
+    authenticate_service_account, update_pipeline, AnalysisParameters, BNAPipeline, Context,
+    Fargate, AWSS3,
 };
 use csv::ReaderBuilder;
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
@@ -97,16 +97,25 @@ pub struct BNACoreServices {
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct BNAFeatures {
-    pub people: Option<f64>,
-    pub retail: Option<f64>,
-    pub transit: Option<f64>,
+pub struct BNAPeople {
+    pub score: Option<f64>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct BNARetail {
+    pub score: Option<f64>,
+}
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct BNATransit {
+    pub score: Option<f64>,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct BNAPost {
     pub core_services: BNACoreServices,
-    pub features: BNAFeatures,
+    pub people: BNAPeople,
+    pub retail: BNARetail,
+    pub transit: BNATransit,
     pub infrastructure: BNAInfrastructure,
     pub opportunity: BNAOpportunity,
     pub recreation: BNARecreation,
@@ -271,12 +280,12 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
         .to_time()
         .expect("a valid start time is expected");
     let end_time = stopped_at.to_time().ok();
-    let pipeline = BrokenspokePipeline {
+    let pipeline = BNAPipeline {
         cost,
         end_time,
         start_time,
         state_machine_id,
-        state: Some(BrokenspokeState::Setup),
+        step: Some("Setup".to_string()),
         ..Default::default()
     };
     update_pipeline(&patch_url, &auth, &pipeline)?;
@@ -307,10 +316,14 @@ fn scores_to_bnapost(overall_scores: OverallScores, version: String, city_id: Uu
                 .get_normalized_score("core_services")
                 .unwrap_or_default(),
         },
-        features: BNAFeatures {
-            people: overall_scores.get_normalized_score("people"),
-            retail: overall_scores.get_normalized_score("retail"),
-            transit: overall_scores.get_normalized_score("transit"),
+        people: BNAPeople {
+            score: overall_scores.get_normalized_score("people"),
+        },
+        retail: BNARetail {
+            score: overall_scores.get_normalized_score("retail"),
+        },
+        transit: BNATransit {
+            score: overall_scores.get_normalized_score("transit"),
         },
         infrastructure: BNAInfrastructure {
             low_stress_miles: overall_scores.get_normalized_score("total_miles_low_stress"),
