@@ -27,7 +27,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     let api_hostname = get_aws_parameter_value("BNA_API_HOSTNAME").await?;
 
     // Prepare the API URL.
-    let url = format!("{api_hostname}/bnas/analysis");
+    let url = format!("{api_hostname}/ratings/analysis");
 
     // Authenticate the service account.
     let auth = authenticate_service_account()
