@@ -70,44 +70,69 @@ impl AnalysisParameters {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub enum BrokenspokeState {
-    SqsMessage,
-    Setup,
-    Analysis,
-    Cleanup,
-}
-
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct BrokenspokePipeline {
+pub struct BNAPipeline {
     pub cost: Option<Decimal>,
     pub end_time: Option<OffsetDateTime>,
+    pub fargate_price_id: Option<i32>,
     pub fargate_task_arn: Option<String>,
-    pub neon_branch_id: Option<String>,
+    pub result_posted: Option<bool>,
     pub s3_bucket: Option<String>,
-    pub scheduled_trigger_id: Option<Uuid>,
+    pub status: Option<String>,
     pub sqs_message: Option<String>,
     pub start_time: OffsetDateTime,
-    pub state: Option<BrokenspokeState>,
     pub state_machine_id: Uuid,
+    pub step: Option<String>,
     pub torn_down: Option<bool>,
 }
 
-impl Default for BrokenspokePipeline {
+impl Default for BNAPipeline {
     fn default() -> Self {
         Self {
             cost: Default::default(),
             end_time: Default::default(),
+            fargate_price_id: Default::default(),
             fargate_task_arn: Default::default(),
-            neon_branch_id: Default::default(),
+            result_posted: Default::default(),
             s3_bucket: Default::default(),
-            scheduled_trigger_id: Default::default(),
             sqs_message: Default::default(),
             start_time: OffsetDateTime::now_utc(),
             state_machine_id: Default::default(),
-            state: Default::default(),
+            status: Default::default(),
+            step: Default::default(),
             torn_down: Default::default(),
         }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum BNAPipelineStatus {
+    Pending,
+    Processing,
+    Completed,
+}
+
+impl FromStr for BNAPipelineStatus {
+    type Err = serde_plain::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        serde_plain::from_str::<Self>(s)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum BNAPipelineStep {
+    Analysis,
+    Cleanup,
+    Setup,
+    Save,
+}
+
+impl FromStr for BNAPipelineStep {
+    type Err = serde_plain::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        serde_plain::from_str::<Self>(s)
     }
 }
 
@@ -232,7 +257,7 @@ pub struct StateMachine {
 pub fn update_pipeline(
     url: &str,
     auth: &AuthResponse,
-    pipeline: &BrokenspokePipeline,
+    pipeline: &BNAPipeline,
 ) -> Result<reqwest::blocking::Response, reqwest::Error> {
     Client::new()
         .patch(url)
