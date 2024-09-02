@@ -5,8 +5,7 @@ use aws_sdk_ecs::types::{
 };
 use bnacore::aws::get_aws_parameter_value;
 use bnalambdas::{
-    authenticate_service_account, update_pipeline, AnalysisParameters, BrokenspokePipeline,
-    BrokenspokeState, Context, AWSS3,
+    authenticate_service_account, update_pipeline, AnalysisParameters, BNAPipeline, Context, AWSS3,
 };
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use reqwest::blocking::Client;
@@ -57,9 +56,9 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
         state_machine_id = state_machine_context.execution.name,
         "create a new Brokensspoke pipeline entry",
     );
-    let pipeline = BrokenspokePipeline {
+    let pipeline = BNAPipeline {
         state_machine_id,
-        state: Some(BrokenspokeState::Analysis),
+        step: Some("Analysis".to_string()),
         sqs_message: Some(serde_json::to_string(analysis_parameters)?),
         ..Default::default()
     };
@@ -134,7 +133,10 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
         .await?;
 
     // Prepare the output.
-    let task = run_task_output.tasks().first().unwrap();
+    let task = run_task_output
+        .tasks()
+        .first()
+        .expect("there must be one task");
     let output = TaskOutput {
         ecs_cluster_arn: task.cluster_arn().unwrap().into(),
         task_arn: task.task_arn().unwrap().into(),
@@ -143,7 +145,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
     };
 
     // Update the pipeline status.
-    let pipeline = BrokenspokePipeline {
+    let pipeline = BNAPipeline {
         state_machine_id,
         fargate_task_arn: Some(task.task_arn().unwrap().into()),
         ..Default::default()

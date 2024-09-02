@@ -3,8 +3,7 @@ use bnacore::{
     neon,
 };
 use bnalambdas::{
-    authenticate_service_account, update_pipeline, AnalysisParameters, BrokenspokePipeline,
-    BrokenspokeState, Context,
+    authenticate_service_account, update_pipeline, AnalysisParameters, BNAPipeline, Context,
 };
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use serde::{Deserialize, Serialize};
@@ -52,9 +51,9 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
     // Update the pipeline status.
     info!("updating pipeline...");
     let patch_url = format!("{url}/{state_machine_id}");
-    let pipeline = BrokenspokePipeline {
+    let pipeline = BNAPipeline {
         state_machine_id,
-        state: Some(BrokenspokeState::Setup),
+        step: Some("Setup".to_string()),
         ..Default::default()
     };
     update_pipeline(&patch_url, &auth, &pipeline)?;
@@ -117,9 +116,8 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
         .unwrap();
 
     // Update the pipeline status.
-    let pipeline = BrokenspokePipeline {
+    let pipeline = BNAPipeline {
         state_machine_id,
-        neon_branch_id: Some(neon_branch_id.clone()),
         ..Default::default()
     };
     update_pipeline(&patch_url, &auth, &pipeline)?;
