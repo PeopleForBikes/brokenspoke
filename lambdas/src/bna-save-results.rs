@@ -194,7 +194,12 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     };
     let name = &analysis_parameters.city;
     let cities_url = format!("{api_hostname}/cities");
-    let get_cities_url = format!("{cities_url}/{country}/{region}/{name}");
+    let get_cities_url = format!(
+        "{cities_url}/{}/{}/{}",
+        country.to_title_case(),
+        region.to_title_case(),
+        name.to_title_case()
+    );
     info!("endpoint: {}", get_cities_url);
     let client = Client::new();
     let r = client.get(&get_cities_url).send()?;
@@ -217,6 +222,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     if let Some(city) = city {
         info!("The city exists, update the population...");
         city_id = city.city_id.unwrap();
+        // TODO: Patch city census.
     } else {
         info!("Create a new city...");
         // Create the city.
