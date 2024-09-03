@@ -6,6 +6,7 @@ use bnalambdas::{
     Fargate, AWSS3,
 };
 use csv::ReaderBuilder;
+use heck::ToTitleCase;
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use reqwest::blocking::Client;
 use rust_decimal::Decimal;
@@ -218,7 +219,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
         info!("Create a new city...");
         // Create the city.
         let c = City {
-            country: country.clone(),
+            country: country.clone().to_title_case(),
             state: region.clone(),
             name: name.clone(),
             ..Default::default()
