@@ -247,7 +247,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     let bna_post = scores_to_bnapost(overall_scores, version, city_id);
 
     // Prepare API URLs.
-    let bnas_url = format!("{api_hostname}/bnas");
+    let bnas_url = format!("{api_hostname}/ratings");
 
     // Post a new entry via the API.
     info!("Post a new BNA entry via the API...");
