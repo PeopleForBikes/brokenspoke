@@ -125,7 +125,7 @@ pub struct BNAPost {
 
 #[derive(Serialize, Deserialize, Default, Debug)]
 pub struct City {
-    pub city_id: Option<Uuid>,
+    pub id: Option<Uuid>,
     pub country: String,
     pub state: String,
     pub name: String,
@@ -221,7 +221,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     let city_id: Uuid;
     if let Some(city) = city {
         info!("The city exists, update the population...");
-        city_id = city.city_id.unwrap();
+        city_id = city.id.unwrap();
         // TODO: Patch city census.
     } else {
         info!("Create a new city...");
@@ -239,7 +239,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
             .send()?
             .error_for_status()?
             .json::<City>()?;
-        city_id = city.city_id.unwrap();
+        city_id = city.id.unwrap();
     }
 
     // Convert the overall scores to a BNAPost struct.
