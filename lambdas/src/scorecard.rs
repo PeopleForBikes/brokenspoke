@@ -28,7 +28,7 @@ async fn function_handler(event: LambdaEvent<SqsEvent>) -> Result<(), Error> {
     let key = format!("{}/{}-{}-{}.pdf", year, country, region, city);
 
     // Prepare the font database.
-    let mut fontdb = usvg::fontdb::Database::new();
+    let mut fontdb = svg2pdf::usvg::fontdb::Database::new();
     fontdb.load_system_fonts();
 
     // Load custom fonts.
@@ -75,11 +75,11 @@ async fn function_handler(event: LambdaEvent<SqsEvent>) -> Result<(), Error> {
     Ok(())
 }
 
-fn pdf_convert(svg: &str, fontdb: &usvg::fontdb::Database) -> Result<Vec<u8>, String> {
+fn pdf_convert(svg: &str, fontdb: &svg2pdf::usvg::fontdb::Database) -> Result<Vec<u8>, String> {
     // Set rendering options.
-    let options = usvg::Options {
+    let options = svg2pdf::usvg::Options {
         fontdb: Arc::new(fontdb.clone()),
-        ..usvg::Options::default()
+        ..svg2pdf::usvg::Options::default()
     };
 
     // Set conversion options.
@@ -87,7 +87,7 @@ fn pdf_convert(svg: &str, fontdb: &usvg::fontdb::Database) -> Result<Vec<u8>, St
     let page_options = PageOptions::default();
 
     // Load the svg nodes.
-    let tree = usvg::Tree::from_str(svg, &options).map_err(|err| err.to_string())?;
+    let tree = svg2pdf::usvg::Tree::from_str(svg, &options).map_err(|err| err.to_string())?;
 
     // Convert to PDF.
     Ok(svg2pdf::to_pdf(&tree, conversion_options, page_options))
