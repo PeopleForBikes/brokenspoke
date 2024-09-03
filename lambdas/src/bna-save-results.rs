@@ -123,7 +123,7 @@ pub struct BNAPost {
     pub summary: BNASummary,
 }
 
-#[derive(Serialize, Deserialize, Default)]
+#[derive(Serialize, Deserialize, Default, Debug)]
 pub struct City {
     pub city_id: Option<Uuid>,
     pub country: String,
@@ -195,6 +195,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     let name = &analysis_parameters.city;
     let cities_url = format!("{api_hostname}/cities");
     let get_cities_url = format!("{cities_url}/{country}/{region}/{name}");
+    info!("endpoint: {}", get_cities_url);
     let client = Client::new();
     let r = client.get(&get_cities_url).send()?;
     let city: Option<City> = match r.status().as_u16() {
@@ -208,6 +209,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
             ))))
         }
     };
+    info!("City: {:#?}", city);
 
     // Create city if it does not exist and save the city_id.
     // Otherwise save the city_id and update the population..
