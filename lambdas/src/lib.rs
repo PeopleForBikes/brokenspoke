@@ -78,10 +78,10 @@ pub struct BNAPipeline {
     pub fargate_task_arn: Option<String>,
     pub result_posted: Option<bool>,
     pub s3_bucket: Option<String>,
-    pub status: Option<String>,
     pub sqs_message: Option<String>,
     pub start_time: OffsetDateTime,
     pub state_machine_id: Uuid,
+    pub status: Option<String>,
     pub step: Option<String>,
     pub torn_down: Option<bool>,
 }

@@ -13,6 +13,7 @@ aws_lambda_events = { workspace = true }
 bnacore = { path = "../bnacore" }
 csv = { workspace = true }
 fontdb = { workspace = true }
+heck = { workspace = true }
 image = { workspace = true }
 lambda_http = { workspace = true }
 lambda_runtime = { workspace = true }

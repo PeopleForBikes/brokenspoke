@@ -170,8 +170,12 @@ async fn main() -> Result<(), Error> {
         e
     })
 }
+
 #[cfg(test)]
 mod tests {
+    use bnalambdas::AuthResponse;
+    use uuid::Uuid;
+
     use super::*;
 
     #[test]
@@ -207,5 +211,37 @@ mod tests {
           }
         }"#;
         let _deserialized = serde_json::from_str::<TaskInput>(json_input).unwrap();
+    }
+
+    #[tokio::test]
+    async fn test_create_pipeline() {
+        let auth = AuthResponse {
+            access_token: String::from(""),
+            expires_in: 3600,
+            token_type: String::from("Bearer"),
+        };
+
+        // Prepare the API URL.
+        let url = format!("https://api.peopleforbikes.xyz/ratings/analysis");
+
+        // Prepare the payload.
+        let pipeline = BNAPipeline {
+            state_machine_id: Uuid::parse_str("fc009967-c4d0-416b-baee-93708ac80cbc").unwrap(),
+            step: Some("Analysis".to_string()),
+            sqs_message: Some(serde_json::to_string(r#"{"analysis_parameters": "test"}"#).unwrap()),
+            ..Default::default()
+        };
+        dbg!(&pipeline);
+        dbg!(serde_json::to_string(&pipeline).unwrap());
+
+        // Send the request.
+        let post = reqwest::Client::new()
+            .post(&url)
+            .bearer_auth(auth.access_token.clone())
+            .json(&pipeline)
+            .send()
+            .await;
+        let p = post;
+        dbg!(p);
     }
 }
