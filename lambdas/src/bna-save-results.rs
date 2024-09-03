@@ -220,8 +220,8 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
         // Create the city.
         let c = City {
             country: country.clone().to_title_case(),
-            state: region.clone(),
-            name: name.clone(),
+            state: region.clone().to_title_case(),
+            name: name.clone().to_title_case(),
             ..Default::default()
         };
         let city = client
