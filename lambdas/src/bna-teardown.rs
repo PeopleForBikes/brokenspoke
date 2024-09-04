@@ -42,7 +42,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     let patch_url = format!("{url}/{state_machine_id}");
     let pipeline = BNAPipeline {
         state_machine_id,
-        step: Some("TearDown".to_string()),
+        step: Some("Cleanup".to_string()),
         ..Default::default()
     };
     update_pipeline(&patch_url, &auth, &pipeline)?;
