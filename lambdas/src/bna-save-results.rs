@@ -260,8 +260,10 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
         .error_for_status()?;
 
     // Compute the time it took to run the fargate task.
+    info!("describing fargate task {}", fargate.task_arn);
     let describe_tasks = ecs_client
         .describe_tasks()
+        .cluster(fargate.ecs_cluster_arn.clone())
         .tasks(fargate.task_arn.clone())
         .send()
         .await?;
@@ -586,5 +588,33 @@ mod tests {
     //         .error_for_status()
     //         .unwrap();
     //     dbg!(r);
+    // }
+
+    // #[tokio::test]
+    // async fn test_describe_task() {
+    //     let cluster_arn = "arn:aws:ecs:us-west-2:863246263227:cluster/bna";
+    //     let fargate_task_arn =
+    //         "arn:aws:ecs:us-west-2:863246263227:task/bna/6b7ec08ae2084efb8482173632ecfe6e";
+    //     let config = aws_config::load_defaults(BehaviorVersion::latest()).await;
+    //     let ecs_client = aws_sdk_ecs::Client::new(&config);
+    //     let describe_tasks = ecs_client
+    //         .describe_tasks()
+    //         .cluster(cluster_arn)
+    //         .tasks(fargate_task_arn)
+    //         .send()
+    //         .await
+    //         .unwrap();
+    //     let task_info = describe_tasks.tasks().first().unwrap();
+    //     let started_at = task_info
+    //         .started_at()
+    //         .expect("the task must have started at this point");
+    //     let stopped_at = task_info
+    //         .started_at()
+    //         .expect("the task must have stopped at this point");
+    //     let started_secs = started_at.secs();
+    //     let stopped_secs = stopped_at.secs();
+    //     let elapsed = (stopped_secs - started_secs) / 1000;
+    //     dbg!(task_info);
+    //     dbg!(elapsed);
     // }
 }
