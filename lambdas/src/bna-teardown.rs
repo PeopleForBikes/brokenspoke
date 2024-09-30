@@ -1,7 +1,6 @@
 use bnacore::aws::get_aws_parameter_value;
 use bnalambdas::{
-    authenticate_service_account, update_pipeline, AnalysisParameters, BrokenspokePipeline,
-    BrokenspokeState, Context,
+    authenticate_service_account, update_pipeline, AnalysisParameters, BNAPipeline, Context,
 };
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use serde::{Deserialize, Serialize};
@@ -28,7 +27,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     let api_hostname = get_aws_parameter_value("BNA_API_HOSTNAME").await?;
 
     // Prepare the API URL.
-    let url = format!("{api_hostname}/bnas/analysis");
+    let url = format!("{api_hostname}/ratings/analysis");
 
     // Authenticate the service account.
     let auth = authenticate_service_account()
@@ -41,9 +40,9 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
 
     // Update the pipeline status.
     let patch_url = format!("{url}/{state_machine_id}");
-    let pipeline = BrokenspokePipeline {
+    let pipeline = BNAPipeline {
         state_machine_id,
-        state: Some(BrokenspokeState::Cleanup),
+        step: Some("Cleanup".to_string()),
         ..Default::default()
     };
     update_pipeline(&patch_url, &auth, &pipeline)?;

@@ -5,8 +5,7 @@ use aws_sdk_ecs::types::{
 };
 use bnacore::aws::get_aws_parameter_value;
 use bnalambdas::{
-    authenticate_service_account, update_pipeline, AnalysisParameters, BrokenspokePipeline,
-    BrokenspokeState, Context, AWSS3,
+    authenticate_service_account, update_pipeline, AnalysisParameters, BNAPipeline, Context, AWSS3,
 };
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use reqwest::blocking::Client;
@@ -36,7 +35,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
     let api_hostname = get_aws_parameter_value("BNA_API_HOSTNAME").await?;
 
     // Prepare the API URL.
-    let url = format!("{api_hostname}/bnas/analysis");
+    let url = format!("{api_hostname}/ratings/analysis");
 
     // Authenticate the service account.
     let auth = authenticate_service_account()
@@ -57,9 +56,9 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
         state_machine_id = state_machine_context.execution.name,
         "create a new Brokensspoke pipeline entry",
     );
-    let pipeline = BrokenspokePipeline {
+    let pipeline = BNAPipeline {
         state_machine_id,
-        state: Some(BrokenspokeState::Analysis),
+        step: Some("Analysis".to_string()),
         sqs_message: Some(serde_json::to_string(analysis_parameters)?),
         ..Default::default()
     };
@@ -134,7 +133,10 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
         .await?;
 
     // Prepare the output.
-    let task = run_task_output.tasks().first().unwrap();
+    let task = run_task_output
+        .tasks()
+        .first()
+        .expect("there must be one task");
     let output = TaskOutput {
         ecs_cluster_arn: task.cluster_arn().unwrap().into(),
         task_arn: task.task_arn().unwrap().into(),
@@ -143,7 +145,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<TaskOutput, E
     };
 
     // Update the pipeline status.
-    let pipeline = BrokenspokePipeline {
+    let pipeline = BNAPipeline {
         state_machine_id,
         fargate_task_arn: Some(task.task_arn().unwrap().into()),
         ..Default::default()
@@ -168,8 +170,12 @@ async fn main() -> Result<(), Error> {
         e
     })
 }
+
 #[cfg(test)]
 mod tests {
+    use bnalambdas::AuthResponse;
+    use uuid::Uuid;
+
     use super::*;
 
     #[test]
@@ -205,5 +211,37 @@ mod tests {
           }
         }"#;
         let _deserialized = serde_json::from_str::<TaskInput>(json_input).unwrap();
+    }
+
+    #[tokio::test]
+    async fn test_create_pipeline() {
+        let auth = AuthResponse {
+            access_token: String::from(""),
+            expires_in: 3600,
+            token_type: String::from("Bearer"),
+        };
+
+        // Prepare the API URL.
+        let url = format!("https://api.peopleforbikes.xyz/ratings/analysis");
+
+        // Prepare the payload.
+        let pipeline = BNAPipeline {
+            state_machine_id: Uuid::parse_str("fc009967-c4d0-416b-baee-93708ac80cbc").unwrap(),
+            step: Some("Analysis".to_string()),
+            sqs_message: Some(serde_json::to_string(r#"{"analysis_parameters": "test"}"#).unwrap()),
+            ..Default::default()
+        };
+        dbg!(&pipeline);
+        dbg!(serde_json::to_string(&pipeline).unwrap());
+
+        // Send the request.
+        let post = reqwest::Client::new()
+            .post(&url)
+            .bearer_auth(auth.access_token.clone())
+            .json(&pipeline)
+            .send()
+            .await;
+        let p = post;
+        dbg!(p);
     }
 }

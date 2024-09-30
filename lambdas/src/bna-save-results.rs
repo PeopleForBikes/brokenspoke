@@ -2,10 +2,11 @@ use aws_config::BehaviorVersion;
 use aws_smithy_types_convert::date_time::DateTimeExt;
 use bnacore::aws::get_aws_parameter_value;
 use bnalambdas::{
-    authenticate_service_account, update_pipeline, AnalysisParameters, BrokenspokePipeline,
-    BrokenspokeState, Context, Fargate, AWSS3,
+    authenticate_service_account, update_pipeline, AnalysisParameters, BNAPipeline, Context,
+    Fargate, AWSS3,
 };
 use csv::ReaderBuilder;
+use heck::ToTitleCase;
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use reqwest::blocking::Client;
 use rust_decimal::Decimal;
@@ -97,25 +98,34 @@ pub struct BNACoreServices {
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct BNAFeatures {
-    pub people: Option<f64>,
-    pub retail: Option<f64>,
-    pub transit: Option<f64>,
+pub struct BNAPeople {
+    pub score: Option<f64>,
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct BNARetail {
+    pub score: Option<f64>,
+}
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct BNATransit {
+    pub score: Option<f64>,
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct BNAPost {
     pub core_services: BNACoreServices,
-    pub features: BNAFeatures,
+    pub people: BNAPeople,
+    pub retail: BNARetail,
+    pub transit: BNATransit,
     pub infrastructure: BNAInfrastructure,
     pub opportunity: BNAOpportunity,
     pub recreation: BNARecreation,
     pub summary: BNASummary,
 }
 
-#[derive(Serialize, Deserialize, Default)]
+#[derive(Serialize, Deserialize, Default, Debug)]
 pub struct City {
-    pub city_id: Option<Uuid>,
+    pub id: Option<Uuid>,
     pub country: String,
     pub state: String,
     pub name: String,
@@ -184,7 +194,13 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     };
     let name = &analysis_parameters.city;
     let cities_url = format!("{api_hostname}/cities");
-    let get_cities_url = format!("{cities_url}/{country}/{region}/{name}");
+    let get_cities_url = format!(
+        "{cities_url}/{}/{}/{}",
+        country.to_title_case(),
+        region.to_title_case(),
+        name.to_title_case()
+    );
+    info!("endpoint: {}", get_cities_url);
     let client = Client::new();
     let r = client.get(&get_cities_url).send()?;
     let city: Option<City> = match r.status().as_u16() {
@@ -198,20 +214,22 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
             ))))
         }
     };
+    info!("City: {:#?}", city);
 
     // Create city if it does not exist and save the city_id.
     // Otherwise save the city_id and update the population..
     let city_id: Uuid;
     if let Some(city) = city {
         info!("The city exists, update the population...");
-        city_id = city.city_id.unwrap();
+        city_id = city.id.unwrap();
+        // TODO: Patch city census.
     } else {
         info!("Create a new city...");
         // Create the city.
         let c = City {
-            country: country.clone(),
-            state: region.clone(),
-            name: name.clone(),
+            country: country.clone().to_title_case(),
+            state: region.clone().to_title_case(),
+            name: name.clone().to_title_case(),
             ..Default::default()
         };
         let city = client
@@ -221,7 +239,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
             .send()?
             .error_for_status()?
             .json::<City>()?;
-        city_id = city.city_id.unwrap();
+        city_id = city.id.unwrap();
     }
 
     // Convert the overall scores to a BNAPost struct.
@@ -229,7 +247,7 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
     let bna_post = scores_to_bnapost(overall_scores, version, city_id);
 
     // Prepare API URLs.
-    let bnas_url = format!("{api_hostname}/bnas");
+    let bnas_url = format!("{api_hostname}/ratings");
 
     // Post a new entry via the API.
     info!("Post a new BNA entry via the API...");
@@ -242,8 +260,10 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
         .error_for_status()?;
 
     // Compute the time it took to run the fargate task.
+    info!("describing fargate task {}", fargate.task_arn);
     let describe_tasks = ecs_client
         .describe_tasks()
+        .cluster(fargate.ecs_cluster_arn.clone())
         .tasks(fargate.task_arn.clone())
         .send()
         .await?;
@@ -271,12 +291,12 @@ async fn function_handler(event: LambdaEvent<TaskInput>) -> Result<(), Error> {
         .to_time()
         .expect("a valid start time is expected");
     let end_time = stopped_at.to_time().ok();
-    let pipeline = BrokenspokePipeline {
+    let pipeline = BNAPipeline {
         cost,
         end_time,
         start_time,
         state_machine_id,
-        state: Some(BrokenspokeState::Setup),
+        step: Some("Setup".to_string()),
         ..Default::default()
     };
     update_pipeline(&patch_url, &auth, &pipeline)?;
@@ -307,10 +327,14 @@ fn scores_to_bnapost(overall_scores: OverallScores, version: String, city_id: Uu
                 .get_normalized_score("core_services")
                 .unwrap_or_default(),
         },
-        features: BNAFeatures {
-            people: overall_scores.get_normalized_score("people"),
-            retail: overall_scores.get_normalized_score("retail"),
-            transit: overall_scores.get_normalized_score("transit"),
+        people: BNAPeople {
+            score: overall_scores.get_normalized_score("people"),
+        },
+        retail: BNARetail {
+            score: overall_scores.get_normalized_score("retail"),
+        },
+        transit: BNATransit {
+            score: overall_scores.get_normalized_score("transit"),
         },
         infrastructure: BNAInfrastructure {
             low_stress_miles: overall_scores.get_normalized_score("total_miles_low_stress"),
@@ -564,5 +588,33 @@ mod tests {
     //         .error_for_status()
     //         .unwrap();
     //     dbg!(r);
+    // }
+
+    // #[tokio::test]
+    // async fn test_describe_task() {
+    //     let cluster_arn = "arn:aws:ecs:us-west-2:863246263227:cluster/bna";
+    //     let fargate_task_arn =
+    //         "arn:aws:ecs:us-west-2:863246263227:task/bna/6b7ec08ae2084efb8482173632ecfe6e";
+    //     let config = aws_config::load_defaults(BehaviorVersion::latest()).await;
+    //     let ecs_client = aws_sdk_ecs::Client::new(&config);
+    //     let describe_tasks = ecs_client
+    //         .describe_tasks()
+    //         .cluster(cluster_arn)
+    //         .tasks(fargate_task_arn)
+    //         .send()
+    //         .await
+    //         .unwrap();
+    //     let task_info = describe_tasks.tasks().first().unwrap();
+    //     let started_at = task_info
+    //         .started_at()
+    //         .expect("the task must have started at this point");
+    //     let stopped_at = task_info
+    //         .started_at()
+    //         .expect("the task must have stopped at this point");
+    //     let started_secs = started_at.secs();
+    //     let stopped_secs = stopped_at.secs();
+    //     let elapsed = (stopped_secs - started_secs) / 1000;
+    //     dbg!(task_info);
+    //     dbg!(elapsed);
     // }
 }

@@ -63,6 +63,11 @@ each rated city.
 around using a bike or other micromobility device that typically travels under
 20 mph (32 km/h).
 
+**Pipeline**: A set of actions being executed automatically in a specific order.
+
+**BNA pipeline**: Pipeline used to collect all the required input data to run a
+BNA analysis.
+
 ### Incubating
 
 > **WARNING: the terms bellow are still waiting to be defined properly. They may
