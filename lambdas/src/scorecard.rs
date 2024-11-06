@@ -90,7 +90,7 @@ fn pdf_convert(svg: &str, fontdb: &svg2pdf::usvg::fontdb::Database) -> Result<Ve
     let tree = svg2pdf::usvg::Tree::from_str(svg, &options).map_err(|err| err.to_string())?;
 
     // Convert to PDF.
-    Ok(svg2pdf::to_pdf(&tree, conversion_options, page_options))
+    svg2pdf::to_pdf(&tree, conversion_options, page_options).map_err(|err| err.to_string())
 }
 
 #[tokio::main]
