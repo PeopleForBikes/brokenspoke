@@ -8,7 +8,6 @@ pub mod scorecard;
 pub mod template;
 pub mod versioning;
 
-use pyo3::{exceptions::PyOSError, prelude::*};
 use std::{fmt, io};
 use thiserror::Error;
 
@@ -77,12 +76,6 @@ pub enum Error {
     /// Environment variable error.
     #[error("Environment variable error")]
     VarError(#[from] std::env::VarError),
-}
-
-impl std::convert::From<Error> for PyErr {
-    fn from(err: Error) -> PyErr {
-        PyOSError::new_err(err.to_string())
-    }
 }
 
 /// Describe all the available city datasets.

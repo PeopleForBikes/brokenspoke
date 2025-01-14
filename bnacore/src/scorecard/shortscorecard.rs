@@ -1,68 +1,43 @@
 use super::{
     scorecard21::ScoreCard21, scorecard23::ScoreCard23, scorecard24::ScoreCard24, ScorecardCsv,
 };
-use pyo3::prelude::*;
 use serde::Serialize;
 
 /// Represent a ScoreCard to be passed to `svggloo`.
 ///
 /// The fields must match all the fields from ScoreCard, and be represented by
 /// their short forms.
-#[pyclass]
 #[derive(Debug, Serialize, Clone)]
 pub struct ShortScoreCard {
     /// City
-    #[pyo3(get, set)]
     pub ci: String,
-    #[pyo3(get, set)]
     pub co: String,
-    #[pyo3(get, set)]
     pub st: String,
-    #[pyo3(get, set)]
     pub uuid: String,
-    #[pyo3(get, set)]
     pub po: u32,
-    #[pyo3(get, set)]
     pub ra: f64,
-    #[pyo3(get, set)]
     pub rasc: u8,
 
     // Community Survey
-    #[pyo3(get, set)]
     pub nw: u8,
-    #[pyo3(get, set)]
     pub aw: u8,
-    #[pyo3(get, set)]
     pub sf: u8,
-    #[pyo3(get, set)]
     pub rs: u8,
-    #[pyo3(get, set)]
     pub total: u8,
-    #[pyo3(get, set)]
     pub cssc: u8,
-    #[pyo3(get, set)]
     pub responses: u32,
 
     // BNA
-    #[pyo3(get, set)]
     pub nh: u8,
-    #[pyo3(get, set)]
     pub op: u8,
-    #[pyo3(get, set)]
     pub es: u8,
-    #[pyo3(get, set)]
     pub ret: u8,
-    #[pyo3(get, set)]
     pub rec: u8,
-    #[pyo3(get, set)]
     pub tr: u8,
-    #[pyo3(get, set)]
     pub bnasc: u8,
 
     // Infrastructure
-    #[pyo3(get, set)]
     pub lsm: u32,
-    #[pyo3(get, set)]
     pub hsm: u32,
 }
 
@@ -168,13 +143,3 @@ impl From<&ScoreCard24> for ShortScoreCard {
 }
 
 impl ScorecardCsv for ShortScoreCard {}
-
-/// Define Python compatible methods.
-#[pymethods]
-impl ShortScoreCard {
-    /// Python wrapper for the [`ShortScoreCard::to_csv`] method.
-    #[staticmethod]
-    pub fn save_csv(path: &str, entries: Vec<ShortScoreCard>) -> PyResult<()> {
-        Ok(ShortScoreCard::to_csv(path, &entries)?)
-    }
-}
