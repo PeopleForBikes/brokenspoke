@@ -235,13 +235,11 @@ mod tests {
         dbg!(serde_json::to_string(&pipeline).unwrap());
 
         // Send the request.
-        let post = reqwest::Client::new()
+        let _post = reqwest::Client::new()
             .post(&url)
             .bearer_auth(auth.access_token.clone())
             .json(&pipeline)
             .send()
             .await;
-        let p = post;
-        dbg!(p);
     }
 }

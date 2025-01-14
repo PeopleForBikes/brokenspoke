@@ -146,7 +146,7 @@ impl Dataset {
     }
 }
 
-/// Decribes all the objects to export to the Python bnacore module.
+// /// Decribes all the objects to export to the Python bnacore module.
 // #[pymodule]
 // fn bnacore(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
 //     m.add_class::<City>()?;
