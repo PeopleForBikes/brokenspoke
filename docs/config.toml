@@ -15,7 +15,7 @@ build_search_index = true
 theme = "adidoks"
 
 # Whether to generate a feed file for the site
-generate_feed = true
+generate_feeds = true
 
 [markdown]
 # Whether to do syntax highlighting
