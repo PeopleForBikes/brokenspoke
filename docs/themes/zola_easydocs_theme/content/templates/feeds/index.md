@@ -4,7 +4,7 @@ weight = 50
 aliases = ["/documentation/templates/rss/"]
 +++
 
-If the site `config.toml` file sets `generate_feed = true`, then Zola will
+If the site `config.toml` file sets `generate_feeds = true`, then Zola will
 generate a feed file for the site, named according to the `feed_filename`
 setting in `config.toml`, which defaults to `atom.xml`. Given the feed filename
 `atom.xml`, the generated file will live at `base_url/atom.xml`, based upon the
