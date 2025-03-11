@@ -19,7 +19,7 @@ Any non-Markdown file in a section directory is added to the `assets` collection
 Markdown file using relative links.
 
 ## Drafting
-Just like pages sections can be drafted by setting the `draft` option in the front matter. By default this is not done. When a section is drafted it's descendants like pages, subsections and assets will not be processed unless the `--drafts` flag is passed. Note that even pages that don't have a `draft` status will not be processed if one of their parent sections is drafted. 
+Just like pages sections can be drafted by setting the `draft` option in the front matter. By default this is not done. When a section is drafted it's descendants like pages, subsections and assets will not be processed unless the `--drafts` flag is passed. Note that even pages that don't have a `draft` status will not be processed if one of their parent sections is drafted.
 
 ## Front matter
 
@@ -91,7 +91,7 @@ render = true
 # Useful for the same reason as `render` but when you don't want a 404 when
 # landing on the root section page.
 # Example: redirect_to = "documentation/content/overview"
-redirect_to = 
+redirect_to =
 
 # If set to "true", the section will pass its pages on to the parent section. Defaults to `false`.
 # Useful when the section shouldn't split up the parent section, like
@@ -106,7 +106,7 @@ aliases = []
 # section's root path. This is independent of the site-wide variable of the same
 # name. The section feed will only include posts from that respective feed, and
 # not from any other sections, including sub-sections under that section.
-generate_feed = false
+generate_feeds = false
 
 # Your own data.
 [extra]
@@ -174,7 +174,7 @@ to newest (at the bottom).
 
 `reverse` has no effect on `page.later`/`page.earlier` or `page.heavier`/`page.lighter`.
 
-If the section is paginated the `paginate_reversed=true` in the front matter of the relevant section should be set instead of using the filter. 
+If the section is paginated the `paginate_reversed=true` in the front matter of the relevant section should be set instead of using the filter.
 
 ## Sorting subsections
 Sorting sections is a bit less flexible: sections can only be sorted by `weight`,
