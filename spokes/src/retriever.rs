@@ -150,10 +150,11 @@ async fn main() -> Result<(), Report> {
     // Prepare the downloads for each city.
     let mut downloads: Vec<Download> = Vec::new();
     for city in scorecards {
+        let name = &city.full_name().replace('-', "/");
         // Prepare the dataset downloads for this city.
         for dataset in &opts.datasets {
             let ds: Dataset = dataset.into();
-            let filename = format!("{}-{}.{}", &city.full_name(), &ds, &ds.extension());
+            let filename = format!("{}/{}/{}.{}", name, &city.version(), &ds, &ds.extension());
             let d = Download::new(&city.url(&ds)?, &filename.replace(' ', "_"));
             downloads.push(d);
         }

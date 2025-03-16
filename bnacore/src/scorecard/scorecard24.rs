@@ -83,7 +83,14 @@ fn extract_version_from_filename(filename: &str) -> String {
     let mut parts = filename.split('_');
     let version_part = parts.next_back().unwrap();
     let v_version = version_part.replace(".csv", "");
-    v_version.replace('v', "")
+    let version = v_version.replace('v', "");
+    let version_parts = version
+        .split('.')
+        .map(|p| p.parse::<i32>().unwrap())
+        .collect::<Vec<i32>>();
+    let version_major = version_parts[0];
+    let version_minor = version_parts[1];
+    format!("{version_major}.{:0>2}", version_minor)
 }
 
 #[cfg(test)]
@@ -95,7 +102,7 @@ mod tests {
     fn test_extract_version_from_filename() {
         assert_eq!(
             extract_version_from_filename("_Christchurch_v23.1.csv"),
-            "23.1"
+            "23.01"
         );
     }
 

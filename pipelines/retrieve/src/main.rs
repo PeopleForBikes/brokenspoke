@@ -23,7 +23,7 @@ fn main() -> Result<(), Report> {
     let asset_dir = top_dir.join("assets");
     let output_dir = top_dir.join("pipelines/retrieve/output");
     let city_ratings_15 = asset_dir
-        .join("city_ratings/city_ratings_2021_v15.csv")
+        .join("city-ratings/city-ratings-v25.09.csv")
         .canonicalize()?;
 
     // Create the output directory.
@@ -39,7 +39,7 @@ fn main() -> Result<(), Report> {
         .arg("--bin")
         .arg("retriever")
         .arg("--")
-        .arg("--from-csv")
+        .arg("v24")
         .arg(&city_ratings_15)
         .arg("census-block")
         .arg("connected-census-block")
