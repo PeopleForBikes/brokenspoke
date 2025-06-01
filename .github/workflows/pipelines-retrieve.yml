@@ -9,6 +9,7 @@ on:
     paths:
       - ".github/workflows/pipelines-retrieve.yml"
       - "pipelines/retrieve/**"
+      - "Cargo.toml"
     types:
       - opened
       - synchronize

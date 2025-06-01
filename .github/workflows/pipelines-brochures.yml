@@ -9,6 +9,7 @@ on:
     paths:
       - ".github/workflows/pipelines-brochures.yml"
       - "pipelines/brochures/**"
+      - "Cargo.toml"
     types:
       - opened
       - synchronize

@@ -378,12 +378,7 @@ async fn fetch_s3_object_as_bytes(
         .key(key)
         .send()
         .await
-        .map_err(|e| {
-            std::io::Error::new(
-                std::io::ErrorKind::Other,
-                format!("AWS S3 operation error: {e}"),
-            )
-        })?;
+        .map_err(|e| std::io::Error::other(format!("AWS S3 operation error: {e}")))?;
     let mut buffer: Vec<u8> = Vec::new();
     while let Some(bytes) = object.body.try_next().await? {
         buffer.write_all(&bytes)?;
