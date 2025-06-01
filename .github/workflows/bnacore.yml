@@ -9,6 +9,7 @@ on:
     paths:
       - ".github/workflows/bnacore.yml"
       - "bnacore/**"
+      - "Cargo.toml"
     types:
       - opened
       - synchronize

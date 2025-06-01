@@ -80,8 +80,8 @@ impl ScoreCard24 {}
 
 /// Extract the version number from the scorecard filename.
 fn extract_version_from_filename(filename: &str) -> String {
-    let parts = filename.split('_');
-    let version_part = parts.last().unwrap();
+    let mut parts = filename.split('_');
+    let version_part = parts.next_back().unwrap();
     let v_version = version_part.replace(".csv", "");
     v_version.replace('v', "")
 }

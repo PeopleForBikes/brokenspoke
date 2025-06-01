@@ -9,6 +9,7 @@ on:
     paths:
       - ".github/workflows/incubator.yml"
       - "incubator/**"
+      - "Cargo.toml"
     types:
       - opened
       - synchronize

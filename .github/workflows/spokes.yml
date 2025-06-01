@@ -9,6 +9,7 @@ on:
     paths:
       - ".github/workflows/spokes.yml"
       - "spokes/**"
+      - "Cargo.toml"
     types:
       - opened
       - synchronize
