@@ -20,8 +20,7 @@ impl Calver {
         let parts: Vec<&str> = version.split('.').collect();
         if parts.len() < 2 || parts.len() > 3 {
             return Err(format!(
-                "version string must contain 2 ou 3 parts (YY.0M[.Micro]), got {:?}",
-                parts
+                "version string must contain 2 ou 3 parts (YY.0M[.Micro]), got {parts:?}"
             ));
         }
 

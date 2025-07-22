@@ -96,7 +96,7 @@ impl From<&str> for Dataset {
             Dataset::DATA_DICTIONARY => Dataset::DataDictionary,
             Dataset::OVERALL_SCORES => Dataset::OverallScores,
             Dataset::WAYS => Dataset::Ways,
-            _ => panic!("Cannot parse dataset name {}", item),
+            _ => panic!("Cannot parse dataset name {item}"),
         }
     }
 }
