@@ -25,7 +25,7 @@ async fn function_handler(event: LambdaEvent<SqsEvent>) -> Result<(), Error> {
     let country = &v["country"];
     let city = &v["city"];
     let region = v.get("region").unwrap_or(city);
-    let key = format!("{}/{}-{}-{}.pdf", year, country, region, city);
+    let key = format!("{year}/{country}-{region}-{city}.pdf");
 
     // Prepare the font database.
     let mut fontdb = svg2pdf::usvg::fontdb::Database::new();

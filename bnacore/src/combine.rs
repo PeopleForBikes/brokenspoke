@@ -27,12 +27,8 @@ pub fn combine_documents(documents: Vec<Document>) -> Result<Document> {
                 .into_values()
                 .map(|object_id| {
                     if !first {
-                        let bookmark = Bookmark::new(
-                            format!("Page_{}", pagenum),
-                            [0.0, 0.0, 1.0],
-                            0,
-                            object_id,
-                        );
+                        let bookmark =
+                            Bookmark::new(format!("Page_{pagenum}"), [0.0, 0.0, 1.0], 0, object_id);
                         document.add_bookmark(bookmark, None);
                         first = true;
                         pagenum += 1;
