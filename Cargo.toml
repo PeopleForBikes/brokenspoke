@@ -57,7 +57,7 @@ url = "2.4.1"
 usvg = "0.45.1"
 uuid = "1.17.0"
 walkdir = "2.4.0"
-zip = "4.0.0"
+zip = "5.0.0"
 
 
 [profile.flamegraph]
