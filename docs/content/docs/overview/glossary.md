@@ -78,7 +78,7 @@ around using a bike or other micromobility device that typically travels under
 **BNA pipeline**: Pipeline used to collect all the required input data to run a
 BNA analysis.
 
-### Incubating
+## Incubating
 
 > **WARNING: the terms bellow are still waiting to be defined properly. They may
 > or may not be included in the glossary.**
