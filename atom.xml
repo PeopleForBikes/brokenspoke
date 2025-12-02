@@ -178,7 +178,7 @@ around using a bike or other micromobility device that typically travels under
 &lt;p&gt;&lt;strong&gt;Pipeline&lt;&#x2F;strong&gt;: A set of actions being executed automatically in a specific order.&lt;&#x2F;p&gt;
 &lt;p&gt;&lt;strong&gt;BNA pipeline&lt;&#x2F;strong&gt;: Pipeline used to collect all the required input data to run a
 BNA analysis.&lt;&#x2F;p&gt;
-&lt;h3 id=&quot;incubating&quot;&gt;Incubating&lt;&#x2F;h3&gt;
+&lt;h2 id=&quot;incubating&quot;&gt;Incubating&lt;&#x2F;h2&gt;
 &lt;blockquote&gt;
 &lt;p&gt;&lt;strong&gt;WARNING: the terms bellow are still waiting to be defined properly. They may
 or may not be included in the glossary.&lt;&#x2F;strong&gt;&lt;&#x2F;p&gt;
