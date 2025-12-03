@@ -20,7 +20,6 @@ csv = { workspace = true }
 libflate = { workspace = true }
 lopdf = { workspace = true }
 minijinja = { workspace = true }
-# pyo3 = { workspace = true }
 regex = { workspace = true }
 reqwest = { workspace = true, features = [
   "blocking",
