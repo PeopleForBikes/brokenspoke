@@ -21,6 +21,7 @@
 .installed.cfg
 .ipynb_checkpoints
 .nox/
+*.numbers
 .python-version
 .tox/
 .venv/
