@@ -1,0 +1,63 @@
+name: tools
+
+defaults:
+  run:
+    working-directory: tools
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/tools.yml"
+      - "tools/**"
+      - "Cargo.toml"
+    types:
+      - opened
+      - synchronize
+      - reopened
+  push:
+    paths:
+      - ".github/workflows/tools.yml"
+      - "incubator/**"
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: astral-sh/setup-uv@85856786d1ce8acfbcc2f13a5f3fbd6b938f9f41 #v7.1.2
+        with:
+          enable-cache: true
+      - name: Set up Python
+        run: uv python install
+      - name: Lint
+        run: |
+          uv tool run isort --check --profile black --fgw 2 .
+          uv tool run ruff format --check .
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: astral-sh/setup-uv@85856786d1ce8acfbcc2f13a5f3fbd6b938f9f41 #v7.1.2
+        with:
+          enable-cache: true
+      - name: Set up Python
+        run: uv python install
+      - name: Test
+        run: |
+          uv run \
+            --with pandas \
+            --with us \
+            --with typer \
+            --with xdoctest \
+            python -m xdoctest \
+            fips.py \
+            all
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
