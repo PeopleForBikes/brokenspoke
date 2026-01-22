@@ -31,7 +31,7 @@ serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 serde_with = { workspace = true }
 thiserror = { workspace = true }
-time = { workspace = true, features = ["macros", "serde-well-known"] }
+time = { version = "0.3.45", features = ["macros", "serde-well-known"] }
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 url = { workspace = true, features = ["serde"] }
 walkdir = { workspace = true }
