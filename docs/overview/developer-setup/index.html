@@ -307,28 +307,28 @@
       <main class="docs-content col-lg-11 col-xl-9">
         <h1>Developer Setup</h1>
         
-        <p>The infrastructure relies heavily on <a href="https://www.docker.com/">Docker</a> containers and <a href="https://kubernetes.io/">Kubernetes</a>.</p>
+        <p>The infrastructure relies heavily on <a rel="external" href="https://www.docker.com/">Docker</a> containers and <a rel="external" href="https://kubernetes.io/">Kubernetes</a>.</p>
 <h2 id="requirements">Requirements</h2>
 <p>Before starting, it is assumed that the following tools are installed and
 configured on the developer machine. If that is not the case, please refer to
 the official installation instructions to prepare your environment.</p>
 <ul>
-<li><a href="https://git-scm.com/downloads">git</a></li>
-<li><a href="https://www.docker.com/get-started/">docker</a></li>
-<li><a href="https://kubernetes.io/docs/tasks/tools/">kubectl</a></li>
-<li><a href="https://minikube.sigs.k8s.io/docs/start/">minikube</a></li>
-<li><a href="https://helm.sh/docs/intro/install/">helm</a></li>
-<li><a href="https://github.com/casey/just#packages=">just</a></li>
+<li><a rel="external" href="https://git-scm.com/downloads">git</a></li>
+<li><a rel="external" href="https://www.docker.com/get-started/">docker</a></li>
+<li><a rel="external" href="https://kubernetes.io/docs/tasks/tools/">kubectl</a></li>
+<li><a rel="external" href="https://minikube.sigs.k8s.io/docs/start/">minikube</a></li>
+<li><a rel="external" href="https://helm.sh/docs/intro/install/">helm</a></li>
+<li><a rel="external" href="https://github.com/casey/just#packages=">just</a></li>
 </ul>
 <p>It is also expected for all the Broken Spoke Projects to be located in the same
 folder. If that is not the case, the commands described in this documentation
 will have to be adjusted accordingly.</p>
 <p>Configuring helper variables may help:</p>
-<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">export PFB_HOME=&quot;{$HOME}&#x2F;projects&#x2F;PeopleForBikes&quot;
-export BROKENSPOKE_INFRA=&quot;{$PFB_HOME}&#x2F;brokenspoke&#x2F;infra&quot;
+<pre><code data-lang="bash">export PFB_HOME=&quot;{$HOME}/projects/PeopleForBikes&quot;
+export BROKENSPOKE_INFRA=&quot;{$PFB_HOME}/brokenspoke/infra&quot;
 </code></pre>
 <p>Then make sure the directories exist and go to the right one:</p>
-<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">mkdir -p ${PFB_HOME}
+<pre><code data-lang="bash">mkdir -p ${PFB_HOME}
 cd ${PFB_HOME}
 </code></pre>
 <h3 id="platforms">Platforms</h3>
@@ -341,31 +341,31 @@ help us improve the multi-platform support and automation are welcome.</p>
 <p><strong>REMARK: make sure to run the commands in the correct folder.</strong></p>
 </blockquote>
 <p>Start by cloning the [Broken Spoke] repository:</p>
-<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">git clone git@github.com:PeopleForBikes&#x2F;brokenspoke.git
+<pre><code data-lang="bash">git clone git@github.com:PeopleForBikes/brokenspoke.git
 cd ${BROKENSPOKE_INFRA}
 </code></pre>
 <p>Provision and configure a local Kubernetes cluster:</p>
-<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">just
+<pre><code data-lang="bash">just
 </code></pre>
-<p>This will spin up <a href="https://minikube.sigs.k8s.io/docs/">Minikube</a> and configure a <a href="https://www.postgresql.org/">postgresql</a> instance.</p>
+<p>This will spin up <a rel="external" href="https://minikube.sigs.k8s.io/docs/">Minikube</a> and configure a <a rel="external" href="https://www.postgresql.org/">postgresql</a> instance.</p>
 <p>The process will take a few minutes. Follow the it on the screen as it will
 display some useful pieces of information.</p>
 <h3 id="connecting-to-the-database">Connecting to the database</h3>
 <p>Export the connection string as follow:</p>
-<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">export DATABASE_URL=postgresql:&#x2F;&#x2F;minikube:minikube@127.0.0.1:5432&#x2F;bna
+<pre><code data-lang="bash">export DATABASE_URL=postgresql://minikube:minikube@127.0.0.1:5432/bna
 </code></pre>
 <p>In another terminal, start the kubectl process:</p>
-<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">kubectl port-forward --namespace default svc&#x2F;postgresql 5432:5432
+<pre><code data-lang="bash">kubectl port-forward --namespace default svc/postgresql 5432:5432
 </code></pre>
 <blockquote>
 <p><strong>REMARK: this terminal will have to stay open as long as you plan to interact
 with the database.</strong></p>
 </blockquote>
-<p>The database is now accessible using your favorite client, for instance <a href="https://www.pgcli.com/">pgcli</a>:</p>
-<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">pgcli $DATABASE_URL
+<p>The database is now accessible using your favorite client, for instance <a rel="external" href="https://www.pgcli.com/">pgcli</a>:</p>
+<pre><code data-lang="bash">pgcli $DATABASE_URL
 </code></pre>
-<p>or <a href="https://www.postgresql.org/docs/current/app-psql.html">psql</a>:</p>
-<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">$ psql $DATABASE_URL -c &#x27;SELECT COUNT(id) from city;&#x27;
+<p>or <a rel="external" href="https://www.postgresql.org/docs/current/app-psql.html">psql</a>:</p>
+<pre><code data-lang="bash">$ psql $DATABASE_URL -c &#39;SELECT COUNT(id) from city;&#39;
  count
 -------
    767

@@ -301,10 +301,10 @@ generated brochures in one zip file.</p>
 <p>In order to work, the tool expects the brochure names to respect the BNA
 convention: <code>&lt;country&gt;-&lt;state&gt;-&lt;city&gt;.pdf</code>.</p>
 <h2 id="example">Example</h2>
-<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">bundler pdf country spokes&#x2F;examples&#x2F;brochures&#x2F;output
+<pre><code data-lang="bash">bundler pdf country spokes/examples/brochures/output
 </code></pre>
 <p>If the following brochures were generated and put in the same folder:</p>
-<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">.
+<pre><code data-lang="bash">.
 ├── australia-nt-alice_springs.pdf
 ├── england-eng-london.pdf
 ├── france-idf-paris.pdf
@@ -317,7 +317,7 @@ convention: <code>&lt;country&gt;-&lt;state&gt;-&lt;city&gt;.pdf</code>.</p>
 └── united_states-ut-park_city.pdf
 </code></pre>
 <p>Running the bundler on this folder would produce the following bundles:</p>
-<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">.
+<pre><code data-lang="bash">.
 ├── all.zip
 ├── australia.zip
 ├── england.zip

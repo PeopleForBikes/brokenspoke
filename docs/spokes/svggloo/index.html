@@ -310,10 +310,10 @@ variables in the template must be surrounded by <code>{{}}</code>, for instance 
 <h4 id="data-file">Data file</h4>
 <p>The data file must be a CSV file.</p>
 <h4 id="svg-export">SVG Export</h4>
-<p>The SVG export is done using <a href="https://inkscape.org/">inkscape</a>, <a href="https://cairosvg.org/">cairosvg</a>, or <a href="https://docs.rs/svg2pdf/latest/svg2pdf/">svg2pdf</a>. If the
+<p>The SVG export is done using <a rel="external" href="https://inkscape.org/">inkscape</a>, <a rel="external" href="https://cairosvg.org/">cairosvg</a>, or <a rel="external" href="https://docs.rs/svg2pdf/latest/svg2pdf/">svg2pdf</a>. If the
 exporter program is not found svggloo will abort the operation.</p>
 <h5 id="inkscape">Inkscape</h5>
-<p>When installing <a href="https://inkscape.org/">inkscape</a> on Windows, you will be prompted to whether or not
+<p>When installing <a rel="external" href="https://inkscape.org/">inkscape</a> on Windows, you will be prompted to whether or not
 add it to the system PATH:</p>
 <p><img src="../../../images/spokes/svggloo/inkscape-win-install-system-path.png"
 alt="Inkscape System PATH install" width="100%"></p>
@@ -324,9 +324,9 @@ all users"</em>.</p>
 PATH", this spoke will not work.</strong></p>
 </blockquote>
 <h2 id="example">Example</h2>
-<p>Rendering brochures with <a href="https://inkscape.org/">inkscape</a>:</p>
-<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">svggloo --field country --field state --field city --export Inkscape \
-  examples&#x2F;brochures&#x2F;brochure.svg
+<p>Rendering brochures with <a rel="external" href="https://inkscape.org/">inkscape</a>:</p>
+<pre><code data-lang="bash">svggloo --field country --field state --field city --export Inkscape \
+  examples/brochures/brochure.svg
 </code></pre>
 <p>The tool expects the following inputs:</p>
 <ul>

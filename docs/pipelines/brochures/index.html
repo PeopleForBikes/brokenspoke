@@ -335,19 +335,19 @@ style="display: block;margin: 0 auto;"></p>
 <h2 id="run-it-locally">Run it locally</h2>
 <h3 id="requirements">Requirements</h3>
 <ul>
-<li><a href="https://www.rust-lang.org/tools/install">Rust</a></li>
-<li><a href="https://inkscape.org/release/">Inkscape</a></li>
-<li><a href="https://fonts.google.com/specimen/Montserrat">Montserrat Font</a></li>
+<li><a rel="external" href="https://www.rust-lang.org/tools/install">Rust</a></li>
+<li><a rel="external" href="https://inkscape.org/release/">Inkscape</a></li>
+<li><a rel="external" href="https://fonts.google.com/specimen/Montserrat">Montserrat Font</a></li>
 <li>Dharma Gothic Extended Font</li>
 </ul>
 <h3 id="run-it">Run it</h3>
 <p>This pipeline was written in Rust and can be run locally with the following
 commands:</p>
-<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">cd pipelines&#x2F;brochures
+<pre><code data-lang="bash">cd pipelines/brochures
 cargo run
 </code></pre>
 <p>This will produce the following output:</p>
-<pre data-lang="bash" class="language-bash "><code class="language-bash" data-lang="bash">2022-10-05T01:53:20.508083Z  INFO brochures: 📁 Creating the output directory...
+<pre><code data-lang="bash">2022-10-05T01:53:20.508083Z  INFO brochures: 📁 Creating the output directory...
 2022-10-05T01:53:20.508248Z  INFO brochures: ⚙️  Copying the brochure template...
 2022-10-05T01:53:20.509215Z  INFO brochures: 🔄 Converting the City Ratings file to a Shortcode file...
 2022-10-05T01:53:20.925506Z  INFO brochures: 📄 Generating SVG files...
@@ -362,7 +362,7 @@ with the latest version fo the template.</p>
 <p>If another data set needs to be processed, the parameters may need to be
 adjusted. This can be done at the top of the script, in the <code>parameters</code>
 section:</p>
-<pre data-lang="rs" class="language-rs "><code class="language-rs" data-lang="rs">&#x2F;&#x2F; Parameters
+<pre><code data-lang="rs">// Parameters
 let format = &quot;v23&quot;;
 let city_rating_version = &quot;v23.2&quot;;
 </code></pre>
