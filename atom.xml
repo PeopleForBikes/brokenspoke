@@ -62,13 +62,13 @@ the official installation instructions to prepare your environment.&lt;&#x2F;p&g
 folder. If that is not the case, the commands described in this documentation
 will have to be adjusted accordingly.&lt;&#x2F;p&gt;
 &lt;p&gt;Configuring helper variables may help:&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;export &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;PFB_HOME&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;HOME&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;}&#x2F;projects&#x2F;PeopleForBikes&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;export &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;BROKENSPOKE_INFRA&lt;&#x2F;span&gt;&lt;span&gt;=&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;PFB_HOME&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;}&#x2F;brokenspoke&#x2F;infra&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre data-lang=&quot;bash&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;export PFB_HOME=&amp;quot;{$HOME}&amp;#x2F;projects&amp;#x2F;PeopleForBikes&amp;quot;
+export BROKENSPOKE_INFRA=&amp;quot;{$PFB_HOME}&amp;#x2F;brokenspoke&amp;#x2F;infra&amp;quot;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;Then make sure the directories exist and go to the right one:&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;mkdir -p &lt;&#x2F;span&gt;&lt;span&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;PFB_HOME&lt;&#x2F;span&gt;&lt;span&gt;}
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;cd &lt;&#x2F;span&gt;&lt;span&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;PFB_HOME&lt;&#x2F;span&gt;&lt;span&gt;}
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre data-lang=&quot;bash&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;mkdir -p ${PFB_HOME}
+cd ${PFB_HOME}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;h3 id=&quot;platforms&quot;&gt;Platforms&lt;&#x2F;h3&gt;
 &lt;p&gt;Last but not least, while we try to be platform agnostic and provide as much
 abstraction as possible, the main developers work on OSX and Linux, therefore
@@ -79,36 +79,36 @@ help us improve the multi-platform support and automation are welcome.&lt;&#x2F;
 &lt;p&gt;&lt;strong&gt;REMARK: make sure to run the commands in the correct folder.&lt;&#x2F;strong&gt;&lt;&#x2F;p&gt;
 &lt;&#x2F;blockquote&gt;
 &lt;p&gt;Start by cloning the [Broken Spoke] repository:&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;git&lt;&#x2F;span&gt;&lt;span&gt; clone git@github.com:PeopleForBikes&#x2F;brokenspoke.git
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;cd &lt;&#x2F;span&gt;&lt;span&gt;${&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;BROKENSPOKE_INFRA&lt;&#x2F;span&gt;&lt;span&gt;}
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre data-lang=&quot;bash&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone git@github.com:PeopleForBikes&amp;#x2F;brokenspoke.git
+cd ${BROKENSPOKE_INFRA}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;Provision and configure a local Kubernetes cluster:&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;just
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre data-lang=&quot;bash&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;just
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;This will spin up &lt;a href=&quot;https:&#x2F;&#x2F;minikube.sigs.k8s.io&#x2F;docs&#x2F;&quot;&gt;Minikube&lt;&#x2F;a&gt; and configure a &lt;a href=&quot;https:&#x2F;&#x2F;www.postgresql.org&#x2F;&quot;&gt;postgresql&lt;&#x2F;a&gt; instance.&lt;&#x2F;p&gt;
 &lt;p&gt;The process will take a few minutes. Follow the it on the screen as it will
 display some useful pieces of information.&lt;&#x2F;p&gt;
 &lt;h3 id=&quot;connecting-to-the-database&quot;&gt;Connecting to the database&lt;&#x2F;h3&gt;
 &lt;p&gt;Export the connection string as follow:&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;export &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;DATABASE_URL&lt;&#x2F;span&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;postgresql:&#x2F;&#x2F;minikube:minikube@127.0.0.1:5432&#x2F;bna
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre data-lang=&quot;bash&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;export DATABASE_URL=postgresql:&amp;#x2F;&amp;#x2F;minikube:minikube@127.0.0.1:5432&amp;#x2F;bna
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;In another terminal, start the kubectl process:&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;kubectl&lt;&#x2F;span&gt;&lt;span&gt; port-forward&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt; --namespace&lt;&#x2F;span&gt;&lt;span&gt; default svc&#x2F;postgresql 5432:5432
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre data-lang=&quot;bash&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;kubectl port-forward --namespace default svc&amp;#x2F;postgresql 5432:5432
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;blockquote&gt;
 &lt;p&gt;&lt;strong&gt;REMARK: this terminal will have to stay open as long as you plan to interact
 with the database.&lt;&#x2F;strong&gt;&lt;&#x2F;p&gt;
 &lt;&#x2F;blockquote&gt;
 &lt;p&gt;The database is now accessible using your favorite client, for instance &lt;a href=&quot;https:&#x2F;&#x2F;www.pgcli.com&#x2F;&quot;&gt;pgcli&lt;&#x2F;a&gt;:&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;pgcli &lt;&#x2F;span&gt;&lt;span&gt;$&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;DATABASE_URL
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre data-lang=&quot;bash&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;pgcli $DATABASE_URL
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;or &lt;a href=&quot;https:&#x2F;&#x2F;www.postgresql.org&#x2F;docs&#x2F;current&#x2F;app-psql.html&quot;&gt;psql&lt;&#x2F;a&gt;:&lt;&#x2F;p&gt;
-&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; psql $&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;DATABASE_URL -c &lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;SELECT COUNT(id) from city;&lt;&#x2F;span&gt;&lt;span&gt;&amp;#39;
-&lt;&#x2F;span&gt;&lt;span&gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;count
-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;-------
-&lt;&#x2F;span&gt;&lt;span&gt;   &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;767
-&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt; row)
-&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre data-lang=&quot;bash&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;$ psql $DATABASE_URL -c &amp;#x27;SELECT COUNT(id) from city;&amp;#x27;
+ count
+-------
+   767
+(1 row)
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 </content>
         
     </entry>
