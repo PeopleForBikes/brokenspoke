@@ -21,10 +21,11 @@ libflate = { workspace = true }
 lopdf = { workspace = true }
 minijinja = { workspace = true }
 regex = { workspace = true }
-reqwest = { workspace = true, features = [
+reqwest = { workspace = true, default-features = false, features = [
   "blocking",
+  "charset",
+  "http2",
   "json",
-  "native-tls-vendored",
   "rustls",
 ] }
 serde = { workspace = true, features = ["derive"] }
