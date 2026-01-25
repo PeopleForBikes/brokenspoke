@@ -1,3 +1,10 @@
+assets_dir := "assets"
+tools_dir := "tools"
+fips_year := "2024"
+fips_asset_file := assets_dir / "city-ratings/city-ratings-all-historical-results-v25.09.csv"
+fips_place_lookup := tools_dir / "fips_place_lookup.csv"
+tool_fips := tools_dir / "fips.py"
+
 # Meta task running ALL the CI tasks at onces.
 ci: lint
 
@@ -26,3 +33,15 @@ fmt-md:
 # Build the documentation
 docs:
     cd docs && zola build
+
+# Build FIPS lookup table.
+tool-fips-build:
+    uv run {{ tool_fips }} build --year {{ fips_year }} --out {{ fips_place_lookup }}
+
+# Validate FIPS dataset.
+tools-fips-validate:
+    uv run {{ tool_fips }} validate --dataset-csv {{ fips_asset_file }} --lookup-csv {{ fips_place_lookup }}
+
+# Fix FIPS dataset.
+tool-fips-fix:
+    uv run {{ tool_fips }} fix --dataset-csv {{ fips_asset_file }} --out {{ fips_asset_file }}
