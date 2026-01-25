@@ -175,7 +175,7 @@ def normalize_fips_7(x: str) -> str:
     return s
 
 
-def parse_gazetteer_file(path: Path) -> pd.DataFrame:
+def parse_place_gazetteer_file(path: Path) -> pd.DataFrame:
     """
     Parse a Census Gazetteer place file (TSV).
 
@@ -185,7 +185,7 @@ def parse_gazetteer_file(path: Path) -> pd.DataFrame:
     >>> from pathlib import Path
     >>> p = Path("gaz_test.tsv")
     >>> _ = p.write_text("USPS\\tGEOID\\tNAME\\nTX\\t4805000\\tAustin\\nTX\\tBAD\\tX")
-    >>> df = parse_gazetteer_file(p)
+    >>> df = parse_place_gazetteer_file(p)
     >>> list(df["GEOID"])
     ['4805000']
     >>> p.unlink()
@@ -200,6 +200,24 @@ def parse_gazetteer_file(path: Path) -> pd.DataFrame:
 
     df = df[["USPS", "GEOID", "NAME"]]
     return df[df["GEOID"].str.fullmatch(r"\d{7}")]
+
+
+def parse_cousub_gazetteer_file(path: Path) -> pd.DataFrame:
+    """
+    Parse a Census Gazetteer countysub file. GEOIDs include county code, need to remove.
+    """
+
+    df = pd.read_csv(path, sep="\t", dtype=str, keep_default_na=False)
+    df.columns = [c.strip().lstrip("\ufeff") for c in df.columns]
+
+    required = {"USPS", "GEOID", "NAME"}
+    missing = required - set(df.columns)
+    if missing:
+        raise typer.BadParameter(f"Missing required columns: {sorted(missing)}")
+
+    df = df[["USPS", "GEOID", "NAME"]]
+
+    return df[df["GEOID"].str.fullmatch(r"\d{10}")]
 
 
 # ─────────────────────────────────────────────────────────────
@@ -228,26 +246,38 @@ def build(
 
     for _, r in state_codes.iterrows():
         state_fips = r["state_fips"]
-        url = f"{base}/{year}_gaz_place_{state_fips}.txt"
-        dest = workdir / f"{year}_gaz_place_{state_fips}.txt"
+        for geo_type, suffix in [("place", "place"), ("cousub", "cousubs")]:
+            url = f"{base}/{year}_gaz_{suffix}_{state_fips}.txt"
+            dest = workdir / f"{year}_gaz_{suffix}_{state_fips}.txt"
 
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        df_raw = pd.read_csv(url, sep="\t", dtype=str, keep_default_na=False)
-        df_raw.to_csv(dest, sep="\t", index=False)
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            df_raw = pd.read_csv(url, sep="\t", dtype=str, keep_default_na=False)
+            df_raw.to_csv(dest, sep="\t", index=False)
 
-        inputs.append({"url": url, "path": str(dest), "sha256": sha256_file(dest)})
+            inputs.append({"url": url, "path": str(dest), "sha256": sha256_file(dest)})
 
-        df = parse_gazetteer_file(dest)
-        df = df.rename(
-            columns={"GEOID": "fips", "NAME": "place_name", "USPS": "state_abbr"}
-        )
-        df = df.merge(
-            state_codes[["state_abbr", "state_name"]],
-            on="state_abbr",
-            how="left",
-            validate="m:1",
-        )
-        rows.append(df[["fips", "place_name", "state_abbr", "state_name"]])
+            # Parse the raw file using the correct parser
+            if geo_type == "place":
+                df = parse_place_gazetteer_file(dest)
+            else:  # cousub
+                df = parse_cousub_gazetteer_file(dest)
+                # transform 10-digit GEOID → 7-digit pseudo-FIPS (state + last 5 digits)
+                df["GEOID"] = df["GEOID"].str[:2] + df["GEOID"].str[-5:]
+
+            df = df.rename(
+                columns={"GEOID": "fips", "NAME": "place_name", "USPS": "state_abbr"}
+            )
+            df["geo_type"] = geo_type
+
+            df = df.merge(
+                state_codes[["state_abbr", "state_name"]],
+                on="state_abbr",
+                how="left",
+                validate="m:1",
+            )
+            rows.append(
+                df[["fips", "place_name", "state_abbr", "state_name", "geo_type"]]
+            )
 
     lookup = (
         pd.concat(rows, ignore_index=True)
@@ -259,7 +289,7 @@ def build(
     lookup.to_csv(out, index=False)
 
     manifest = {
-        "source": {"type": "census_gazetteer_places", "year": year},
+        "source": {"type": "census_gazetteer_places_cousubs", "year": year},
         "inputs": inputs,
         "output": {
             "path": str(out),
@@ -297,12 +327,12 @@ def validate(
     us_df["state_prefix"] = us_df["census_fips_code"].str[:2]
     us_df["state_prefix_ok"] = us_df["expected_prefix"] == us_df["state_prefix"]
 
-    lookup = pd.read_csv(lookup_csv, dtype={"fips": str})[["fips"]]
+    lookup = pd.read_csv(lookup_csv, dtype={"fips": str})
     us_df = us_df.merge(lookup, left_on="census_fips_code", right_on="fips", how="left")
-    us_df["place_known"] = us_df["fips"].notna()
+    us_df["geo_known"] = us_df["geo_type"].notna()
 
     errors = us_df[
-        ~us_df["valid_len"] | ~us_df["state_prefix_ok"] | ~us_df["place_known"]
+        ~us_df["valid_len"] | ~us_df["state_prefix_ok"] | ~us_df["geo_known"]
     ]
 
     typer.echo(f"Found {len(errors)} problematic US rows out of {len(us_df)} total.")
@@ -315,7 +345,7 @@ def validate(
                     "census_fips_code",
                     "valid_len",
                     "state_prefix_ok",
-                    "place_known",
+                    "geo_known",
                 ]
             ].to_string(index=False)
         )
