@@ -32,7 +32,7 @@ pub enum AWSError {
 /// Represent the contents of the encrypted fields SecretString or SecretBinary
 /// from the specified version of a secret, whichever contains content.
 /// https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct SecretValue {
     /// Amazon Resource Name of the secret.
@@ -78,7 +78,7 @@ impl SecretValue {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub enum ParameterType {
     SecureString,
@@ -89,7 +89,7 @@ pub enum ParameterType {
 /// Represent a single parameter from the store.
 ///
 /// Ref: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm/client/get_parameter.html
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct Parameter {
     /// The Amazon Resource Name (ARN) of the parameter.
@@ -120,11 +120,11 @@ pub struct Parameter {
     pub version: u32,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct ResultMetadata {}
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct SSMParameter {
     pub parameter: Parameter,
