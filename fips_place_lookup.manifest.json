@@ -1,5 +1,5 @@
 {
-  "inputs": [
+  "inputs": [ 
     {
       "path": ".cache/gazetteer_places/2024_gaz_place_01.txt",
       "sha256": "a6f193fcb5a1b1d2303e04fd40770d4bd637fa0ecb0cd36abcf16b38e31447e4",
